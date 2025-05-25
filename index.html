@@ -856,12 +856,14 @@
                     // Base hex with preview color
                     this.drawHex(pos.x, pos.y, this.colors[displayHeight] || '#000', '#0f3460', 2);
                     
-                    // Height number
-                    this.ctx.fillStyle = '#fff';
-                    this.ctx.font = `bold ${fontSize}px Arial`;
-                    this.ctx.textAlign = 'center';
-                    this.ctx.textBaseline = 'middle';
-                    this.ctx.fillText(displayHeight.toString(), pos.x, pos.y);
+                    // Height number (only show if not 0)
+                    if (displayHeight > 0) {
+                        this.ctx.fillStyle = '#fff';
+                        this.ctx.font = `bold ${fontSize}px Arial`;
+                        this.ctx.textAlign = 'center';
+                        this.ctx.textBaseline = 'middle';
+                        this.ctx.fillText(displayHeight.toString(), pos.x, pos.y);
+                    }
                 });
                 
                 // Draw hover outline overlay
