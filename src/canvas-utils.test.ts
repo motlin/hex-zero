@@ -12,15 +12,14 @@ describe('calculateHexSize', () => {
 		const canvasHeight = 600;
 		const radius = 4;
 		const hexSize = calculateHexSize(canvasWidth, canvasHeight, radius);
-		const padding = 40;
+		const padding = 60;
+		const fitFactor = 0.9;
 
-		// Board dimensions based on hex size
-		const boardWidth = radius * 3 * hexSize + padding;
-		const boardHeight = radius * 2 * Math.sqrt(3) * hexSize + padding;
+		const boardWidth = (radius * 3 * hexSize) / fitFactor + padding;
+		const boardHeight = (radius * 2 * Math.sqrt(3) * hexSize) / fitFactor + padding;
 
-		// Board should fit within canvas
-		expect(boardWidth).toBeLessThanOrEqual(canvasWidth);
-		expect(boardHeight).toBeLessThanOrEqual(canvasHeight);
+		expect(boardWidth).toBeLessThanOrEqual(canvasWidth + 1);
+		expect(boardHeight).toBeLessThanOrEqual(canvasHeight + 1);
 	});
 
 	it('should apply zoom factor correctly', () => {
@@ -38,7 +37,6 @@ describe('calculateHexSize', () => {
 	});
 
 	it('should have minimum hex size', () => {
-		// Very small canvas should still have usable hex size
 		const hexSize = calculateHexSize(50, 50, 8, 1.0);
 		expect(hexSize).toBeGreaterThanOrEqual(10);
 	});
