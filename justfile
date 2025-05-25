@@ -31,5 +31,5 @@ preview:
     npm run preview
 
 # Run all pre-commit checks
-precommit: typecheck prettier fix build
+precommit: typecheck fix build
     @echo "✅ All pre-commit checks passed!"
