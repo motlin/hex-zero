@@ -157,10 +157,23 @@
             border-radius: 4px;
             width: 80px;
             font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        .custom-form input.invalid {
+            border-color: #e94560;
+            background-color: rgba(233, 69, 96, 0.1);
         }
         
         .custom-form label {
             font-size: 14px;
+        }
+        
+        .validation-error {
+            color: #e94560;
+            font-size: 12px;
+            margin-top: 5px;
+            min-height: 18px;
         }
         
         .hidden {
@@ -248,11 +261,12 @@
             <h3 style="color: #f39c12; margin-bottom: 15px;">Custom Game</h3>
             <div class="custom-form">
                 <label>Radius:</label>
-                <input type="number" id="customRadius" min="2" max="8" value="4">
+                <input type="number" id="customRadius" min="2" max="8" value="4" oninput="validateCustomInputs()">
                 <label>Pieces:</label>
-                <input type="number" id="customPieces" min="3" max="15" value="8">
-                <button onclick="startCustomGame()">Start</button>
+                <input type="number" id="customPieces" min="3" max="15" value="8" oninput="validateCustomInputs()">
+                <button id="customStartBtn" onclick="startCustomGame()">Start</button>
             </div>
+            <div class="validation-error" id="validationError"></div>
         </div>
     </div>
     
@@ -305,6 +319,11 @@
     <script>
         let game = null;
         
+        // Validate on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            validateCustomInputs();
+        });
+        
         function startGame(radius, numPieces) {
             document.getElementById('difficultyScreen').classList.add('hidden');
             document.getElementById('gameScreen').classList.remove('hidden');
@@ -312,10 +331,59 @@
             game = new HexSeptominoGame(radius, numPieces);
         }
         
+        function validateCustomInputs() {
+            const radiusInput = document.getElementById('customRadius');
+            const piecesInput = document.getElementById('customPieces');
+            const errorDiv = document.getElementById('validationError');
+            const startBtn = document.getElementById('customStartBtn');
+            
+            const radius = parseInt(radiusInput.value);
+            const pieces = parseInt(piecesInput.value);
+            
+            let errors = [];
+            let isValid = true;
+            
+            // Validate radius
+            if (isNaN(radius) || radius < 2 || radius > 8) {
+                radiusInput.classList.add('invalid');
+                if (isNaN(radius) || radiusInput.value === '') {
+                    errors.push('Radius must be a number between 2 and 8');
+                } else if (radius < 2) {
+                    errors.push('Radius must be at least 2');
+                } else if (radius > 8) {
+                    errors.push('Radius must be at most 8');
+                }
+                isValid = false;
+            } else {
+                radiusInput.classList.remove('invalid');
+            }
+            
+            // Validate pieces
+            if (isNaN(pieces) || pieces < 3 || pieces > 15) {
+                piecesInput.classList.add('invalid');
+                if (isNaN(pieces) || piecesInput.value === '') {
+                    errors.push('Pieces must be a number between 3 and 15');
+                } else if (pieces < 3) {
+                    errors.push('Pieces must be at least 3');
+                } else if (pieces > 15) {
+                    errors.push('Pieces must be at most 15');
+                }
+                isValid = false;
+            } else {
+                piecesInput.classList.remove('invalid');
+            }
+            
+            // Update UI
+            errorDiv.textContent = errors.join('. ');
+            startBtn.disabled = !isValid;
+            
+            return isValid;
+        }
+        
         function startCustomGame() {
-            const radius = parseInt(document.getElementById('customRadius').value);
-            const pieces = parseInt(document.getElementById('customPieces').value);
-            if (radius >= 2 && radius <= 8 && pieces >= 3 && pieces <= 15) {
+            if (validateCustomInputs()) {
+                const radius = parseInt(document.getElementById('customRadius').value);
+                const pieces = parseInt(document.getElementById('customPieces').value);
                 startGame(radius, pieces);
             }
         }
