@@ -10,7 +10,10 @@
     "lint:fix": "prettier --write \"src/**/*.{js,ts,css,md,json}\" && eslint . --fix",
     "ci:eslint": "eslint . --format json --output-file eslint_report.json",
     "ci:prettier": "prettier --check \"src/**/*.{js,ts,css,md,json}\"",
-    "ci:typecheck": "tsc --noEmit"
+    "ci:typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "repository": {
     "type": "git",
@@ -24,12 +27,16 @@
   "homepage": "https://github.com/motlin/hex-flip#readme",
   "devDependencies": {
     "@eslint/js": "^9.27.0",
+    "@testing-library/dom": "^10.4.0",
     "@types/node": "^22.15.21",
+    "@vitest/ui": "^3.1.4",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.1.5",
+    "jsdom": "^26.1.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
+    "vitest": "^3.1.4"
   }
 }

@@ -1,3 +1,5 @@
+import {calculateHexSize} from './canvas-utils';
+
 // Global augmentation must be at the top level
 declare global {
 	interface Window {
@@ -266,6 +268,7 @@ class HexSeptominoGame {
 	private mouseHex: HexCoordinate | null;
 	private touchHex: HexCoordinate | null;
 	private isTouching: boolean;
+	private zoomFactor: number;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -305,9 +308,17 @@ class HexSeptominoGame {
 		this.mouseHex = null;
 		this.touchHex = null;
 		this.isTouching = false;
+		this.zoomFactor = 1.0;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
+
+		// Recalculate size after DOM layout
+		setTimeout(() => {
+			this.updateCanvasSize();
+			this.grid.hexSize = this.hexSize;
+			this.render();
+		}, 100);
 
 		// Handle resize
 		window.addEventListener('resize', () => {
@@ -318,29 +329,15 @@ class HexSeptominoGame {
 	}
 
 	private updateCanvasSize(): void {
-		const container = this.canvas.parentElement;
-		const isMobile = window.innerWidth <= 768;
+		// Get the actual size of the canvas from CSS
+		const rect = this.canvas.getBoundingClientRect();
 
-		// Get available space
-		const maxWidth = container?.clientWidth || window.innerWidth - 40;
-		// Account for header and mobile controls
-		const maxHeight = isMobile ? window.innerHeight - 250 : window.innerHeight - 100;
+		// Set canvas internal dimensions to match CSS dimensions
+		this.canvas.width = rect.width;
+		this.canvas.height = rect.height;
 
-		// Calculate required size for the board
-		// Approximate width
-		const boardWidth = this.radius * 3 * 30 + 60;
-		// Approximate height
-		const boardHeight = this.radius * 2 * Math.sqrt(3) * 30 + 60;
-
-		// Scale to fit
-		const scale = Math.min(1, maxWidth / boardWidth, maxHeight / boardHeight);
-
-		// Set canvas size
-		this.canvas.width = Math.min(maxWidth, boardWidth * scale);
-		this.canvas.height = Math.min(maxHeight, boardHeight * scale);
-
-		// Calculate hex size based on canvas and radius
-		this.hexSize = Math.min(30, (this.canvas.width - 60) / (this.radius * 3));
+		// Calculate hex size based on canvas dimensions
+		this.hexSize = calculateHexSize(rect.width, rect.height, this.radius, this.zoomFactor);
 	}
 
 	private setupEventListeners(): void {
@@ -629,6 +626,25 @@ class HexSeptominoGame {
 			case 'ArrowRight':
 				this.redo();
 				break;
+			case '+':
+			case '=':
+				// Handle both + and = keys for zoom in
+				this.zoom(1.1);
+				break;
+			case '-':
+				this.zoom(0.9);
+				break;
+		}
+	}
+
+	private zoom(factor: number): void {
+		const oldZoom = this.zoomFactor;
+		this.zoomFactor = Math.max(0.5, Math.min(2.0, this.zoomFactor * factor));
+
+		if (oldZoom !== this.zoomFactor) {
+			this.updateCanvasSize();
+			this.grid.hexSize = this.hexSize;
+			this.render();
 		}
 	}
 
