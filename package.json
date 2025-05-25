@@ -1,0 +1,36 @@
+{
+  "name": "hex-flip",
+  "version": "1.0.0",
+  "description": "Hex Flip is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview",
+    "build": "vite build",
+    "lint:fix": "prettier --write \"src/**/*.{js,ts,css,md,json}\" && eslint . --fix",
+    "ci:eslint": "eslint . --format json --output-file eslint_report.json",
+    "ci:prettier": "prettier --check \"src/**/*.{js,ts,css,md,json}\"",
+    "ci:typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motlin/hex-flip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/motlin/hex-flip/issues"
+  },
+  "homepage": "https://github.com/motlin/hex-flip#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@types/node": "^22.15.21",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1",
+    "vite": "^6.3.5"
+  }
+}
