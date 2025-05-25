@@ -1,6 +1,5 @@
 import {calculateHexSize} from './canvas-utils';
 
-// Global augmentation must be at the top level
 declare global {
 	interface Window {
 		startGame: (radius: number, numPieces: number) => void;
@@ -11,7 +10,6 @@ declare global {
 	}
 }
 
-// Type definitions
 interface HexCoordinate {
 	q: number;
 	r: number;
@@ -50,10 +48,8 @@ interface SolutionMove {
 
 type ColorMap = Record<number, string>;
 
-// Global game instance
 let game: HexSeptominoGame | null = null;
 
-// Validate on page load
 window.addEventListener('DOMContentLoaded', () => {
 	validateCustomInputs();
 });
@@ -78,7 +74,6 @@ function validateCustomInputs(): boolean {
 	const errors: string[] = [];
 	let isValid = true;
 
-	// Validate radius
 	if (isNaN(radius) || radius < 2 || radius > 8) {
 		radiusInput.classList.add('invalid');
 		if (isNaN(radius) || radiusInput.value === '') {
@@ -93,7 +88,6 @@ function validateCustomInputs(): boolean {
 		radiusInput.classList.remove('invalid');
 	}
 
-	// Validate pieces
 	if (isNaN(pieces) || pieces < 3 || pieces > 15) {
 		piecesInput.classList.add('invalid');
 		if (isNaN(pieces) || piecesInput.value === '') {
@@ -108,7 +102,6 @@ function validateCustomInputs(): boolean {
 		piecesInput.classList.remove('invalid');
 	}
 
-	// Update UI
 	errorDiv.textContent = errors.join('. ');
 	startBtn.disabled = !isValid;
 
@@ -129,7 +122,6 @@ function showDifficultyScreen(): void {
 	document.getElementById('difficultyScreen')!.classList.remove('hidden');
 }
 
-// Hexagonal grid math
 class HexGrid {
 	public radius: number;
 	public hexSize: number;
@@ -140,7 +132,6 @@ class HexGrid {
 		this.hexSize = hexSize;
 		this.hexes = new Map<string, Hex>();
 
-		// Generate all hex coordinates within radius
 		for (let q = -radius; q <= radius; q++) {
 			for (let r = -radius; r <= radius; r++) {
 				const s = -q - r;
@@ -152,26 +143,22 @@ class HexGrid {
 		}
 	}
 
-	// Get hex at cube coordinates
 	getHex(q: number, r: number): Hex | undefined {
 		return this.hexes.get(`${q},${r}`);
 	}
 
-	// Convert cube coordinates to pixel position
 	hexToPixel(q: number, r: number): Point {
 		const x = this.hexSize * ((3 / 2) * q);
 		const y = this.hexSize * ((Math.sqrt(3) / 2) * q + Math.sqrt(3) * r);
 		return {x, y};
 	}
 
-	// Convert pixel position to cube coordinates
 	pixelToHex(x: number, y: number): HexCoordinate {
 		const q = ((2 / 3) * x) / this.hexSize;
 		const r = ((-1 / 3) * x + (Math.sqrt(3) / 3) * y) / this.hexSize;
 		return this.roundHex(q, r);
 	}
 
-	// Round to nearest hex
 	roundHex(q: number, r: number): HexCoordinate {
 		const s = -q - r;
 		let rq = Math.round(q);
@@ -191,7 +178,6 @@ class HexGrid {
 		return {q: rq, r: rr};
 	}
 
-	// Get neighboring hexes
 	getNeighbors(q: number, r: number): HexCoordinate[] {
 		const dirs: [number, number][] = [
 			[1, 0],
@@ -205,17 +191,13 @@ class HexGrid {
 	}
 }
 
-// Septomino piece generator
 class SeptominoGenerator {
 	static generatePiece(): Piece {
-		// Start with center at 0,0
 		const tiles: Piece = [{q: 0, r: 0}];
 
-		// Add 2-6 more tiles (for total of 3-7)
 		const numTiles = 2 + Math.floor(Math.random() * 5);
 
 		for (let i = 0; i < numTiles; i++) {
-			// Get all possible neighbors of center
 			const neighbors: HexCoordinate[] = [
 				{q: 1, r: 0},
 				{q: 1, r: -1},
@@ -225,7 +207,6 @@ class SeptominoGenerator {
 				{q: 0, r: 1},
 			];
 
-			// Filter out already used positions
 			const available = neighbors.filter((n) => !tiles.some((t) => t.q === n.q && t.r === n.r));
 
 			if (available.length > 0) {
@@ -246,7 +227,6 @@ class SeptominoGenerator {
 	}
 }
 
-// Game class
 class HexSeptominoGame {
 	private canvas: HTMLCanvasElement;
 	private ctx: CanvasRenderingContext2D;
@@ -279,8 +259,6 @@ class HexSeptominoGame {
 		this.radius = radius;
 		this.numPieces = numPieces;
 
-		// Calculate responsive sizes
-		// Default size, will be updated
 		this.hexSize = 30;
 		this.updateCanvasSize();
 
@@ -313,14 +291,12 @@ class HexSeptominoGame {
 		this.generateLevel();
 		this.render();
 
-		// Recalculate size after DOM layout
 		setTimeout(() => {
 			this.updateCanvasSize();
 			this.grid.hexSize = this.hexSize;
 			this.render();
 		}, 100);
 
-		// Handle resize
 		window.addEventListener('resize', () => {
 			this.updateCanvasSize();
 			this.grid.hexSize = this.hexSize;
@@ -336,7 +312,6 @@ class HexSeptominoGame {
 		this.canvas.width = rect.width;
 		this.canvas.height = rect.height;
 
-		// Calculate hex size based on canvas dimensions
 		this.hexSize = calculateHexSize(rect.width, rect.height, this.radius, this.zoomFactor);
 	}
 
@@ -359,7 +334,6 @@ class HexSeptominoGame {
 	}
 
 	private generateLevel(): void {
-		// Generate pieces
 		this.pieces = SeptominoGenerator.generateSet(this.numPieces);
 		this.solution = [];
 		this.placedPieces.clear();
@@ -367,23 +341,18 @@ class HexSeptominoGame {
 		this.redoStack = [];
 		this.currentPieceIndex = 0;
 
-		// Reset grid
 		this.grid.hexes.forEach((hex) => (hex.height = 0));
 
-		// Place pieces randomly to create the puzzle
 		const positions = Array.from(this.grid.hexes.values());
 
 		this.pieces.forEach((piece, index) => {
-			// Find valid positions for this piece (don't check height during generation)
 			const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
 
 			if (validPositions.length > 0) {
 				const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
 
-				// Record solution
 				this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
 
-				// Apply piece to increase heights
 				piece.forEach((tile) => {
 					const hex = this.grid.getHex(pos.q + tile.q, pos.r + tile.r);
 					if (hex) {
@@ -393,7 +362,6 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Save initial grid state
 		this.grid.hexes.forEach((hex, key) => {
 			this.initialGridState.set(key, hex.height);
 		});
@@ -402,7 +370,6 @@ class HexSeptominoGame {
 	}
 
 	private canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
-		// Check if all hexes exist and optionally check height > 0
 		return piece.every((tile) => {
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (checkHeight) {
@@ -418,10 +385,8 @@ class HexSeptominoGame {
 		if (!this.canPlacePiece(piece, centerQ, centerR)) return;
 		if (this.placedPieces.has(this.currentPieceIndex)) return;
 
-		// Clear redo stack
 		this.redoStack = [];
 
-		// Record move
 		const move: Move = {
 			pieceIndex: this.currentPieceIndex,
 			q: centerQ,
@@ -429,7 +394,6 @@ class HexSeptominoGame {
 			heightChanges: [],
 		};
 
-		// Apply piece
 		piece.forEach((tile) => {
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (hex && hex.height > 0) {
@@ -441,7 +405,6 @@ class HexSeptominoGame {
 		this.history.push(move);
 		this.placedPieces.add(this.currentPieceIndex);
 
-		// Auto-advance to next unplaced piece
 		this.findNextUnplacedPiece();
 
 		this.checkWinCondition();
@@ -471,7 +434,6 @@ class HexSeptominoGame {
 		const move = this.history.pop()!;
 		this.redoStack.push(move);
 
-		// Restore heights
 		move.heightChanges.forEach((change) => {
 			const hex = this.grid.getHex(change.q, change.r);
 			if (hex) hex.height = change.oldHeight;
@@ -499,7 +461,6 @@ class HexSeptominoGame {
 			this.hintPos = {q: solutionMove.q, r: solutionMove.r};
 			this.render();
 
-			// Clear hint after 2 seconds
 			setTimeout(() => {
 				this.hintPos = null;
 				this.render();
@@ -508,13 +469,11 @@ class HexSeptominoGame {
 	}
 
 	private restart(): void {
-		// Restore initial grid state
 		this.initialGridState.forEach((height, key) => {
 			const hex = this.grid.hexes.get(key);
 			if (hex) hex.height = height;
 		});
 
-		// Reset game state
 		this.placedPieces.clear();
 		this.history = [];
 		this.redoStack = [];
@@ -668,15 +627,12 @@ class HexSeptominoGame {
 	}
 
 	private render(): void {
-		// Clear canvas
 		this.ctx.fillStyle = '#0f3460';
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-		// Translate to center
 		this.ctx.save();
 		this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
 
-		// Calculate font size based on hex size
 		const fontSize = Math.max(12, Math.floor(this.hexSize * 0.5));
 
 		// Draw hexes
@@ -826,12 +782,10 @@ class HexSeptominoGame {
 	}
 }
 
-// Make functions available globally
 window.startGame = startGame;
 window.startCustomGame = startCustomGame;
 window.validateCustomInputs = validateCustomInputs;
 window.showDifficultyScreen = showDifficultyScreen;
 window.game = game;
 
-// Export to make this a module
 export {};

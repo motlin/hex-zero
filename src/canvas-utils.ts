@@ -10,15 +10,14 @@ export function calculateHexSize(
 	radius: number,
 	zoomFactor: number = 1.0,
 ): number {
-	const padding = 40;
+	const padding = 60;
 
-	// Calculate hex size to fit the board within the canvas
 	const widthBasedHexSize = (canvasWidth - padding) / (radius * 3);
 	const heightBasedHexSize = (canvasHeight - padding) / (radius * 2 * Math.sqrt(3));
 	const baseHexSize = Math.min(widthBasedHexSize, heightBasedHexSize);
 
-	// Apply zoom factor for zoom in/out functionality
-	const hexSize = Math.max(10, baseHexSize * zoomFactor);
+	const fitFactor = 0.9;
 
+	const hexSize = Math.max(10, baseHexSize * fitFactor * zoomFactor);
 	return hexSize;
 }
