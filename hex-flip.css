@@ -1,0 +1,229 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #1a1a2e;
+    color: #eee;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+h1 {
+    margin: 10px 0;
+    text-align: center;
+    color: #e94560;
+    font-size: 24px;
+}
+
+.game-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    padding: 0 10px;
+    max-width: 100%;
+    flex-grow: 1;
+}
+
+.canvas-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+canvas {
+    border: 2px solid #0f3460;
+    border-radius: 4px;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.controls {
+    background-color: #16213e;
+    padding: 20px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 200px;
+}
+
+button {
+    background-color: #e94560;
+    color: #eee;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: opacity 0.2s;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.piece-info {
+    text-align: center;
+}
+
+.solution-status {
+    color: #f39c12;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.instructions {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Difficulty selection screen */
+.difficulty-screen {
+    background-color: #16213e;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 500px;
+    margin: 20px;
+}
+
+.difficulty-screen h2 {
+    color: #e94560;
+    margin-bottom: 30px;
+}
+
+.difficulty-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.difficulty-card {
+    background-color: #0f3460;
+    padding: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.difficulty-card:hover {
+    transform: scale(1.05);
+    background-color: #1a4a7a;
+}
+
+.difficulty-card h3 {
+    color: #f39c12;
+    margin: 0 0 10px 0;
+}
+
+.difficulty-card p {
+    margin: 0;
+    font-size: 14px;
+    color: #aaa;
+}
+
+.custom-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.custom-form input {
+    background-color: #0f3460;
+    border: 1px solid #2a5080;
+    color: #eee;
+    padding: 8px 12px;
+    border-radius: 4px;
+    width: 80px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.custom-form input.invalid {
+    border-color: #e94560;
+    background-color: rgba(233, 69, 96, 0.1);
+}
+
+.custom-form label {
+    font-size: 14px;
+}
+
+.validation-error {
+    color: #e94560;
+    font-size: 12px;
+    margin-top: 5px;
+    min-height: 18px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Mobile styles */
+.mobile-controls {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #16213e;
+    padding: 10px;
+    border-top: 2px solid #0f3460;
+}
+
+.mobile-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.mobile-controls button {
+    padding: 15px 10px;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 20px;
+        margin: 5px 0;
+    }
+
+    .game-container {
+        flex-direction: column;
+        padding: 5px;
+    }
+
+    .controls {
+        display: none;
+    }
+
+    .mobile-controls {
+        display: block;
+    }
+
+    .difficulty-screen {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .canvas-container {
+        width: 100%;
+        height: calc(100vh - 200px);
+    }
+}
