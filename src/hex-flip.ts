@@ -601,7 +601,10 @@ class HexSeptominoGame {
 
 	private handleClick(_event: MouseEvent): void {
 		if (this.mouseHex && !this.placedPieces.has(this.currentPieceIndex)) {
-			this.placePiece(this.mouseHex.q, this.mouseHex.r);
+			const piece = this.pieces[this.currentPieceIndex];
+			if (this.canPlacePiece(piece, this.mouseHex.q, this.mouseHex.r)) {
+				this.placePiece(this.mouseHex.q, this.mouseHex.r);
+			}
 		}
 	}
 
