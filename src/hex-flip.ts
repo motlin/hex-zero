@@ -574,9 +574,11 @@ class HexSeptominoGame {
 	private handleKeyPress(event: KeyboardEvent): void {
 		switch (event.key) {
 			case 'ArrowUp':
+				event.preventDefault();
 				this.cyclePiece(-1);
 				break;
 			case 'ArrowDown':
+				event.preventDefault();
 				this.cyclePiece(1);
 				break;
 			case 'ArrowLeft':
