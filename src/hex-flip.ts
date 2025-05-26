@@ -249,6 +249,7 @@ class HexSeptominoGame {
 	private touchHex: HexCoordinate | null;
 	private isTouching: boolean;
 	private zoomFactor: number;
+	private hintTimeout: number | null;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -287,6 +288,7 @@ class HexSeptominoGame {
 		this.touchHex = null;
 		this.isTouching = false;
 		this.zoomFactor = 1.0;
+		this.hintTimeout = null;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -328,7 +330,7 @@ class HexSeptominoGame {
 		});
 
 		document.addEventListener('keydown', (e) => this.handleKeyPress(e));
-		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.showHint());
+		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.toggleHint());
 		(document.getElementById('restartBtn') as HTMLElement).addEventListener('click', () => this.restart());
 		(document.getElementById('newGameBtn') as HTMLElement).addEventListener('click', () => showDifficultyScreen());
 
@@ -474,15 +476,27 @@ class HexSeptominoGame {
 		this.placePiece(move.q, move.r);
 	}
 
-	showHint(): void {
+	toggleHint(): void {
+		// If hint is already showing, hide it
+		if (this.hintPos) {
+			this.hintPos = null;
+			if (this.hintTimeout) {
+				clearTimeout(this.hintTimeout);
+				this.hintTimeout = null;
+			}
+			this.render();
+			return;
+		}
+
 		const solutionMove = this.solution.find((move) => move.pieceIndex === this.currentPieceIndex);
 
 		if (solutionMove) {
 			this.hintPos = {q: solutionMove.q, r: solutionMove.r};
 			this.render();
 
-			setTimeout(() => {
+			this.hintTimeout = window.setTimeout(() => {
 				this.hintPos = null;
+				this.hintTimeout = null;
 				this.render();
 			}, 2000);
 		}
@@ -615,6 +629,7 @@ class HexSeptominoGame {
 				this.zoom(1.1);
 				break;
 			case '-':
+			case '_':
 				this.zoom(0.9);
 				break;
 			case '?':
@@ -622,7 +637,7 @@ class HexSeptominoGame {
 				break;
 			case 'h':
 			case 'H':
-				this.showHint();
+				this.toggleHint();
 				break;
 		}
 	}
