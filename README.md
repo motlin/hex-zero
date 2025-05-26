@@ -132,20 +132,22 @@ Levels are procedurally generated to ensure solvability:
 
 ## Development
 
-The game runs entirely in the browser with no server required.
+The game is built with TypeScript and Vite, requiring Node.js to run locally.
 
 To run the game locally:
 
 ```bash
 git clone https://github.com/motlin/hex-flip.git
 cd hex-flip
+npm install
 
-open index.html
-
-python3 -m http.server 8000
+# Run development server
+npm run dev
+# OR if you have just installed:
+just dev
 ```
 
-Then navigate to `http://localhost:8000` in your browser.
+The development server will start and provide a local URL (typically `http://localhost:5173`).
 
 ## License
 
