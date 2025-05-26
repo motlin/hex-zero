@@ -331,6 +331,26 @@ class HexSeptominoGame {
 		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.showHint());
 		(document.getElementById('restartBtn') as HTMLElement).addEventListener('click', () => this.restart());
 		(document.getElementById('newGameBtn') as HTMLElement).addEventListener('click', () => showDifficultyScreen());
+
+		// Keyboard shortcuts modal event listeners
+		const closeBtn = document.getElementById('closeShortcutsBtn');
+		const modal = document.getElementById('keyboardShortcutsModal');
+		const modalOverlay = modal?.querySelector('.modal-overlay');
+
+		if (closeBtn) {
+			closeBtn.addEventListener('click', () => this.toggleKeyboardShortcuts());
+		}
+
+		if (modalOverlay) {
+			modalOverlay.addEventListener('click', () => this.toggleKeyboardShortcuts());
+		}
+
+		// Close modal on ESC key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+				this.toggleKeyboardShortcuts();
+			}
+		});
 	}
 
 	private generateLevel(): void {
@@ -582,9 +602,11 @@ class HexSeptominoGame {
 				this.cyclePiece(1);
 				break;
 			case 'ArrowLeft':
+				event.preventDefault();
 				this.undo();
 				break;
 			case 'ArrowRight':
+				event.preventDefault();
 				this.redo();
 				break;
 			case '+':
@@ -594,6 +616,13 @@ class HexSeptominoGame {
 				break;
 			case '-':
 				this.zoom(0.9);
+				break;
+			case '?':
+				this.toggleKeyboardShortcuts();
+				break;
+			case 'h':
+			case 'H':
+				this.showHint();
 				break;
 		}
 	}
@@ -606,6 +635,13 @@ class HexSeptominoGame {
 			this.updateCanvasSize();
 			this.grid.hexSize = this.hexSize;
 			this.render();
+		}
+	}
+
+	private toggleKeyboardShortcuts(): void {
+		const modal = document.getElementById('keyboardShortcutsModal');
+		if (modal) {
+			modal.classList.toggle('hidden');
 		}
 	}
 
