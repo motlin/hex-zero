@@ -422,13 +422,13 @@ class HexSeptominoGame {
 		}
 	}
 
-	private cyclePiece(direction: number): void {
+	cyclePiece(direction: number): void {
 		this.currentPieceIndex = (this.currentPieceIndex + direction + this.pieces.length) % this.pieces.length;
 		this.updateUI();
 		this.render();
 	}
 
-	private undo(): void {
+	undo(): void {
 		if (this.history.length === 0) return;
 
 		const move = this.history.pop()!;
@@ -446,7 +446,7 @@ class HexSeptominoGame {
 		this.render();
 	}
 
-	private redo(): void {
+	redo(): void {
 		if (this.redoStack.length === 0) return;
 
 		const move = this.redoStack.pop()!;
@@ -454,7 +454,7 @@ class HexSeptominoGame {
 		this.placePiece(move.q, move.r);
 	}
 
-	private showHint(): void {
+	showHint(): void {
 		const solutionMove = this.solution.find((move) => move.pieceIndex === this.currentPieceIndex);
 
 		if (solutionMove) {
@@ -640,15 +640,16 @@ class HexSeptominoGame {
 			const pos = this.grid.hexToPixel(hex.q, hex.r);
 			let displayHeight = hex.height;
 
-			// Check if this hex is being previewed
-			if (this.mouseHex && !this.placedPieces.has(this.currentPieceIndex)) {
+			// Check if this hex is being previewed (mouse or touch)
+			const previewHex = this.mouseHex || this.touchHex;
+			if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
 				const piece = this.pieces[this.currentPieceIndex];
-				const canPlace = this.canPlacePiece(piece, this.mouseHex.q, this.mouseHex.r);
+				const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
 				if (canPlace) {
 					// Check if this hex would be affected by the piece
 					const isAffected = piece.some(
-						(tile) => hex.q === this.mouseHex!.q + tile.q && hex.r === this.mouseHex!.r + tile.r,
+						(tile) => hex.q === previewHex.q + tile.q && hex.r === previewHex.r + tile.r,
 					);
 
 					if (isAffected && hex.height > 0) {
@@ -670,13 +671,14 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Draw hover outline overlay
-		if (this.mouseHex && !this.placedPieces.has(this.currentPieceIndex)) {
+		// Draw hover/touch outline overlay
+		const previewHex = this.mouseHex || this.touchHex;
+		if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
 			const piece = this.pieces[this.currentPieceIndex];
-			const canPlace = this.canPlacePiece(piece, this.mouseHex.q, this.mouseHex.r);
+			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
 			piece.forEach((tile) => {
-				const hex = this.grid.getHex(this.mouseHex!.q + tile.q, this.mouseHex!.r + tile.r);
+				const hex = this.grid.getHex(previewHex.q + tile.q, previewHex.r + tile.r);
 				if (hex) {
 					const pos = this.grid.hexToPixel(hex.q, hex.r);
 					if (canPlace) {
