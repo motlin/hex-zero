@@ -20,6 +20,16 @@ interface Hex extends HexCoordinate {
 	height: number;
 }
 
+interface AnimatingHex {
+	q: number;
+	r: number;
+	centerQ: number;
+	centerR: number;
+	startHeight: number;
+	targetHeight: number;
+	progress: number;
+}
+
 type Piece = HexCoordinate[];
 
 interface Move {
@@ -250,6 +260,9 @@ class HexSeptominoGame {
 	private isTouching: boolean;
 	private zoomFactor: number;
 	private hintTimeout: number | null;
+	private animatingHexes: AnimatingHex[];
+	private animationStartTime: number | null;
+	private animationDuration: number;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -289,6 +302,9 @@ class HexSeptominoGame {
 		this.isTouching = false;
 		this.zoomFactor = 1.0;
 		this.hintTimeout = null;
+		this.animatingHexes = [];
+		this.animationStartTime = null;
+		this.animationDuration = 1200;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -414,22 +430,45 @@ class HexSeptominoGame {
 			heightChanges: [],
 		};
 
+		this.animatingHexes = [];
+
 		piece.forEach((tile) => {
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (hex && hex.height > 0) {
 				move.heightChanges.push({q: hex.q, r: hex.r, oldHeight: hex.height});
-				hex.height--;
+
+				this.animatingHexes.push({
+					q: hex.q,
+					r: hex.r,
+					centerQ: centerQ,
+					centerR: centerR,
+					startHeight: hex.height,
+					targetHeight: hex.height - 1,
+					progress: 0,
+				});
 			}
 		});
 
-		this.history.push(move);
-		this.placedPieces.add(this.currentPieceIndex);
+		this.animationStartTime = performance.now();
+		this.requestAnimationFrame();
 
-		this.findNextUnplacedPiece();
+		setTimeout(() => {
+			piece.forEach((tile) => {
+				const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
+				if (hex && hex.height > 0) {
+					hex.height--;
+				}
+			});
 
-		this.checkWinCondition();
-		this.updateUI();
-		this.render();
+			this.history.push(move);
+			this.placedPieces.add(this.currentPieceIndex);
+
+			this.findNextUnplacedPiece();
+
+			this.checkWinCondition();
+			this.updateUI();
+			this.render();
+		}, this.animationDuration);
 	}
 
 	private findNextUnplacedPiece(): void {
@@ -689,22 +728,31 @@ class HexSeptominoGame {
 
 		const fontSize = Math.max(12, Math.floor(this.hexSize * 0.5));
 
+		// First pass: Draw all hexes in their target state (background)
 		this.grid.hexes.forEach((hex) => {
 			const pos = this.grid.hexToPixel(hex.q, hex.r);
 			let displayHeight = hex.height;
 
-			const previewHex = this.mouseHex || this.touchHex;
-			if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
-				const piece = this.pieces[this.currentPieceIndex];
-				const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
+			// Check if this hex is being animated
+			const animatingHex = this.animatingHexes.find((h) => h.q === hex.q && h.r === hex.r);
+			if (animatingHex) {
+				// Show the target state as background
+				displayHeight = animatingHex.targetHeight;
+			} else {
+				// Preview logic for non-animating hexes
+				const previewHex = this.mouseHex || this.touchHex;
+				if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
+					const piece = this.pieces[this.currentPieceIndex];
+					const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
-				if (canPlace) {
-					const isAffected = piece.some(
-						(tile) => hex.q === previewHex.q + tile.q && hex.r === previewHex.r + tile.r,
-					);
+					if (canPlace) {
+						const isAffected = piece.some(
+							(tile) => hex.q === previewHex.q + tile.q && hex.r === previewHex.r + tile.r,
+						);
 
-					if (isAffected && hex.height > 0) {
-						displayHeight = hex.height - 1;
+						if (isAffected && hex.height > 0) {
+							displayHeight = hex.height - 1;
+						}
 					}
 				}
 			}
@@ -718,6 +766,64 @@ class HexSeptominoGame {
 				this.ctx.textBaseline = 'middle';
 				this.ctx.fillText(displayHeight.toString(), pos.x, pos.y);
 			}
+		});
+
+		// Second pass: Draw animating hexes on top
+		this.animatingHexes.forEach((animatingHex) => {
+			const hex = this.grid.getHex(animatingHex.q, animatingHex.r);
+			if (!hex) return;
+
+			const pos = this.grid.hexToPixel(hex.q, hex.r);
+			const centerPos = this.grid.hexToPixel(animatingHex.centerQ, animatingHex.centerR);
+
+			// Calculate direction vector from hex to center
+			const dx = centerPos.x - pos.x;
+			const dy = centerPos.y - pos.y;
+
+			// Skip if this is the center hex
+			if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) return;
+
+			// Calculate the flattening effect
+			const flatten = 1 - animatingHex.progress;
+
+			// Move hex position toward the shared edge as it flattens
+			// Move halfway to center
+			const moveProgress = animatingHex.progress * 0.5;
+			const currentX = pos.x + dx * moveProgress;
+			const currentY = pos.y + dy * moveProgress;
+
+			this.ctx.save();
+			this.ctx.translate(currentX, currentY);
+
+			// Apply flattening transformation perpendicular to the direction to center
+			// The hex should flatten along the axis pointing to center
+			const angle = Math.atan2(dy, dx);
+			this.ctx.rotate(angle);
+			this.ctx.scale(flatten, 1);
+			this.ctx.rotate(-angle);
+
+			// Draw the hex with fading opacity
+			this.ctx.globalAlpha = flatten;
+			this.drawHexOnCanvas(
+				this.ctx,
+				0,
+				0,
+				this.hexSize,
+				this.colors[animatingHex.startHeight] || '#000',
+				'#0f3460',
+				2,
+			);
+
+			// Draw the number with same transformations
+			if (animatingHex.startHeight > 0 && flatten > 0.1) {
+				this.ctx.fillStyle = '#fff';
+				this.ctx.font = `bold ${fontSize}px Arial`;
+				this.ctx.textAlign = 'center';
+				this.ctx.textBaseline = 'middle';
+				this.ctx.fillText(animatingHex.startHeight.toString(), 0, 0);
+			}
+
+			this.ctx.restore();
 		});
 
 		const previewHex = this.mouseHex || this.touchHex;
@@ -826,6 +932,39 @@ class HexSeptominoGame {
 		ctx.strokeStyle = strokeColor;
 		ctx.lineWidth = lineWidth;
 		ctx.stroke();
+	}
+
+	private requestAnimationFrame(): void {
+		if (this.animationStartTime !== null && this.animatingHexes.length > 0) {
+			requestAnimationFrame(() => this.animate());
+		}
+	}
+
+	private animate(): void {
+		if (this.animationStartTime === null) return;
+
+		const now = performance.now();
+		const elapsed = now - this.animationStartTime;
+		const progress = Math.min(elapsed / this.animationDuration, 1);
+
+		const easeInOutCubic = (t: number): number => {
+			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+		};
+
+		const easedProgress = easeInOutCubic(progress);
+
+		this.animatingHexes.forEach((hex) => {
+			hex.progress = easedProgress;
+		});
+
+		this.render();
+
+		if (progress < 1) {
+			this.requestAnimationFrame();
+		} else {
+			this.animatingHexes = [];
+			this.animationStartTime = null;
+		}
 	}
 }
 
