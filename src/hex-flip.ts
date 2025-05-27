@@ -307,10 +307,8 @@ class HexSeptominoGame {
 	}
 
 	private updateCanvasSize(): void {
-		// Get the actual size of the canvas from CSS
 		const rect = this.canvas.getBoundingClientRect();
 
-		// Set canvas internal dimensions to match CSS dimensions
 		this.canvas.width = rect.width;
 		this.canvas.height = rect.height;
 
@@ -691,19 +689,16 @@ class HexSeptominoGame {
 
 		const fontSize = Math.max(12, Math.floor(this.hexSize * 0.5));
 
-		// Draw hexes
 		this.grid.hexes.forEach((hex) => {
 			const pos = this.grid.hexToPixel(hex.q, hex.r);
 			let displayHeight = hex.height;
 
-			// Check if this hex is being previewed (mouse or touch)
 			const previewHex = this.mouseHex || this.touchHex;
 			if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
 				const piece = this.pieces[this.currentPieceIndex];
 				const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
 				if (canPlace) {
-					// Check if this hex would be affected by the piece
 					const isAffected = piece.some(
 						(tile) => hex.q === previewHex.q + tile.q && hex.r === previewHex.r + tile.r,
 					);
@@ -714,10 +709,8 @@ class HexSeptominoGame {
 				}
 			}
 
-			// Base hex with preview color
 			this.drawHex(pos.x, pos.y, this.colors[displayHeight] || '#000', '#0f3460', 2);
 
-			// Height number (only show if not 0)
 			if (displayHeight > 0) {
 				this.ctx.fillStyle = '#fff';
 				this.ctx.font = `bold ${fontSize}px Arial`;
@@ -727,7 +720,6 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Draw hover/touch outline overlay
 		const previewHex = this.mouseHex || this.touchHex;
 		if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
 			const piece = this.pieces[this.currentPieceIndex];
@@ -738,17 +730,14 @@ class HexSeptominoGame {
 				if (hex) {
 					const pos = this.grid.hexToPixel(hex.q, hex.r);
 					if (canPlace) {
-						// Yellow for valid placement
 						this.drawHex(pos.x, pos.y, 'rgba(255, 235, 59, 0.3)', '#ffeb3b', 3);
 					} else {
-						// Red for invalid placement
 						this.drawHex(pos.x, pos.y, 'rgba(244, 67, 54, 0.3)', '#f44336', 3);
 					}
 				}
 			});
 		}
 
-		// Draw hint
 		if (this.hintPos) {
 			const piece = this.pieces[this.currentPieceIndex];
 			piece.forEach((tile) => {
