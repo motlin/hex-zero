@@ -28,6 +28,7 @@ interface AnimatingHex {
 	startHeight: number;
 	targetHeight: number;
 	progress: number;
+	delay: number;
 }
 
 type Piece = HexCoordinate[];
@@ -304,7 +305,7 @@ class HexSeptominoGame {
 		this.hintTimeout = null;
 		this.animatingHexes = [];
 		this.animationStartTime = null;
-		this.animationDuration = 1200;
+		this.animationDuration = 750;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -432,10 +433,35 @@ class HexSeptominoGame {
 
 		this.animatingHexes = [];
 
-		piece.forEach((tile) => {
+		// Sort pieces by position for clockwise animation
+		// Center first, then top, then clockwise
+		const sortedPieces = piece.slice().sort((a, b) => {
+			// Center hex goes first
+			if (a.q === 0 && a.r === 0) return -1;
+			if (b.q === 0 && b.r === 0) return 1;
+
+			// Top hex (0, -1) goes second
+			if (a.q === 0 && a.r === -1) return -1;
+			if (b.q === 0 && b.r === -1) return 1;
+
+			// Rest go clockwise - calculate angle from center
+			const angleA = Math.atan2(a.r, a.q);
+			const angleB = Math.atan2(b.r, b.q);
+
+			// Adjust angles to start from top and go clockwise
+			const adjustedA = (angleA + Math.PI * 2.5) % (Math.PI * 2);
+			const adjustedB = (angleB + Math.PI * 2.5) % (Math.PI * 2);
+
+			return adjustedA - adjustedB;
+		});
+
+		sortedPieces.forEach((tile, index) => {
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (hex && hex.height > 0) {
 				move.heightChanges.push({q: hex.q, r: hex.r, oldHeight: hex.height});
+
+				// Stagger the animations - 100ms between each hex
+				const delay = index * 100;
 
 				this.animatingHexes.push({
 					q: hex.q,
@@ -445,6 +471,7 @@ class HexSeptominoGame {
 					startHeight: hex.height,
 					targetHeight: hex.height - 1,
 					progress: 0,
+					delay: delay,
 				});
 			}
 		});
@@ -738,23 +765,6 @@ class HexSeptominoGame {
 			if (animatingHex) {
 				// Show the target state as background
 				displayHeight = animatingHex.targetHeight;
-			} else {
-				// Preview logic for non-animating hexes
-				const previewHex = this.mouseHex || this.touchHex;
-				if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
-					const piece = this.pieces[this.currentPieceIndex];
-					const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
-
-					if (canPlace) {
-						const isAffected = piece.some(
-							(tile) => hex.q === previewHex.q + tile.q && hex.r === previewHex.r + tile.r,
-						);
-
-						if (isAffected && hex.height > 0) {
-							displayHeight = hex.height - 1;
-						}
-					}
-				}
 			}
 
 			this.drawHex(pos.x, pos.y, this.colors[displayHeight] || '#000', '#0f3460', 2);
@@ -774,36 +784,20 @@ class HexSeptominoGame {
 			if (!hex) return;
 
 			const pos = this.grid.hexToPixel(hex.q, hex.r);
-			const centerPos = this.grid.hexToPixel(animatingHex.centerQ, animatingHex.centerR);
 
-			// Calculate direction vector from hex to center
-			const dx = centerPos.x - pos.x;
-			const dy = centerPos.y - pos.y;
-
-			// Skip if this is the center hex
-			if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) return;
-
-			// Calculate the flattening effect
-			const flatten = 1 - animatingHex.progress;
-
-			// Move hex position toward the shared edge as it flattens
-			// Move halfway to center
-			const moveProgress = animatingHex.progress * 0.5;
-			const currentX = pos.x + dx * moveProgress;
-			const currentY = pos.y + dy * moveProgress;
-
+			// Burst animation for all hexes
 			this.ctx.save();
-			this.ctx.translate(currentX, currentY);
+			this.ctx.translate(pos.x, pos.y);
 
-			// Apply flattening transformation perpendicular to the direction to center
-			// The hex should flatten along the axis pointing to center
-			const angle = Math.atan2(dy, dx);
-			this.ctx.rotate(angle);
-			this.ctx.scale(flatten, 1);
-			this.ctx.rotate(-angle);
+			// Scale up and fade out for burst effect
+			// Scale up to 150%
+			const burstScale = 1 + animatingHex.progress * 0.5;
+			const opacity = 1 - animatingHex.progress;
 
-			// Draw the hex with fading opacity
-			this.ctx.globalAlpha = flatten;
+			this.ctx.globalAlpha = opacity;
+			this.ctx.scale(burstScale, burstScale);
+
+			// Draw the bursting hex
 			this.drawHexOnCanvas(
 				this.ctx,
 				0,
@@ -814,8 +808,8 @@ class HexSeptominoGame {
 				2,
 			);
 
-			// Draw the number with same transformations
-			if (animatingHex.startHeight > 0 && flatten > 0.1) {
+			// Draw the number with burst effect
+			if (animatingHex.startHeight > 0 && opacity > 0.1) {
 				this.ctx.fillStyle = '#fff';
 				this.ctx.font = `bold ${fontSize}px Arial`;
 				this.ctx.textAlign = 'center';
@@ -951,10 +945,13 @@ class HexSeptominoGame {
 			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 		};
 
-		const easedProgress = easeInOutCubic(progress);
-
 		this.animatingHexes.forEach((hex) => {
-			hex.progress = easedProgress;
+			// Apply delay to each hex
+			const hexElapsed = Math.max(0, elapsed - hex.delay);
+			// 400ms per hex animation
+			const hexProgress = Math.min(hexElapsed / 400, 1);
+			const easedHexProgress = easeInOutCubic(hexProgress);
+			hex.progress = easedHexProgress;
 		});
 
 		this.render();
