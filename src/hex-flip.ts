@@ -264,6 +264,13 @@ class HexSeptominoGame {
 	private animatingHexes: AnimatingHex[];
 	private animationStartTime: number | null;
 	private animationDuration: number;
+	private isPanning: boolean;
+	private panStartX: number;
+	private panStartY: number;
+	private panOffsetX: number;
+	private panOffsetY: number;
+	private lastPinchDistance: number | null;
+	private showMobilePiecePreview: boolean;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -306,6 +313,13 @@ class HexSeptominoGame {
 		this.animatingHexes = [];
 		this.animationStartTime = null;
 		this.animationDuration = 750;
+		this.isPanning = false;
+		this.panStartX = 0;
+		this.panStartY = 0;
+		this.panOffsetX = 0;
+		this.panOffsetY = 0;
+		this.lastPinchDistance = null;
+		this.showMobilePiecePreview = false;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -335,12 +349,16 @@ class HexSeptominoGame {
 	private setupEventListeners(): void {
 		this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
 		this.canvas.addEventListener('click', (e) => this.handleClick(e));
-		this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e));
-		this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e));
-		this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e));
+		this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+		this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+		this.canvas.addEventListener('wheel', (e) => this.handleWheel(e), {passive: false});
+		this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: false});
+		this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: false});
+		this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), {passive: false});
 		this.canvas.addEventListener('touchcancel', (e) => this.handleTouchCancel(e));
 		this.canvas.addEventListener('mouseleave', () => {
 			this.mouseHex = null;
+			this.isPanning = false;
 			this.render();
 		});
 
@@ -594,9 +612,18 @@ class HexSeptominoGame {
 	}
 
 	private handleMouseMove(event: MouseEvent): void {
+		if (this.isPanning) {
+			const deltaX = event.clientX - this.panStartX;
+			const deltaY = event.clientY - this.panStartY;
+			this.panOffsetX = deltaX;
+			this.panOffsetY = deltaY;
+			this.render();
+			return;
+		}
+
 		const rect = this.canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left - this.canvas.width / 2;
-		const y = event.clientY - rect.top - this.canvas.height / 2;
+		const x = event.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
+		const y = event.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
 
 		const hex = this.grid.pixelToHex(x, y);
 		if (this.grid.getHex(hex.q, hex.r)) {
@@ -608,66 +635,153 @@ class HexSeptominoGame {
 		this.render();
 	}
 
+	private handleMouseDown(event: MouseEvent): void {
+		if (event.button === 0) {
+			// Left button
+			this.isPanning = true;
+			this.panStartX = event.clientX - this.panOffsetX;
+			this.panStartY = event.clientY - this.panOffsetY;
+		}
+	}
+
+	private handleMouseUp(_event: MouseEvent): void {
+		this.isPanning = false;
+	}
+
+	private handleWheel(event: WheelEvent): void {
+		event.preventDefault();
+		const zoomSpeed = 0.001;
+		const delta = event.deltaY * -zoomSpeed;
+		this.zoom(1 + delta);
+	}
+
 	private handleTouchStart(event: TouchEvent): void {
 		event.preventDefault();
-		const touch = event.touches[0];
-		const rect = this.canvas.getBoundingClientRect();
-		const x = touch.clientX - rect.left - this.canvas.width / 2;
-		const y = touch.clientY - rect.top - this.canvas.height / 2;
 
-		const hex = this.grid.pixelToHex(x, y);
-		if (this.grid.getHex(hex.q, hex.r)) {
-			this.touchHex = hex;
-			this.isTouching = true;
-			this.render();
+		if (event.touches.length === 1) {
+			// Single touch - show piece preview and track position
+			const touch = event.touches[0];
+			const rect = this.canvas.getBoundingClientRect();
+			const x = touch.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
+			const y = touch.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
+
+			const hex = this.grid.pixelToHex(x, y);
+			if (this.grid.getHex(hex.q, hex.r)) {
+				this.touchHex = hex;
+				this.isTouching = true;
+				this.showMobilePiecePreview = true;
+				this.render();
+			}
+		} else if (event.touches.length === 2) {
+			// Two touches - start pan/zoom
+			this.touchHex = null;
+			this.showMobilePiecePreview = false;
+			this.isTouching = false;
+
+			// Calculate initial pinch distance
+			const touch1 = event.touches[0];
+			const touch2 = event.touches[1];
+			const dx = touch2.clientX - touch1.clientX;
+			const dy = touch2.clientY - touch1.clientY;
+			this.lastPinchDistance = Math.sqrt(dx * dx + dy * dy);
+
+			// Calculate center point for panning
+			const centerX = (touch1.clientX + touch2.clientX) / 2;
+			const centerY = (touch1.clientY + touch2.clientY) / 2;
+			this.panStartX = centerX - this.panOffsetX;
+			this.panStartY = centerY - this.panOffsetY;
 		}
 	}
 
 	private handleTouchMove(event: TouchEvent): void {
-		if (!this.isTouching) return;
 		event.preventDefault();
 
-		const touch = event.touches[0];
-		const rect = this.canvas.getBoundingClientRect();
-		const x = touch.clientX - rect.left - this.canvas.width / 2;
-		const y = touch.clientY - rect.top - this.canvas.height / 2;
+		if (event.touches.length === 1 && this.isTouching) {
+			// Single touch - update position
+			const touch = event.touches[0];
+			const rect = this.canvas.getBoundingClientRect();
+			const x = touch.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
+			const y = touch.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
 
-		const hex = this.grid.pixelToHex(x, y);
-		if (this.grid.getHex(hex.q, hex.r)) {
-			this.touchHex = hex;
-		} else {
-			this.touchHex = null;
+			const hex = this.grid.pixelToHex(x, y);
+			if (this.grid.getHex(hex.q, hex.r)) {
+				this.touchHex = hex;
+			} else {
+				this.touchHex = null;
+			}
+			this.render();
+		} else if (event.touches.length === 2) {
+			// Two touches - handle pan and zoom
+			const touch1 = event.touches[0];
+			const touch2 = event.touches[1];
+
+			// Calculate new pinch distance
+			const dx = touch2.clientX - touch1.clientX;
+			const dy = touch2.clientY - touch1.clientY;
+			const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
+
+			// Handle zoom
+			if (this.lastPinchDistance !== null) {
+				const scale = newPinchDistance / this.lastPinchDistance;
+				this.zoom(scale);
+			}
+			this.lastPinchDistance = newPinchDistance;
+
+			// Handle pan
+			const centerX = (touch1.clientX + touch2.clientX) / 2;
+			const centerY = (touch1.clientY + touch2.clientY) / 2;
+			this.panOffsetX = centerX - this.panStartX;
+			this.panOffsetY = centerY - this.panStartY;
+
+			this.render();
 		}
-		this.render();
 	}
 
 	private handleTouchEnd(event: TouchEvent): void {
-		if (!this.isTouching) return;
 		event.preventDefault();
 
-		if (this.touchHex && !this.placedPieces.has(this.currentPieceIndex)) {
-			const piece = this.pieces[this.currentPieceIndex];
-			if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
-				this.placePiece(this.touchHex.q, this.touchHex.r);
+		if (event.touches.length === 0) {
+			// All touches ended
+			if (this.isTouching && this.touchHex && !this.placedPieces.has(this.currentPieceIndex)) {
+				const piece = this.pieces[this.currentPieceIndex];
+				if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
+					this.placePiece(this.touchHex.q, this.touchHex.r);
+				}
 			}
-		}
 
-		this.touchHex = null;
-		this.isTouching = false;
-		this.render();
+			this.touchHex = null;
+			this.isTouching = false;
+			this.showMobilePiecePreview = false;
+			this.lastPinchDistance = null;
+			this.render();
+		} else if (event.touches.length === 1) {
+			// Going from two touches to one
+			this.lastPinchDistance = null;
+			// Could restart single touch tracking here if needed
+		}
 	}
 
 	private handleTouchCancel(_event: TouchEvent): void {
 		this.touchHex = null;
 		this.isTouching = false;
+		this.showMobilePiecePreview = false;
+		this.lastPinchDistance = null;
 		this.render();
 	}
 
-	private handleClick(_event: MouseEvent): void {
-		if (this.mouseHex && !this.placedPieces.has(this.currentPieceIndex)) {
+	private handleClick(event: MouseEvent): void {
+		// Don't place piece if we were panning
+		if (this.isPanning) return;
+
+		const rect = this.canvas.getBoundingClientRect();
+		const x = event.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
+		const y = event.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
+
+		const hex = this.grid.pixelToHex(x, y);
+		if (this.grid.getHex(hex.q, hex.r) && !this.placedPieces.has(this.currentPieceIndex)) {
 			const piece = this.pieces[this.currentPieceIndex];
-			if (this.canPlacePiece(piece, this.mouseHex.q, this.mouseHex.r)) {
-				this.placePiece(this.mouseHex.q, this.mouseHex.r);
+			if (this.canPlacePiece(piece, hex.q, hex.r)) {
+				this.placePiece(hex.q, hex.r);
 			}
 		}
 	}
@@ -706,6 +820,10 @@ class HexSeptominoGame {
 			case 'H':
 				this.toggleHint();
 				break;
+			case 'r':
+			case 'R':
+				this.resetView();
+				break;
 		}
 	}
 
@@ -718,6 +836,15 @@ class HexSeptominoGame {
 			this.grid.hexSize = this.hexSize;
 			this.render();
 		}
+	}
+
+	resetView(): void {
+		this.zoomFactor = 1.0;
+		this.panOffsetX = 0;
+		this.panOffsetY = 0;
+		this.updateCanvasSize();
+		this.grid.hexSize = this.hexSize;
+		this.render();
 	}
 
 	private toggleKeyboardShortcuts(): void {
@@ -751,7 +878,7 @@ class HexSeptominoGame {
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 		this.ctx.save();
-		this.ctx.translate(this.canvas.width / 2, this.canvas.height / 2);
+		this.ctx.translate(this.canvas.width / 2 + this.panOffsetX, this.canvas.height / 2 + this.panOffsetY);
 
 		const fontSize = Math.max(12, Math.floor(this.hexSize * 0.5));
 
@@ -854,6 +981,34 @@ class HexSeptominoGame {
 		}
 
 		this.ctx.restore();
+
+		// Draw mobile piece preview overlay
+		if (this.showMobilePiecePreview && !this.placedPieces.has(this.currentPieceIndex)) {
+			const piece = this.pieces[this.currentPieceIndex];
+			const previewSize = 80;
+			const previewHexSize = 15;
+
+			// Draw preview in top-right corner
+			this.ctx.save();
+			this.ctx.translate(this.canvas.width - previewSize - 20, 20);
+
+			// Background
+			this.ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
+			this.ctx.fillRect(-10, -10, previewSize + 20, previewSize + 20);
+			this.ctx.strokeStyle = '#0f3460';
+			this.ctx.lineWidth = 2;
+			this.ctx.strokeRect(-10, -10, previewSize + 20, previewSize + 20);
+
+			// Draw piece
+			this.ctx.translate(previewSize / 2, previewSize / 2);
+			piece.forEach((tile) => {
+				const x = previewHexSize * ((3 / 2) * tile.q);
+				const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
+				this.drawHexOnCanvas(this.ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
+			});
+
+			this.ctx.restore();
+		}
 	}
 
 	private renderPiecePreview(): void {

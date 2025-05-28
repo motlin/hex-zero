@@ -120,6 +120,10 @@
                     <span class="key">-</span>
                     <span class="description">Zoom out</span>
                 </div>
+                <div class="shortcut-item">
+                    <span class="key">R</span>
+                    <span class="description">Reset view</span>
+                </div>
             </div>
             <div class="modal-footer">
                 <button id="closeShortcutsBtn">Close</button>
@@ -134,7 +138,7 @@
             <button onclick="game.toggleHint()">Hint</button>
             <button onclick="game.cyclePiece(1)">Next</button>
             <button onclick="game.undo()">Undo</button>
-            <button onclick="showDifficultyScreen()">New</button>
+            <button onclick="game.resetView()">Reset</button>
             <button onclick="game.redo()">Redo</button>
         </div>
         <div style="text-align: center; margin-top: 10px; font-size: 12px;">
