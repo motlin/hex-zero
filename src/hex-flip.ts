@@ -497,6 +497,12 @@ class HexSeptominoGame {
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
 
+		// Update piece selection and UI immediately, before animation completes
+		this.history.push(move);
+		this.placedPieces.add(this.currentPieceIndex);
+		this.findNextUnplacedPiece();
+		this.updateUI();
+
 		setTimeout(() => {
 			piece.forEach((tile) => {
 				const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
@@ -505,13 +511,7 @@ class HexSeptominoGame {
 				}
 			});
 
-			this.history.push(move);
-			this.placedPieces.add(this.currentPieceIndex);
-
-			this.findNextUnplacedPiece();
-
 			this.checkWinCondition();
-			this.updateUI();
 			this.render();
 		}, this.animationDuration);
 	}
