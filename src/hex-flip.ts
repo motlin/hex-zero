@@ -271,6 +271,13 @@ class HexSeptominoGame {
 	private panOffsetY: number;
 	private lastPinchDistance: number | null;
 	private showMobilePiecePreview: boolean;
+	private invalidPlacementAnimation: {
+		isActive: boolean;
+		startTime: number;
+		position: HexCoordinate;
+		duration: number;
+	} | null;
+	private wheelThrottled: boolean;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -320,6 +327,8 @@ class HexSeptominoGame {
 		this.panOffsetY = 0;
 		this.lastPinchDistance = null;
 		this.showMobilePiecePreview = false;
+		this.invalidPlacementAnimation = null;
+		this.wheelThrottled = false;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -650,9 +659,17 @@ class HexSeptominoGame {
 
 	private handleWheel(event: WheelEvent): void {
 		event.preventDefault();
-		const zoomSpeed = 0.001;
-		const delta = event.deltaY * -zoomSpeed;
-		this.zoom(1 + delta);
+
+		// Use requestAnimationFrame-based throttling for smooth performance
+		if (!this.wheelThrottled) {
+			this.wheelThrottled = true;
+
+			requestAnimationFrame(() => {
+				const direction = event.deltaY > 0 ? 1 : -1;
+				this.cyclePiece(direction);
+				this.wheelThrottled = false;
+			});
+		}
 	}
 
 	private handleTouchStart(event: TouchEvent): void {
@@ -746,6 +763,8 @@ class HexSeptominoGame {
 				const piece = this.pieces[this.currentPieceIndex];
 				if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
 					this.placePiece(this.touchHex.q, this.touchHex.r);
+				} else {
+					this.showInvalidPlacementFeedback(this.touchHex);
 				}
 			}
 
@@ -782,6 +801,8 @@ class HexSeptominoGame {
 			const piece = this.pieces[this.currentPieceIndex];
 			if (this.canPlacePiece(piece, hex.q, hex.r)) {
 				this.placePiece(hex.q, hex.r);
+			} else {
+				this.showInvalidPlacementFeedback(hex);
 			}
 		}
 	}
@@ -845,6 +866,17 @@ class HexSeptominoGame {
 		this.updateCanvasSize();
 		this.grid.hexSize = this.hexSize;
 		this.render();
+	}
+
+	private showInvalidPlacementFeedback(position: HexCoordinate): void {
+		this.invalidPlacementAnimation = {
+			isActive: true,
+			startTime: performance.now(),
+			position: position,
+			// 1/3 second
+			duration: 333,
+		};
+		this.requestAnimationFrame();
 	}
 
 	private toggleKeyboardShortcuts(): void {
@@ -980,6 +1012,39 @@ class HexSeptominoGame {
 			});
 		}
 
+		// Draw invalid placement animation
+		if (this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) {
+			const elapsed = performance.now() - this.invalidPlacementAnimation.startTime;
+			const progress = elapsed / this.invalidPlacementAnimation.duration;
+
+			// Create a pulsing effect: scale from 1.0 to 1.3 and back
+			// Two full pulses
+			const pulseProgress = Math.sin(progress * Math.PI * 2);
+			const scale = 1.0 + pulseProgress * 0.3;
+			// Fade out over time
+			const opacity = Math.max(0, 1 - progress);
+
+			const piece = this.pieces[this.currentPieceIndex];
+			piece.forEach((tile) => {
+				const hex = this.grid.getHex(
+					this.invalidPlacementAnimation!.position.q + tile.q,
+					this.invalidPlacementAnimation!.position.r + tile.r,
+				);
+				if (hex) {
+					const pos = this.grid.hexToPixel(hex.q, hex.r);
+
+					this.ctx.save();
+					this.ctx.translate(pos.x, pos.y);
+					this.ctx.scale(scale, scale);
+					this.ctx.globalAlpha = opacity;
+					this.ctx.strokeStyle = '#f44336';
+					this.ctx.lineWidth = 5;
+					this.drawHexOutline(0, 0);
+					this.ctx.restore();
+				}
+			});
+		}
+
 		this.ctx.restore();
 
 		// Draw mobile piece preview overlay
@@ -1084,38 +1149,58 @@ class HexSeptominoGame {
 	}
 
 	private requestAnimationFrame(): void {
-		if (this.animationStartTime !== null && this.animatingHexes.length > 0) {
+		if (
+			(this.animationStartTime !== null && this.animatingHexes.length > 0) ||
+			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive)
+		) {
 			requestAnimationFrame(() => this.animate());
 		}
 	}
 
 	private animate(): void {
-		if (this.animationStartTime === null) return;
-
 		const now = performance.now();
-		const elapsed = now - this.animationStartTime;
-		const progress = Math.min(elapsed / this.animationDuration, 1);
+		let needsMoreFrames = false;
 
-		const easeInOutCubic = (t: number): number => {
-			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-		};
+		// Handle piece placement animation
+		if (this.animationStartTime !== null) {
+			const elapsed = now - this.animationStartTime;
+			const progress = Math.min(elapsed / this.animationDuration, 1);
 
-		this.animatingHexes.forEach((hex) => {
-			// Apply delay to each hex
-			const hexElapsed = Math.max(0, elapsed - hex.delay);
-			// 400ms per hex animation
-			const hexProgress = Math.min(hexElapsed / 400, 1);
-			const easedHexProgress = easeInOutCubic(hexProgress);
-			hex.progress = easedHexProgress;
-		});
+			const easeInOutCubic = (t: number): number => {
+				return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+			};
+
+			this.animatingHexes.forEach((hex) => {
+				// Apply delay to each hex
+				const hexElapsed = Math.max(0, elapsed - hex.delay);
+				// 400ms per hex animation
+				const hexProgress = Math.min(hexElapsed / 400, 1);
+				const easedHexProgress = easeInOutCubic(hexProgress);
+				hex.progress = easedHexProgress;
+			});
+
+			if (progress < 1) {
+				needsMoreFrames = true;
+			} else {
+				this.animatingHexes = [];
+				this.animationStartTime = null;
+			}
+		}
+
+		// Handle invalid placement animation
+		if (this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) {
+			const elapsed = now - this.invalidPlacementAnimation.startTime;
+			if (elapsed >= this.invalidPlacementAnimation.duration) {
+				this.invalidPlacementAnimation = null;
+			} else {
+				needsMoreFrames = true;
+			}
+		}
 
 		this.render();
 
-		if (progress < 1) {
+		if (needsMoreFrames) {
 			this.requestAnimationFrame();
-		} else {
-			this.animatingHexes = [];
-			this.animationStartTime = null;
 		}
 	}
 }
