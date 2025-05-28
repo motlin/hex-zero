@@ -277,7 +277,7 @@ class HexSeptominoGame {
 		position: HexCoordinate;
 		duration: number;
 	} | null;
-	private wheelThrottled: boolean;
+	private wheelAccumulator: number;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -328,7 +328,7 @@ class HexSeptominoGame {
 		this.lastPinchDistance = null;
 		this.showMobilePiecePreview = false;
 		this.invalidPlacementAnimation = null;
-		this.wheelThrottled = false;
+		this.wheelAccumulator = 0;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -660,15 +660,18 @@ class HexSeptominoGame {
 	private handleWheel(event: WheelEvent): void {
 		event.preventDefault();
 
-		// Use requestAnimationFrame-based throttling for smooth performance
-		if (!this.wheelThrottled) {
-			this.wheelThrottled = true;
+		// Accumulate scroll delta to handle trackpad sensitivity
+		this.wheelAccumulator += event.deltaY;
 
-			requestAnimationFrame(() => {
-				const direction = event.deltaY > 0 ? 1 : -1;
-				this.cyclePiece(direction);
-				this.wheelThrottled = false;
-			});
+		// Threshold for changing pieces (adjust for sensitivity)
+		// Roughly one "notch" on a traditional mouse wheel
+		const threshold = 120;
+
+		if (Math.abs(this.wheelAccumulator) >= threshold) {
+			const direction = this.wheelAccumulator > 0 ? 1 : -1;
+			this.cyclePiece(direction);
+			// Reset accumulator but keep the remainder for smooth scrolling
+			this.wheelAccumulator = this.wheelAccumulator % threshold;
 		}
 	}
 
