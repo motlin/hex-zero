@@ -1,4 +1,5 @@
 import {calculateHexSize} from './canvas-utils';
+import Hamster, {HamsterInstance} from 'hamsterjs';
 
 declare global {
 	interface Window {
@@ -69,6 +70,11 @@ function startGame(radius: number, numPieces: number): void {
 	document.getElementById('difficultyScreen')!.classList.add('hidden');
 	document.getElementById('gameScreen')!.classList.remove('hidden');
 	document.getElementById('mobileControls')!.classList.remove('hidden');
+
+	if (game) {
+		game.cleanup();
+	}
+
 	game = new HexSeptominoGame(radius, numPieces);
 	window.game = game;
 }
@@ -278,6 +284,14 @@ class HexSeptominoGame {
 		duration: number;
 	} | null;
 	private wheelAccumulator: number;
+	private hamster: HamsterInstance | null;
+
+	cleanup(): void {
+		if (this.hamster) {
+			this.hamster.unwheel();
+			this.hamster = null;
+		}
+	}
 
 	constructor(radius: number, numPieces: number) {
 		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -329,6 +343,7 @@ class HexSeptominoGame {
 		this.showMobilePiecePreview = false;
 		this.invalidPlacementAnimation = null;
 		this.wheelAccumulator = 0;
+		this.hamster = null;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -360,7 +375,17 @@ class HexSeptominoGame {
 		this.canvas.addEventListener('click', (e) => this.handleClick(e));
 		this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
 		this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
-		this.canvas.addEventListener('wheel', (e) => this.handleWheel(e), {passive: false});
+
+		this.hamster = Hamster(this.canvas);
+		this.hamster.wheel((event, delta, _deltaX, deltaY) => {
+			// Mouse wheel does not scroll
+			event.preventDefault();
+
+			// Mouse wheel is for piece cycling only
+			if (Math.abs(deltaY) > Math.abs(_deltaX)) {
+				this.handleHamsterWheel(delta, deltaY);
+			}
+		});
 		this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: false});
 		this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: false});
 		this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), {passive: false});
@@ -657,15 +682,22 @@ class HexSeptominoGame {
 		this.isPanning = false;
 	}
 
-	private handleWheel(event: WheelEvent): void {
-		event.preventDefault();
+	private handleHamsterWheel(delta: number, deltaY: number): void {
+		// Use deltaY for vertical scrolling, fall back to delta if deltaY is 0
+		const scrollDelta = deltaY === 0 ? delta : deltaY;
 
-		// Accumulate scroll delta to handle trackpad sensitivity
-		this.wheelAccumulator += event.deltaY;
+		// Detect and ignore pinch gestures which send very large delta values
+		// Regular scroll events are typically under 100, pinch can be 300+
+		if (Math.abs(scrollDelta) > 100) {
+			return;
+		}
 
-		// Threshold for changing pieces (adjust for sensitivity)
-		// Roughly one "notch" on a traditional mouse wheel
-		const threshold = 120;
+		// Accumulate scroll delta to handle both mouse wheel and trackpad
+		this.wheelAccumulator += scrollDelta;
+
+		// Hamster.js normalizes values differently for mouse wheel vs trackpad
+		// Mouse wheel typically returns ±3, trackpad returns smaller values
+		const threshold = 30;
 
 		if (Math.abs(this.wheelAccumulator) >= threshold) {
 			const direction = this.wheelAccumulator > 0 ? 1 : -1;
