@@ -474,6 +474,15 @@ class HexSeptominoGame {
 		if (!this.canPlacePiece(piece, centerQ, centerR)) return;
 		if (this.placedPieces.has(this.currentPieceIndex)) return;
 
+		// Clear any active hint when placing a piece
+		if (this.hintPos) {
+			this.hintPos = null;
+			if (this.hintTimeout) {
+				clearTimeout(this.hintTimeout);
+				this.hintTimeout = null;
+			}
+		}
+
 		this.redoStack = [];
 
 		const move: Move = {
