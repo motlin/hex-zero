@@ -1,5 +1,6 @@
 import {calculateHexSize} from './canvas-utils';
 import Hamster, {HamsterInstance} from 'hamsterjs';
+import confetti from 'canvas-confetti';
 
 declare global {
 	interface Window {
@@ -285,6 +286,7 @@ class HexSeptominoGame {
 	} | null;
 	private wheelAccumulator: number;
 	private hamster: HamsterInstance | null;
+	private undoCount: number;
 
 	cleanup(): void {
 		if (this.hamster) {
@@ -344,6 +346,7 @@ class HexSeptominoGame {
 		this.invalidPlacementAnimation = null;
 		this.wheelAccumulator = 0;
 		this.hamster = null;
+		this.undoCount = 0;
 		this.setupEventListeners();
 		this.generateLevel();
 		this.render();
@@ -588,6 +591,7 @@ class HexSeptominoGame {
 
 		this.placedPieces.delete(move.pieceIndex);
 		this.currentPieceIndex = move.pieceIndex;
+		this.undoCount++;
 
 		this.updateUI();
 		this.render();
@@ -638,6 +642,7 @@ class HexSeptominoGame {
 		this.redoStack = [];
 		this.currentPieceIndex = 0;
 		this.hintPos = null;
+		this.undoCount = 0;
 
 		(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 		(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
@@ -645,9 +650,60 @@ class HexSeptominoGame {
 		this.render();
 	}
 
+	startNewGame(): void {
+		document.getElementById('victoryScreen')!.classList.add('hidden');
+		showDifficultyScreen();
+	}
+
+	restartAndHideVictory(): void {
+		document.getElementById('victoryScreen')!.classList.add('hidden');
+		this.restart();
+	}
+
 	private checkWinCondition(): void {
 		const allZero = Array.from(this.grid.hexes.values()).every((hex) => hex.height === 0);
 		if (allZero) {
+			// Show victory screen
+			const victoryScreen = document.getElementById('victoryScreen')!;
+			victoryScreen.classList.remove('hidden');
+
+			// Update stats
+			(document.getElementById('victoryMoves') as HTMLElement).textContent = this.history.length.toString();
+			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.undoCount.toString();
+
+			// Fire confetti!
+			const duration = 3000;
+			const animationEnd = Date.now() + duration;
+			const defaults = {startVelocity: 30, spread: 360, ticks: 60, zIndex: 2100};
+
+			function randomInRange(min: number, max: number) {
+				return Math.random() * (max - min) + min;
+			}
+
+			const interval = setInterval(function () {
+				const timeLeft = animationEnd - Date.now();
+
+				if (timeLeft <= 0) {
+					return clearInterval(interval);
+				}
+
+				const particleCount = 50 * (timeLeft / duration);
+				// Since particles fall down, start a bit higher than random
+				confetti({
+					...defaults,
+					particleCount,
+					origin: {x: randomInRange(0.1, 0.3), y: Math.random() - 0.2},
+					colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
+				});
+				confetti({
+					...defaults,
+					particleCount,
+					origin: {x: randomInRange(0.7, 0.9), y: Math.random() - 0.2},
+					colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
+				});
+			}, 250);
+
+			// Also update the status text for accessibility
 			const message = 'Congratulations! You solved it!';
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = message;
 			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = message;

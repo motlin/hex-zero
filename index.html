@@ -135,6 +135,28 @@
         </div>
     </div>
 
+    <!-- Victory Screen -->
+    <div id="victoryScreen" class="victory-screen hidden">
+        <div class="victory-content">
+            <h1 class="victory-title">🎉 Victory! 🎉</h1>
+            <p class="victory-message">Congratulations! You solved the puzzle!</p>
+            <div class="victory-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Moves:</span>
+                    <span id="victoryMoves" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Undos:</span>
+                    <span id="victoryUndos" class="stat-value">0</span>
+                </div>
+            </div>
+            <div class="victory-buttons">
+                <button onclick="window.game?.startNewGame()" class="victory-button primary">New Game</button>
+                <button onclick="window.game?.restartAndHideVictory()" class="victory-button">Play Again</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Mobile Controls -->
     <div id="mobileControls" class="mobile-controls hidden">
         <div class="mobile-controls-grid">
