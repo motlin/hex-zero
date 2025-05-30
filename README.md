@@ -134,16 +134,28 @@ Levels are procedurally generated to ensure solvability:
 
 The game is built with TypeScript and Vite, requiring Node.js to run locally.
 
+### Prerequisites
+
+This project uses [mise](https://mise.jdx.dev/) to manage development tools.
+
+### Setup
+
 To run the game locally:
 
 ```bash
 git clone https://github.com/motlin/hex-flip.git
 cd hex-flip
+
+# Install mise if you haven't already
+# See https://mise.jdx.dev/getting-started.html for installation instructions
+
+# Install the required tools
+mise install
+
+# Install npm dependencies
 npm install
 
 # Run development server
-npm run dev
-# OR if you have just installed:
 just dev
 ```
 
