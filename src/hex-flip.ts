@@ -567,9 +567,26 @@ class HexSeptominoGame {
 	}
 
 	cyclePiece(direction: number): void {
-		this.currentPieceIndex = (this.currentPieceIndex + direction + this.pieces.length) % this.pieces.length;
-		this.updateUI();
-		this.render();
+		// If all pieces are placed, do nothing
+		if (this.placedPieces.size >= this.pieces.length) return;
+
+		// Find the next unplaced piece in the given direction
+		let attempts = 0;
+		let newIndex = this.currentPieceIndex;
+
+		do {
+			newIndex = (newIndex + direction + this.pieces.length) % this.pieces.length;
+			attempts++;
+			// Prevent infinite loop if something goes wrong
+			if (attempts > this.pieces.length) break;
+		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
+
+		// Only update if we found a different unplaced piece
+		if (newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex)) {
+			this.currentPieceIndex = newIndex;
+			this.updateUI();
+			this.render();
+		}
 	}
 
 	undo(): void {
