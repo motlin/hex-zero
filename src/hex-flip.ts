@@ -1,5 +1,4 @@
 import {calculateHexSize} from './canvas-utils';
-import Hamster, {HamsterInstance} from 'hamsterjs';
 import confetti from 'canvas-confetti';
 
 declare global {
@@ -284,15 +283,10 @@ class HexSeptominoGame {
 		position: HexCoordinate;
 		duration: number;
 	} | null;
-	private wheelAccumulator: number;
-	private hamster: HamsterInstance | null;
 	private undoCount: number;
 
 	cleanup(): void {
-		if (this.hamster) {
-			this.hamster.unwheel();
-			this.hamster = null;
-		}
+		// Cleanup is handled by removing event listeners if needed
 	}
 
 	constructor(radius: number, numPieces: number) {
@@ -344,8 +338,6 @@ class HexSeptominoGame {
 		this.lastPinchDistance = null;
 		this.showMobilePiecePreview = false;
 		this.invalidPlacementAnimation = null;
-		this.wheelAccumulator = 0;
-		this.hamster = null;
 		this.undoCount = 0;
 		this.setupEventListeners();
 		this.generateLevel();
@@ -379,16 +371,18 @@ class HexSeptominoGame {
 		this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
 		this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
 
-		this.hamster = Hamster(this.canvas);
-		this.hamster.wheel((event, delta, _deltaX, deltaY) => {
-			// Mouse wheel does not scroll
-			event.preventDefault();
+		this.canvas.addEventListener(
+			'wheel',
+			(e) => {
+				e.preventDefault();
 
-			// Mouse wheel is for piece cycling only
-			if (Math.abs(deltaY) > Math.abs(_deltaX)) {
-				this.handleHamsterWheel(delta, deltaY);
-			}
-		});
+				// Only handle vertical scrolling
+				if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+					this.handleWheelEvent(e);
+				}
+			},
+			{passive: false},
+		);
 		this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: false});
 		this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: false});
 		this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), {passive: false});
@@ -747,28 +741,48 @@ class HexSeptominoGame {
 		this.isPanning = false;
 	}
 
-	private handleHamsterWheel(delta: number, deltaY: number): void {
-		// Use deltaY for vertical scrolling, fall back to delta if deltaY is 0
-		const scrollDelta = deltaY === 0 ? delta : deltaY;
+	private lastWheelTime: number = 0;
+	private consecutiveSmallDeltas: number = 0;
+	private handleWheelEvent(event: WheelEvent): void {
+		// Normalize the delta based on deltaMode
+		let normalizedDelta = event.deltaY;
 
-		// Detect and ignore pinch gestures which send very large delta values
-		// Regular scroll events are typically under 100, pinch can be 300+
-		if (Math.abs(scrollDelta) > 100) {
-			return;
+		// deltaMode: 0 = pixels, 1 = lines, 2 = pages
+		if (event.deltaMode === 1) {
+			// Line mode - multiply by standard line height
+			normalizedDelta *= 40;
+		} else if (event.deltaMode === 2) {
+			// Page mode - multiply by standard page height
+			normalizedDelta *= 800;
 		}
 
-		// Accumulate scroll delta to handle both mouse wheel and trackpad
-		this.wheelAccumulator += scrollDelta;
+		const now = Date.now();
+		const timeSinceLastWheel = now - this.lastWheelTime;
+		const absDelta = Math.abs(normalizedDelta);
 
-		// Hamster.js normalizes values differently for mouse wheel vs trackpad
-		// Mouse wheel typically returns ±3, trackpad returns smaller values
-		const threshold = 30;
+		// Simple approach: any scroll in a direction changes the piece
+		// but with rate limiting to prevent too fast scrolling
+		const direction = Math.sign(normalizedDelta);
 
-		if (Math.abs(this.wheelAccumulator) >= threshold) {
-			const direction = this.wheelAccumulator > 0 ? 1 : -1;
+		// No movement
+		if (direction === 0) return;
+
+		// Track consecutive small deltas to detect trackpad
+		if (absDelta < 4) {
+			this.consecutiveSmallDeltas++;
+		} else {
+			this.consecutiveSmallDeltas = 0;
+		}
+
+		// Determine rate limit based on input type
+		const isTrackpad = this.consecutiveSmallDeltas > 2;
+		// Slower for trackpad
+		const minDelay = isTrackpad ? 200 : 120;
+
+		// Rate limiting: don't cycle too fast
+		if (timeSinceLastWheel >= minDelay || this.lastWheelTime === 0) {
 			this.cyclePiece(direction);
-			// Reset accumulator but keep the remainder for smooth scrolling
-			this.wheelAccumulator = this.wheelAccumulator % threshold;
+			this.lastWheelTime = now;
 		}
 	}
 
