@@ -120,9 +120,9 @@ button:disabled {
 }
 
 .difficulty-options {
-	display: flex;
-	flex-direction: column;
-	gap: 20px;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+	gap: 15px;
 	margin-bottom: 30px;
 }
 
@@ -134,6 +134,7 @@ button:disabled {
 	transition:
 		transform 0.2s,
 		background-color 0.2s;
+	position: relative;
 }
 
 .difficulty-card:hover {
@@ -150,6 +151,23 @@ button:disabled {
 	margin: 0;
 	font-size: 14px;
 	color: #aaa;
+}
+
+.difficulty-card.recommended {
+	border: 2px solid #f39c12;
+	background-color: #1a4a7a;
+}
+
+.recommended-badge {
+	position: absolute;
+	top: -8px;
+	right: -8px;
+	background-color: #f39c12;
+	color: #1a1a2e;
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 12px;
+	font-weight: bold;
 }
 
 .custom-form {
@@ -239,6 +257,10 @@ button:disabled {
 	.difficulty-screen {
 		padding: 20px;
 		margin: 10px;
+	}
+
+	.difficulty-options {
+		grid-template-columns: 1fr;
 	}
 
 	.canvas-container {
