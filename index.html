@@ -25,17 +25,26 @@
     <div id="difficultyScreen" class="difficulty-screen">
         <h2>Select Difficulty</h2>
         <div class="difficulty-options">
-            <div class="difficulty-card" onclick="startGame(3, 6)">
+            <div class="difficulty-card" onclick="startGame(3, 4)">
                 <h3>Easy</h3>
-                <p>Small board (radius 3) with 6 pieces</p>
+                <p>Small board (radius 3) with 4 pieces</p>
             </div>
-            <div class="difficulty-card" onclick="startGame(4, 8)">
+            <div class="difficulty-card recommended" onclick="startGame(3, 6)">
                 <h3>Medium</h3>
-                <p>Standard board (radius 4) with 8 pieces</p>
+                <p>Standard board (radius 3) with 6 pieces</p>
+                <span class="recommended-badge">Recommended</span>
             </div>
-            <div class="difficulty-card" onclick="startGame(5, 10)">
+            <div class="difficulty-card" onclick="startGame(3, 8)">
                 <h3>Hard</h3>
-                <p>Large board (radius 5) with 10 pieces</p>
+                <p>Standard board (radius 3) with 8 pieces</p>
+            </div>
+            <div class="difficulty-card" onclick="startGame(4, 10)">
+                <h3>Extreme</h3>
+                <p>Large board (radius 4) with 10 pieces</p>
+            </div>
+            <div class="difficulty-card" onclick="startGame(4, 14)">
+                <h3>Impossible</h3>
+                <p>Large board (radius 4) with 14 pieces</p>
             </div>
         </div>
 
