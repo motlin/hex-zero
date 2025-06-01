@@ -1,14 +1,14 @@
-# Hex Flip
+# Hex Zero
 
-Hex Flip is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.
+Hex Zero is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.
 
 ## 🎮 Play the Game
 
-**[Play Hex Flip Now!](https://YOUR_USERNAME.github.io/hex-flip/)**
+**[Play Hex Zero Now!](https://YOUR_USERNAME.github.io/hex-zero/)**
 
 ## Game Overview
 
-in Hex Flip, players place multi-hex shapes onto a hexagonal board. Each hex on the board displays a height number indicating how many pieces must be placed covering it. When a septomino is placed, it decreases the height of all covered hexes by 1. Pieces can only be placed where all covered hexes have height greater than 0. Players win when all hexes on the board reach height 0.
+in Hex Zero, players place multi-hex shapes onto a hexagonal board. Each hex on the board displays a height number indicating how many pieces must be placed covering it. When a septomino is placed, it decreases the height of all covered hexes by 1. Pieces can only be placed where all covered hexes have height greater than 0. Players win when all hexes on the board reach height 0.
 
 ## Game Mechanics and Structure
 
@@ -143,8 +143,8 @@ This project uses [mise](https://mise.jdx.dev/) to manage development tools.
 To run the game locally:
 
 ```bash
-git clone https://github.com/motlin/hex-flip.git
-cd hex-flip
+git clone https://github.com/motlin/hex-zero.git
+cd hex-zero
 
 # Install mise if you haven't already
 # See https://mise.jdx.dev/getting-started.html for installation instructions

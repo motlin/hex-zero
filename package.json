@@ -1,7 +1,7 @@
 {
-  "name": "hex-flip",
+  "name": "hex-zero",
   "version": "1.0.0",
-  "description": "Hex Flip is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.",
+  "description": "Hex Zero is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -17,15 +17,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/motlin/hex-flip.git"
+    "url": "git+https://github.com/motlin/hex-zero.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/motlin/hex-flip/issues"
+    "url": "https://github.com/motlin/hex-zero/issues"
   },
-  "homepage": "https://github.com/motlin/hex-flip#readme",
+  "homepage": "https://github.com/motlin/hex-zero#readme",
   "devDependencies": {
     "@eslint/js": "^9.27.0",
     "@testing-library/dom": "^10.4.0",
