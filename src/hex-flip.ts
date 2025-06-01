@@ -617,6 +617,11 @@ class HexSeptominoGame {
 	}
 
 	toggleHint(): void {
+		// Don't show hints while animations are active
+		if (this.animationStartTime !== null || this.animatingHexes.length > 0) {
+			return;
+		}
+
 		// If hint is already showing, hide it
 		if (this.hintPos) {
 			this.hintPos = null;
