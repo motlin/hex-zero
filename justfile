@@ -22,6 +22,10 @@ build:
 fix:
     npm run lint:fix
 
+# `npm run test:run`
+test:
+    npm run test:run
+
 # Run development server
 dev:
     npm run dev
@@ -31,5 +35,5 @@ preview:
     npm run preview
 
 # Run all pre-commit checks
-precommit: typecheck fix build
+precommit: typecheck fix build test
     @echo "✅ All pre-commit checks passed!"
