@@ -1,5 +1,6 @@
 import {calculateHexSize} from './canvas-utils';
 import confetti from 'canvas-confetti';
+import {GameState, type HexCoordinate, type Piece} from './game-state';
 
 declare global {
 	interface Window {
@@ -9,16 +10,6 @@ declare global {
 		showDifficultyScreen: () => void;
 		game: HexSeptominoGame | null;
 	}
-}
-
-interface HexCoordinate {
-	q: number;
-	r: number;
-}
-
-interface Hex extends HexCoordinate {
-	s: number;
-	height: number;
 }
 
 interface AnimatingHex {
@@ -32,30 +23,9 @@ interface AnimatingHex {
 	delay: number;
 }
 
-type Piece = HexCoordinate[];
-
-interface Move {
-	pieceIndex: number;
-	q: number;
-	r: number;
-	heightChanges: HeightChange[];
-}
-
-interface HeightChange {
-	q: number;
-	r: number;
-	oldHeight: number;
-}
-
 interface Point {
 	x: number;
 	y: number;
-}
-
-interface SolutionMove {
-	pieceIndex: number;
-	q: number;
-	r: number;
 }
 
 type ColorMap = Record<number, string>;
@@ -139,29 +109,11 @@ function showDifficultyScreen(): void {
 	document.getElementById('difficultyScreen')!.classList.remove('hidden');
 }
 
-class HexGrid {
-	public radius: number;
+class HexRenderer {
 	public hexSize: number;
-	public hexes: Map<string, Hex>;
 
-	constructor(radius: number, hexSize: number) {
-		this.radius = radius;
+	constructor(hexSize: number) {
 		this.hexSize = hexSize;
-		this.hexes = new Map<string, Hex>();
-
-		for (let q = -radius; q <= radius; q++) {
-			for (let r = -radius; r <= radius; r++) {
-				const s = -q - r;
-				if (Math.abs(s) <= radius) {
-					const key = `${q},${r}`;
-					this.hexes.set(key, {q, r, s, height: 0});
-				}
-			}
-		}
-	}
-
-	getHex(q: number, r: number): Hex | undefined {
-		return this.hexes.get(`${q},${r}`);
 	}
 
 	hexToPixel(q: number, r: number): Point {
@@ -194,54 +146,6 @@ class HexGrid {
 
 		return {q: rq, r: rr};
 	}
-
-	getNeighbors(q: number, r: number): HexCoordinate[] {
-		const dirs: [number, number][] = [
-			[1, 0],
-			[1, -1],
-			[0, -1],
-			[-1, 0],
-			[-1, 1],
-			[0, 1],
-		];
-		return dirs.map(([dq, dr]) => ({q: q + dq, r: r + dr})).filter((pos) => this.getHex(pos.q, pos.r));
-	}
-}
-
-class SeptominoGenerator {
-	static generatePiece(): Piece {
-		const tiles: Piece = [{q: 0, r: 0}];
-
-		const numTiles = 2 + Math.floor(Math.random() * 5);
-
-		for (let i = 0; i < numTiles; i++) {
-			const neighbors: HexCoordinate[] = [
-				{q: 1, r: 0},
-				{q: 1, r: -1},
-				{q: 0, r: -1},
-				{q: -1, r: 0},
-				{q: -1, r: 1},
-				{q: 0, r: 1},
-			];
-
-			const available = neighbors.filter((n) => !tiles.some((t) => t.q === n.q && t.r === n.r));
-
-			if (available.length > 0) {
-				const next = available[Math.floor(Math.random() * available.length)];
-				tiles.push(next);
-			}
-		}
-
-		return tiles;
-	}
-
-	static generateSet(count: number): Piece[] {
-		const pieces: Piece[] = [];
-		for (let i = 0; i < count; i++) {
-			pieces.push(this.generatePiece());
-		}
-		return pieces;
-	}
 }
 
 class HexSeptominoGame {
@@ -249,23 +153,14 @@ class HexSeptominoGame {
 	private ctx: CanvasRenderingContext2D;
 	private previewCanvas: HTMLCanvasElement;
 	private previewCtx: CanvasRenderingContext2D;
-	private radius: number;
-	private numPieces: number;
-	private hexSize: number;
-	private grid: HexGrid;
-	private pieces: Piece[];
-	private currentPieceIndex: number;
-	private placedPieces: Set<number>;
-	private solution: SolutionMove[];
-	private history: Move[];
-	private redoStack: Move[];
-	private hintPos: HexCoordinate | null;
-	private initialGridState: Map<string, number>;
+	private gameState: GameState;
+	private renderer: HexRenderer;
 	private colors: ColorMap;
 	private mouseHex: HexCoordinate | null;
 	private touchHex: HexCoordinate | null;
 	private isTouching: boolean;
 	private zoomFactor: number;
+	private hintPos: HexCoordinate | null;
 	private hintTimeout: number | null;
 	private animatingHexes: AnimatingHex[];
 	private animationStartTime: number | null;
@@ -283,7 +178,6 @@ class HexSeptominoGame {
 		position: HexCoordinate;
 		duration: number;
 	} | null;
-	private undoCount: number;
 
 	cleanup(): void {
 		// Cleanup is handled by removing event listeners if needed
@@ -295,22 +189,9 @@ class HexSeptominoGame {
 		this.previewCanvas = document.getElementById('piecePreview') as HTMLCanvasElement;
 		this.previewCtx = this.previewCanvas.getContext('2d')!;
 
-		this.radius = radius;
-		this.numPieces = numPieces;
-
-		this.hexSize = 30;
+		this.gameState = new GameState(radius, numPieces);
+		this.renderer = new HexRenderer(30);
 		this.updateCanvasSize();
-
-		this.grid = new HexGrid(radius, this.hexSize);
-
-		this.pieces = [];
-		this.currentPieceIndex = 0;
-		this.placedPieces = new Set<number>();
-		this.solution = [];
-		this.history = [];
-		this.redoStack = [];
-		this.hintPos = null;
-		this.initialGridState = new Map<string, number>();
 
 		this.colors = {
 			0: '#16213e',
@@ -326,6 +207,7 @@ class HexSeptominoGame {
 		this.touchHex = null;
 		this.isTouching = false;
 		this.zoomFactor = 1.0;
+		this.hintPos = null;
 		this.hintTimeout = null;
 		this.animatingHexes = [];
 		this.animationStartTime = null;
@@ -338,20 +220,17 @@ class HexSeptominoGame {
 		this.lastPinchDistance = null;
 		this.showMobilePiecePreview = false;
 		this.invalidPlacementAnimation = null;
-		this.undoCount = 0;
 		this.setupEventListeners();
-		this.generateLevel();
+		this.updateUI();
 		this.render();
 
 		setTimeout(() => {
 			this.updateCanvasSize();
-			this.grid.hexSize = this.hexSize;
 			this.render();
 		}, 100);
 
 		window.addEventListener('resize', () => {
 			this.updateCanvasSize();
-			this.grid.hexSize = this.hexSize;
 			this.render();
 		});
 	}
@@ -362,7 +241,8 @@ class HexSeptominoGame {
 		this.canvas.width = rect.width;
 		this.canvas.height = rect.height;
 
-		this.hexSize = calculateHexSize(rect.width, rect.height, this.radius, this.zoomFactor);
+		const settings = this.gameState.getSettings();
+		this.renderer.hexSize = calculateHexSize(rect.width, rect.height, settings.radius, this.zoomFactor);
 	}
 
 	private setupEventListeners(): void {
@@ -419,58 +299,11 @@ class HexSeptominoGame {
 		});
 	}
 
-	private generateLevel(): void {
-		this.pieces = SeptominoGenerator.generateSet(this.numPieces);
-		this.solution = [];
-		this.placedPieces.clear();
-		this.history = [];
-		this.redoStack = [];
-		this.currentPieceIndex = 0;
-
-		this.grid.hexes.forEach((hex) => (hex.height = 0));
-
-		const positions = Array.from(this.grid.hexes.values());
-
-		this.pieces.forEach((piece, index) => {
-			const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
-
-			if (validPositions.length > 0) {
-				const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
-
-				this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
-
-				piece.forEach((tile) => {
-					const hex = this.grid.getHex(pos.q + tile.q, pos.r + tile.r);
-					if (hex) {
-						hex.height = Math.min(hex.height + 1, 6);
-					}
-				});
-			}
-		});
-
-		this.grid.hexes.forEach((hex, key) => {
-			this.initialGridState.set(key, hex.height);
-		});
-
-		this.updateUI();
-	}
-
 	private canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
-		return piece.every((tile) => {
-			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
-			if (checkHeight) {
-				return hex !== undefined && hex.height > 0;
-			} else {
-				return hex !== undefined;
-			}
-		});
+		return this.gameState.canPlacePiece(piece, centerQ, centerR, checkHeight);
 	}
 
 	private placePiece(centerQ: number, centerR: number): void {
-		const piece = this.pieces[this.currentPieceIndex];
-		if (!this.canPlacePiece(piece, centerQ, centerR)) return;
-		if (this.placedPieces.has(this.currentPieceIndex)) return;
-
 		// Clear any active hint when placing a piece
 		if (this.hintPos) {
 			this.hintPos = null;
@@ -480,19 +313,13 @@ class HexSeptominoGame {
 			}
 		}
 
-		this.redoStack = [];
+		const piece = this.gameState.getCurrentPiece();
+		const grid = this.gameState.getGrid();
 
-		const move: Move = {
-			pieceIndex: this.currentPieceIndex,
-			q: centerQ,
-			r: centerR,
-			heightChanges: [],
-		};
-
+		// Create animation setup before placing piece
 		this.animatingHexes = [];
 
 		// Sort pieces by position for clockwise animation
-		// Center first, then top, then clockwise
 		const sortedPieces = piece.slice().sort((a, b) => {
 			// Center hex goes first
 			if (a.q === 0 && a.r === 0) return -1;
@@ -514,10 +341,8 @@ class HexSeptominoGame {
 		});
 
 		sortedPieces.forEach((tile, index) => {
-			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
+			const hex = grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (hex && hex.height > 0) {
-				move.heightChanges.push({q: hex.q, r: hex.r, oldHeight: hex.height});
-
 				// Stagger the animations - 100ms between each hex
 				const delay = index * 100;
 
@@ -534,86 +359,44 @@ class HexSeptominoGame {
 			}
 		});
 
+		// Place the piece using GameState
+		const placed = this.gameState.placePiece(centerQ, centerR);
+		if (!placed) return;
+
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
 
-		// Update piece selection and UI immediately, before animation completes
-		this.history.push(move);
-		this.placedPieces.add(this.currentPieceIndex);
-		this.findNextUnplacedPiece();
+		// Update UI immediately
 		this.updateUI();
 
 		setTimeout(() => {
-			piece.forEach((tile) => {
-				const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
-				if (hex && hex.height > 0) {
-					hex.height--;
-				}
-			});
-
 			this.checkWinCondition();
 			this.render();
 		}, this.animationDuration);
 	}
 
-	private findNextUnplacedPiece(): void {
-		for (let i = 0; i < this.pieces.length; i++) {
-			const index = (this.currentPieceIndex + 1 + i) % this.pieces.length;
-			if (!this.placedPieces.has(index)) {
-				this.currentPieceIndex = index;
-				return;
-			}
-		}
-	}
-
 	cyclePiece(direction: number): void {
-		// If all pieces are placed, do nothing
-		if (this.placedPieces.size >= this.pieces.length) return;
-
-		// Find the next unplaced piece in the given direction
-		let attempts = 0;
-		let newIndex = this.currentPieceIndex;
-
-		do {
-			newIndex = (newIndex + direction + this.pieces.length) % this.pieces.length;
-			attempts++;
-			// Prevent infinite loop if something goes wrong
-			if (attempts > this.pieces.length) break;
-		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
-
-		// Only update if we found a different unplaced piece
-		if (newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex)) {
-			this.currentPieceIndex = newIndex;
+		const cycled = this.gameState.cyclePiece(direction);
+		if (cycled) {
 			this.updateUI();
 			this.render();
 		}
 	}
 
 	undo(): void {
-		if (this.history.length === 0) return;
-
-		const move = this.history.pop()!;
-		this.redoStack.push(move);
-
-		move.heightChanges.forEach((change) => {
-			const hex = this.grid.getHex(change.q, change.r);
-			if (hex) hex.height = change.oldHeight;
-		});
-
-		this.placedPieces.delete(move.pieceIndex);
-		this.currentPieceIndex = move.pieceIndex;
-		this.undoCount++;
-
-		this.updateUI();
-		this.render();
+		const undone = this.gameState.undo();
+		if (undone) {
+			this.updateUI();
+			this.render();
+		}
 	}
 
 	redo(): void {
-		if (this.redoStack.length === 0) return;
-
-		const move = this.redoStack.pop()!;
-		this.currentPieceIndex = move.pieceIndex;
-		this.placePiece(move.q, move.r);
+		const redone = this.gameState.redo();
+		if (redone) {
+			this.updateUI();
+			this.render();
+		}
 	}
 
 	toggleHint(): void {
@@ -633,10 +416,10 @@ class HexSeptominoGame {
 			return;
 		}
 
-		const solutionMove = this.solution.find((move) => move.pieceIndex === this.currentPieceIndex);
+		const hint = this.gameState.getSolutionHint();
 
-		if (solutionMove) {
-			this.hintPos = {q: solutionMove.q, r: solutionMove.r};
+		if (hint) {
+			this.hintPos = hint;
 			this.render();
 
 			this.hintTimeout = window.setTimeout(() => {
@@ -648,17 +431,8 @@ class HexSeptominoGame {
 	}
 
 	private restart(): void {
-		this.initialGridState.forEach((height, key) => {
-			const hex = this.grid.hexes.get(key);
-			if (hex) hex.height = height;
-		});
-
-		this.placedPieces.clear();
-		this.history = [];
-		this.redoStack = [];
-		this.currentPieceIndex = 0;
+		this.gameState.restart();
 		this.hintPos = null;
-		this.undoCount = 0;
 
 		(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 		(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
@@ -677,15 +451,18 @@ class HexSeptominoGame {
 	}
 
 	private checkWinCondition(): void {
-		const allZero = Array.from(this.grid.hexes.values()).every((hex) => hex.height === 0);
-		if (allZero) {
+		if (this.gameState.isGameWon()) {
 			// Show victory screen
 			const victoryScreen = document.getElementById('victoryScreen')!;
 			victoryScreen.classList.remove('hidden');
 
 			// Update stats
-			(document.getElementById('victoryMoves') as HTMLElement).textContent = this.history.length.toString();
-			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.undoCount.toString();
+			(document.getElementById('victoryMoves') as HTMLElement).textContent = this.gameState
+				.getMoveCount()
+				.toString();
+			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.gameState
+				.getUndoCount()
+				.toString();
 
 			// Fire confetti!
 			const duration = 3000;
@@ -740,8 +517,9 @@ class HexSeptominoGame {
 		const x = event.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
 		const y = event.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
 
-		const hex = this.grid.pixelToHex(x, y);
-		if (this.grid.getHex(hex.q, hex.r)) {
+		const hex = this.renderer.pixelToHex(x, y);
+		const grid = this.gameState.getGrid();
+		if (grid.getHex(hex.q, hex.r)) {
 			this.mouseHex = hex;
 		} else {
 			this.mouseHex = null;
@@ -818,8 +596,9 @@ class HexSeptominoGame {
 			const x = touch.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
 			const y = touch.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
 
-			const hex = this.grid.pixelToHex(x, y);
-			if (this.grid.getHex(hex.q, hex.r)) {
+			const hex = this.renderer.pixelToHex(x, y);
+			const grid = this.gameState.getGrid();
+			if (grid.getHex(hex.q, hex.r)) {
 				this.touchHex = hex;
 				this.isTouching = true;
 				this.showMobilePiecePreview = true;
@@ -856,8 +635,9 @@ class HexSeptominoGame {
 			const x = touch.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
 			const y = touch.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
 
-			const hex = this.grid.pixelToHex(x, y);
-			if (this.grid.getHex(hex.q, hex.r)) {
+			const hex = this.renderer.pixelToHex(x, y);
+			const grid = this.gameState.getGrid();
+			if (grid.getHex(hex.q, hex.r)) {
 				this.touchHex = hex;
 			} else {
 				this.touchHex = null;
@@ -895,8 +675,12 @@ class HexSeptominoGame {
 
 		if (event.touches.length === 0) {
 			// All touches ended
-			if (this.isTouching && this.touchHex && !this.placedPieces.has(this.currentPieceIndex)) {
-				const piece = this.pieces[this.currentPieceIndex];
+			if (
+				this.isTouching &&
+				this.touchHex &&
+				!this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())
+			) {
+				const piece = this.gameState.getCurrentPiece();
 				if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
 					this.placePiece(this.touchHex.q, this.touchHex.r);
 				} else {
@@ -932,9 +716,10 @@ class HexSeptominoGame {
 		const x = event.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
 		const y = event.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
 
-		const hex = this.grid.pixelToHex(x, y);
-		if (this.grid.getHex(hex.q, hex.r) && !this.placedPieces.has(this.currentPieceIndex)) {
-			const piece = this.pieces[this.currentPieceIndex];
+		const hex = this.renderer.pixelToHex(x, y);
+		const grid = this.gameState.getGrid();
+		if (grid.getHex(hex.q, hex.r) && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+			const piece = this.gameState.getCurrentPiece();
 			if (this.canPlacePiece(piece, hex.q, hex.r)) {
 				this.placePiece(hex.q, hex.r);
 			} else {
@@ -990,7 +775,6 @@ class HexSeptominoGame {
 
 		if (oldZoom !== this.zoomFactor) {
 			this.updateCanvasSize();
-			this.grid.hexSize = this.hexSize;
 			this.render();
 		}
 	}
@@ -1000,7 +784,6 @@ class HexSeptominoGame {
 		this.panOffsetX = 0;
 		this.panOffsetY = 0;
 		this.updateCanvasSize();
-		this.grid.hexSize = this.hexSize;
 		this.render();
 	}
 
@@ -1023,17 +806,19 @@ class HexSeptominoGame {
 	}
 
 	private updateUI(): void {
-		const pieceText = `Piece ${this.currentPieceIndex + 1} of ${this.pieces.length}`;
+		const currentIndex = this.gameState.getCurrentPieceIndex();
+		const pieces = this.gameState.getPieces();
+		const pieceText = `Piece ${currentIndex + 1} of ${pieces.length}`;
 		(document.getElementById('pieceNumber') as HTMLElement).textContent = pieceText;
 		(document.getElementById('mobilePieceInfo') as HTMLElement).textContent = pieceText;
 
-		(document.getElementById('piecePlaced') as HTMLElement).style.display = this.placedPieces.has(
-			this.currentPieceIndex,
+		(document.getElementById('piecePlaced') as HTMLElement).style.display = this.gameState.isPiecePlaced(
+			currentIndex,
 		)
 			? 'block'
 			: 'none';
 
-		if (this.placedPieces.size < this.pieces.length) {
+		if (!this.gameState.getAllPiecesPlaced()) {
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
 		}
@@ -1048,11 +833,12 @@ class HexSeptominoGame {
 		this.ctx.save();
 		this.ctx.translate(this.canvas.width / 2 + this.panOffsetX, this.canvas.height / 2 + this.panOffsetY);
 
-		const fontSize = Math.max(12, Math.floor(this.hexSize * 0.5));
+		const fontSize = Math.max(12, Math.floor(this.renderer.hexSize * 0.5));
+		const grid = this.gameState.getGrid();
 
 		// First pass: Draw all hexes in their target state (background)
-		this.grid.hexes.forEach((hex) => {
-			const pos = this.grid.hexToPixel(hex.q, hex.r);
+		grid.hexes.forEach((hex) => {
+			const pos = this.renderer.hexToPixel(hex.q, hex.r);
 			let displayHeight = hex.height;
 
 			// Check if this hex is being animated
@@ -1075,10 +861,10 @@ class HexSeptominoGame {
 
 		// Second pass: Draw animating hexes on top
 		this.animatingHexes.forEach((animatingHex) => {
-			const hex = this.grid.getHex(animatingHex.q, animatingHex.r);
+			const hex = grid.getHex(animatingHex.q, animatingHex.r);
 			if (!hex) return;
 
-			const pos = this.grid.hexToPixel(hex.q, hex.r);
+			const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
 			// Burst animation for all hexes
 			this.ctx.save();
@@ -1097,7 +883,7 @@ class HexSeptominoGame {
 				this.ctx,
 				0,
 				0,
-				this.hexSize,
+				this.renderer.hexSize,
 				this.colors[animatingHex.startHeight] || '#000',
 				'#0f3460',
 				2,
@@ -1116,14 +902,14 @@ class HexSeptominoGame {
 		});
 
 		const previewHex = this.mouseHex || this.touchHex;
-		if (previewHex && !this.placedPieces.has(this.currentPieceIndex)) {
-			const piece = this.pieces[this.currentPieceIndex];
+		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+			const piece = this.gameState.getCurrentPiece();
 			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
 			piece.forEach((tile) => {
-				const hex = this.grid.getHex(previewHex.q + tile.q, previewHex.r + tile.r);
+				const hex = grid.getHex(previewHex.q + tile.q, previewHex.r + tile.r);
 				if (hex) {
-					const pos = this.grid.hexToPixel(hex.q, hex.r);
+					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 					if (canPlace) {
 						this.drawHex(pos.x, pos.y, 'rgba(255, 235, 59, 0.3)', '#ffeb3b', 3);
 					} else {
@@ -1134,11 +920,11 @@ class HexSeptominoGame {
 		}
 
 		if (this.hintPos) {
-			const piece = this.pieces[this.currentPieceIndex];
+			const piece = this.gameState.getCurrentPiece();
 			piece.forEach((tile) => {
-				const hex = this.grid.getHex(this.hintPos!.q + tile.q, this.hintPos!.r + tile.r);
+				const hex = grid.getHex(this.hintPos!.q + tile.q, this.hintPos!.r + tile.r);
 				if (hex) {
-					const pos = this.grid.hexToPixel(hex.q, hex.r);
+					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 					this.ctx.strokeStyle = '#e94560';
 					this.ctx.lineWidth = 4;
 					this.ctx.setLineDash([5, 5]);
@@ -1160,14 +946,14 @@ class HexSeptominoGame {
 			// Fade out over time
 			const opacity = Math.max(0, 1 - progress);
 
-			const piece = this.pieces[this.currentPieceIndex];
+			const piece = this.gameState.getCurrentPiece();
 			piece.forEach((tile) => {
-				const hex = this.grid.getHex(
+				const hex = grid.getHex(
 					this.invalidPlacementAnimation!.position.q + tile.q,
 					this.invalidPlacementAnimation!.position.r + tile.r,
 				);
 				if (hex) {
-					const pos = this.grid.hexToPixel(hex.q, hex.r);
+					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
 					this.ctx.save();
 					this.ctx.translate(pos.x, pos.y);
@@ -1184,8 +970,8 @@ class HexSeptominoGame {
 		this.ctx.restore();
 
 		// Draw mobile piece preview overlay
-		if (this.showMobilePiecePreview && !this.placedPieces.has(this.currentPieceIndex)) {
-			const piece = this.pieces[this.currentPieceIndex];
+		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+			const piece = this.gameState.getCurrentPiece();
 			const previewSize = 80;
 			const previewHexSize = 15;
 
@@ -1217,13 +1003,14 @@ class HexSeptominoGame {
 		ctx.fillStyle = '#16213e';
 		ctx.fillRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
 
-		const piece = this.pieces[this.currentPieceIndex];
+		const piece = this.gameState.getCurrentPiece();
+		const currentIndex = this.gameState.getCurrentPieceIndex();
 		const previewHexSize = 20;
 
 		ctx.save();
 		ctx.translate(this.previewCanvas.width / 2, this.previewCanvas.height / 2);
 
-		const color = this.placedPieces.has(this.currentPieceIndex) ? '#666' : '#e94560';
+		const color = this.gameState.isPiecePlaced(currentIndex) ? '#666' : '#e94560';
 
 		piece.forEach((tile) => {
 			const x = previewHexSize * ((3 / 2) * tile.q);
@@ -1235,15 +1022,15 @@ class HexSeptominoGame {
 	}
 
 	private drawHex(x: number, y: number, fillColor: string, strokeColor: string, lineWidth: number): void {
-		this.drawHexOnCanvas(this.ctx, x, y, this.hexSize, fillColor, strokeColor, lineWidth);
+		this.drawHexOnCanvas(this.ctx, x, y, this.renderer.hexSize, fillColor, strokeColor, lineWidth);
 	}
 
 	private drawHexOutline(x: number, y: number): void {
 		this.ctx.beginPath();
 		for (let i = 0; i < 6; i++) {
 			const angle = (Math.PI / 3) * i;
-			const hx = x + this.hexSize * Math.cos(angle);
-			const hy = y + this.hexSize * Math.sin(angle);
+			const hx = x + this.renderer.hexSize * Math.cos(angle);
+			const hy = y + this.renderer.hexSize * Math.sin(angle);
 			if (i === 0) {
 				this.ctx.moveTo(hx, hy);
 			} else {
