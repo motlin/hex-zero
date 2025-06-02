@@ -396,6 +396,7 @@ class HexSeptominoGame {
 
 		if (hint) {
 			this.hintPos = hint;
+			this.gameState.incrementHintCount();
 			this.render();
 
 			this.hintTimeout = window.setTimeout(() => {
@@ -438,6 +439,9 @@ class HexSeptominoGame {
 				.toString();
 			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.gameState
 				.getUndoCount()
+				.toString();
+			(document.getElementById('victoryHints') as HTMLElement).textContent = this.gameState
+				.getHintCount()
 				.toString();
 
 			// Fire confetti!

@@ -350,6 +350,25 @@ describe('GameState', () => {
 
 			expect(firstHint).not.toEqual(secondHint);
 		});
+
+		it('tracks hint count correctly', () => {
+			expect(gameState.getHintCount()).toBe(0);
+
+			gameState.incrementHintCount();
+			expect(gameState.getHintCount()).toBe(1);
+
+			gameState.incrementHintCount();
+			expect(gameState.getHintCount()).toBe(2);
+		});
+
+		it('resets hint count on restart', () => {
+			gameState.incrementHintCount();
+			gameState.incrementHintCount();
+			expect(gameState.getHintCount()).toBe(2);
+
+			gameState.restart();
+			expect(gameState.getHintCount()).toBe(0);
+		});
 	});
 
 	describe('restart', () => {
@@ -364,6 +383,7 @@ describe('GameState', () => {
 			expect(gameState.getPlacedPieces().size).toBe(0);
 			expect(gameState.getHistory()).toHaveLength(0);
 			expect(gameState.getUndoCount()).toBe(0);
+			expect(gameState.getHintCount()).toBe(0);
 			expect(gameState.canUndo()).toBe(false);
 			expect(gameState.canRedo()).toBe(false);
 		});
