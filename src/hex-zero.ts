@@ -1,7 +1,9 @@
-import {calculateHexSize} from './canvas-utils';
 import confetti from 'canvas-confetti';
 import {GameState, type HexCoordinate, type Piece} from './game-state';
 import {HexRenderer} from './renderer/HexRenderer';
+import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
+import {validateCustomInputs} from './ui/InputValidator';
+import {CanvasManager} from './canvas/CanvasManager';
 
 declare global {
 	interface Window {
@@ -24,8 +26,6 @@ interface AnimatingHex {
 	delay: number;
 }
 
-type ColorMap = Record<number, string>;
-
 let game: HexSeptominoGame | null = null;
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -45,52 +45,6 @@ function startGame(radius: number, numPieces: number): void {
 	window.game = game;
 }
 
-function validateCustomInputs(): boolean {
-	const radiusInput = document.getElementById('customRadius') as HTMLInputElement;
-	const piecesInput = document.getElementById('customPieces') as HTMLInputElement;
-	const errorDiv = document.getElementById('validationError') as HTMLElement;
-	const startBtn = document.getElementById('customStartBtn') as HTMLButtonElement;
-
-	const radius = parseInt(radiusInput.value);
-	const pieces = parseInt(piecesInput.value);
-
-	const errors: string[] = [];
-	let isValid = true;
-
-	if (isNaN(radius) || radius < 2 || radius > 8) {
-		radiusInput.classList.add('invalid');
-		if (isNaN(radius) || radiusInput.value === '') {
-			errors.push('Radius must be a number between 2 and 8');
-		} else if (radius < 2) {
-			errors.push('Radius must be at least 2');
-		} else if (radius > 8) {
-			errors.push('Radius must be at most 8');
-		}
-		isValid = false;
-	} else {
-		radiusInput.classList.remove('invalid');
-	}
-
-	if (isNaN(pieces) || pieces < 3 || pieces > 15) {
-		piecesInput.classList.add('invalid');
-		if (isNaN(pieces) || piecesInput.value === '') {
-			errors.push('Pieces must be a number between 3 and 15');
-		} else if (pieces < 3) {
-			errors.push('Pieces must be at least 3');
-		} else if (pieces > 15) {
-			errors.push('Pieces must be at most 15');
-		}
-		isValid = false;
-	} else {
-		piecesInput.classList.remove('invalid');
-	}
-
-	errorDiv.textContent = errors.join('. ');
-	startBtn.disabled = !isValid;
-
-	return isValid;
-}
-
 function startCustomGame(): void {
 	if (validateCustomInputs()) {
 		const radius = parseInt((document.getElementById('customRadius') as HTMLInputElement).value);
@@ -106,10 +60,7 @@ function showDifficultyScreen(): void {
 }
 
 class HexSeptominoGame {
-	private canvas: HTMLCanvasElement;
-	private ctx: CanvasRenderingContext2D;
-	private previewCanvas: HTMLCanvasElement;
-	private previewCtx: CanvasRenderingContext2D;
+	private canvasManager: CanvasManager;
 	private gameState: GameState;
 	private renderer: HexRenderer;
 	private colors: ColorMap;
@@ -141,24 +92,12 @@ class HexSeptominoGame {
 	}
 
 	constructor(radius: number, numPieces: number) {
-		this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
-		this.ctx = this.canvas.getContext('2d')!;
-		this.previewCanvas = document.getElementById('piecePreview') as HTMLCanvasElement;
-		this.previewCtx = this.previewCanvas.getContext('2d')!;
-
+		this.canvasManager = new CanvasManager('gameCanvas', 'piecePreview');
 		this.gameState = new GameState(radius, numPieces);
 		this.renderer = new HexRenderer(30);
 		this.updateCanvasSize();
 
-		this.colors = {
-			0: '#16213e',
-			1: '#e94560',
-			2: '#e67e22',
-			3: '#2ecc71',
-			4: '#3498db',
-			5: '#9b59b6',
-			6: '#c0392b',
-		};
+		this.colors = DEFAULT_COLORS;
 
 		this.mouseHex = null;
 		this.touchHex = null;
@@ -193,22 +132,18 @@ class HexSeptominoGame {
 	}
 
 	private updateCanvasSize(): void {
-		const rect = this.canvas.getBoundingClientRect();
-
-		this.canvas.width = rect.width;
-		this.canvas.height = rect.height;
-
 		const settings = this.gameState.getSettings();
-		this.renderer.hexSize = calculateHexSize(rect.width, rect.height, settings.radius, this.zoomFactor);
+		this.renderer.hexSize = this.canvasManager.updateCanvasSize(settings.radius, this.zoomFactor);
 	}
 
 	private setupEventListeners(): void {
-		this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-		this.canvas.addEventListener('click', (e) => this.handleClick(e));
-		this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-		this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+		const canvas = this.canvasManager.getCanvas();
+		canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+		canvas.addEventListener('click', (e) => this.handleClick(e));
+		canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+		canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
 
-		this.canvas.addEventListener(
+		canvas.addEventListener(
 			'wheel',
 			(e) => {
 				e.preventDefault();
@@ -220,11 +155,11 @@ class HexSeptominoGame {
 			},
 			{passive: false},
 		);
-		this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: false});
-		this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: false});
-		this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), {passive: false});
-		this.canvas.addEventListener('touchcancel', (e) => this.handleTouchCancel(e));
-		this.canvas.addEventListener('mouseleave', () => {
+		canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: false});
+		canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: false});
+		canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), {passive: false});
+		canvas.addEventListener('touchcancel', (e) => this.handleTouchCancel(e));
+		canvas.addEventListener('mouseleave', () => {
 			this.mouseHex = null;
 			this.isPanning = false;
 			this.render();
@@ -470,9 +405,10 @@ class HexSeptominoGame {
 			return;
 		}
 
-		const rect = this.canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
-		const y = event.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
+		const canvas = this.canvasManager.getCanvas();
+		const rect = canvas.getBoundingClientRect();
+		const x = event.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
+		const y = event.clientY - rect.top - canvas.height / 2 - this.panOffsetY;
 
 		const hex = this.renderer.pixelToHex(x, y);
 		const grid = this.gameState.getGrid();
@@ -549,9 +485,10 @@ class HexSeptominoGame {
 		if (event.touches.length === 1) {
 			// Single touch - show piece preview and track position
 			const touch = event.touches[0];
-			const rect = this.canvas.getBoundingClientRect();
-			const x = touch.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
-			const y = touch.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
+			const canvas = this.canvasManager.getCanvas();
+			const rect = canvas.getBoundingClientRect();
+			const x = touch.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
+			const y = touch.clientY - rect.top - canvas.height / 2 - this.panOffsetY;
 
 			const hex = this.renderer.pixelToHex(x, y);
 			const grid = this.gameState.getGrid();
@@ -588,9 +525,10 @@ class HexSeptominoGame {
 		if (event.touches.length === 1 && this.isTouching) {
 			// Single touch - update position
 			const touch = event.touches[0];
-			const rect = this.canvas.getBoundingClientRect();
-			const x = touch.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
-			const y = touch.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
+			const canvas = this.canvasManager.getCanvas();
+			const rect = canvas.getBoundingClientRect();
+			const x = touch.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
+			const y = touch.clientY - rect.top - canvas.height / 2 - this.panOffsetY;
 
 			const hex = this.renderer.pixelToHex(x, y);
 			const grid = this.gameState.getGrid();
@@ -669,9 +607,10 @@ class HexSeptominoGame {
 		// Don't place piece if we were panning
 		if (this.isPanning) return;
 
-		const rect = this.canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left - this.canvas.width / 2 - this.panOffsetX;
-		const y = event.clientY - rect.top - this.canvas.height / 2 - this.panOffsetY;
+		const canvas = this.canvasManager.getCanvas();
+		const rect = canvas.getBoundingClientRect();
+		const x = event.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
+		const y = event.clientY - rect.top - canvas.height / 2 - this.panOffsetY;
 
 		const hex = this.renderer.pixelToHex(x, y);
 		const grid = this.gameState.getGrid();
@@ -784,11 +723,13 @@ class HexSeptominoGame {
 	}
 
 	private render(): void {
-		this.ctx.fillStyle = '#0f3460';
-		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+		const canvas = this.canvasManager.getCanvas();
+		const ctx = this.canvasManager.getContext();
 
-		this.ctx.save();
-		this.ctx.translate(this.canvas.width / 2 + this.panOffsetX, this.canvas.height / 2 + this.panOffsetY);
+		this.canvasManager.clearCanvas('#0f3460');
+
+		ctx.save();
+		ctx.translate(canvas.width / 2 + this.panOffsetX, canvas.height / 2 + this.panOffsetY);
 
 		const fontSize = Math.max(12, Math.floor(this.renderer.hexSize * 0.5));
 		const grid = this.gameState.getGrid();
@@ -805,14 +746,14 @@ class HexSeptominoGame {
 				displayHeight = animatingHex.targetHeight;
 			}
 
-			this.drawHex(pos.x, pos.y, this.colors[displayHeight] || '#000', '#0f3460', 2);
+			this.drawHex(ctx, pos.x, pos.y, this.colors[displayHeight] || '#000', '#0f3460', 2);
 
 			if (displayHeight > 0) {
-				this.ctx.fillStyle = '#fff';
-				this.ctx.font = `bold ${fontSize}px Arial`;
-				this.ctx.textAlign = 'center';
-				this.ctx.textBaseline = 'middle';
-				this.ctx.fillText(displayHeight.toString(), pos.x, pos.y);
+				ctx.fillStyle = '#fff';
+				ctx.font = `bold ${fontSize}px Arial`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(displayHeight.toString(), pos.x, pos.y);
 			}
 		});
 
@@ -824,20 +765,20 @@ class HexSeptominoGame {
 			const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
 			// Burst animation for all hexes
-			this.ctx.save();
-			this.ctx.translate(pos.x, pos.y);
+			ctx.save();
+			ctx.translate(pos.x, pos.y);
 
 			// Scale up and fade out for burst effect
 			// Scale up to 150%
 			const burstScale = 1 + animatingHex.progress * 0.5;
 			const opacity = 1 - animatingHex.progress;
 
-			this.ctx.globalAlpha = opacity;
-			this.ctx.scale(burstScale, burstScale);
+			ctx.globalAlpha = opacity;
+			ctx.scale(burstScale, burstScale);
 
 			// Draw the bursting hex
-			this.drawHexOnCanvas(
-				this.ctx,
+			this.canvasManager.drawHexOnCanvas(
+				ctx,
 				0,
 				0,
 				this.renderer.hexSize,
@@ -848,14 +789,14 @@ class HexSeptominoGame {
 
 			// Draw the number with burst effect
 			if (animatingHex.startHeight > 0 && opacity > 0.1) {
-				this.ctx.fillStyle = '#fff';
-				this.ctx.font = `bold ${fontSize}px Arial`;
-				this.ctx.textAlign = 'center';
-				this.ctx.textBaseline = 'middle';
-				this.ctx.fillText(animatingHex.startHeight.toString(), 0, 0);
+				ctx.fillStyle = '#fff';
+				ctx.font = `bold ${fontSize}px Arial`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(animatingHex.startHeight.toString(), 0, 0);
 			}
 
-			this.ctx.restore();
+			ctx.restore();
 		});
 
 		const previewHex = this.mouseHex || this.touchHex;
@@ -868,9 +809,9 @@ class HexSeptominoGame {
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 					if (canPlace) {
-						this.drawHex(pos.x, pos.y, 'rgba(255, 235, 59, 0.3)', '#ffeb3b', 3);
+						this.drawHex(ctx, pos.x, pos.y, 'rgba(255, 235, 59, 0.3)', '#ffeb3b', 3);
 					} else {
-						this.drawHex(pos.x, pos.y, 'rgba(244, 67, 54, 0.3)', '#f44336', 3);
+						this.drawHex(ctx, pos.x, pos.y, 'rgba(244, 67, 54, 0.3)', '#f44336', 3);
 					}
 				}
 			});
@@ -882,11 +823,11 @@ class HexSeptominoGame {
 				const hex = grid.getHex(this.hintPos!.q + tile.q, this.hintPos!.r + tile.r);
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
-					this.ctx.strokeStyle = '#e94560';
-					this.ctx.lineWidth = 4;
-					this.ctx.setLineDash([5, 5]);
-					this.drawHexOutline(pos.x, pos.y);
-					this.ctx.setLineDash([]);
+					ctx.strokeStyle = '#e94560';
+					ctx.lineWidth = 4;
+					ctx.setLineDash([5, 5]);
+					this.drawHexOutline(ctx, pos.x, pos.y);
+					ctx.setLineDash([]);
 				}
 			});
 		}
@@ -912,19 +853,19 @@ class HexSeptominoGame {
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
-					this.ctx.save();
-					this.ctx.translate(pos.x, pos.y);
-					this.ctx.scale(scale, scale);
-					this.ctx.globalAlpha = opacity;
-					this.ctx.strokeStyle = '#f44336';
-					this.ctx.lineWidth = 5;
-					this.drawHexOutline(0, 0);
-					this.ctx.restore();
+					ctx.save();
+					ctx.translate(pos.x, pos.y);
+					ctx.scale(scale, scale);
+					ctx.globalAlpha = opacity;
+					ctx.strokeStyle = '#f44336';
+					ctx.lineWidth = 5;
+					this.drawHexOutline(ctx, 0, 0);
+					ctx.restore();
 				}
 			});
 		}
 
-		this.ctx.restore();
+		ctx.restore();
 
 		// Draw mobile piece preview overlay
 		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
@@ -933,85 +874,68 @@ class HexSeptominoGame {
 			const previewHexSize = 15;
 
 			// Draw preview in top-right corner
-			this.ctx.save();
-			this.ctx.translate(this.canvas.width - previewSize - 20, 20);
+			ctx.save();
+			ctx.translate(canvas.width - previewSize - 20, 20);
 
 			// Background
-			this.ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
-			this.ctx.fillRect(-10, -10, previewSize + 20, previewSize + 20);
-			this.ctx.strokeStyle = '#0f3460';
-			this.ctx.lineWidth = 2;
-			this.ctx.strokeRect(-10, -10, previewSize + 20, previewSize + 20);
+			ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
+			ctx.fillRect(-10, -10, previewSize + 20, previewSize + 20);
+			ctx.strokeStyle = '#0f3460';
+			ctx.lineWidth = 2;
+			ctx.strokeRect(-10, -10, previewSize + 20, previewSize + 20);
 
 			// Draw piece
-			this.ctx.translate(previewSize / 2, previewSize / 2);
+			ctx.translate(previewSize / 2, previewSize / 2);
 			piece.forEach((tile) => {
 				const x = previewHexSize * ((3 / 2) * tile.q);
 				const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
-				this.drawHexOnCanvas(this.ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
+				this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
 			});
 
-			this.ctx.restore();
+			ctx.restore();
 		}
 	}
 
 	private renderPiecePreview(): void {
-		const ctx = this.previewCtx;
-		ctx.fillStyle = '#16213e';
-		ctx.fillRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
+		this.canvasManager.clearPreviewCanvas('#16213e');
+		const ctx = this.canvasManager.getPreviewContext();
+		const previewCanvas = this.canvasManager.getPreviewCanvas();
 
 		const piece = this.gameState.getCurrentPiece();
 		const currentIndex = this.gameState.getCurrentPieceIndex();
 		const previewHexSize = 20;
 
 		ctx.save();
-		ctx.translate(this.previewCanvas.width / 2, this.previewCanvas.height / 2);
+		ctx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
 
 		const color = this.gameState.isPiecePlaced(currentIndex) ? '#666' : '#e94560';
 
 		piece.forEach((tile) => {
 			const x = previewHexSize * ((3 / 2) * tile.q);
 			const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
-			this.drawHexOnCanvas(ctx, x, y, previewHexSize, color, '#0f3460', 2);
+			this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, color, '#0f3460', 2);
 		});
 
 		ctx.restore();
 	}
 
-	private drawHex(x: number, y: number, fillColor: string, strokeColor: string, lineWidth: number): void {
-		this.drawHexOnCanvas(this.ctx, x, y, this.renderer.hexSize, fillColor, strokeColor, lineWidth);
-	}
-
-	private drawHexOutline(x: number, y: number): void {
-		this.ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
-			const angle = (Math.PI / 3) * i;
-			const hx = x + this.renderer.hexSize * Math.cos(angle);
-			const hy = y + this.renderer.hexSize * Math.sin(angle);
-			if (i === 0) {
-				this.ctx.moveTo(hx, hy);
-			} else {
-				this.ctx.lineTo(hx, hy);
-			}
-		}
-		this.ctx.closePath();
-		this.ctx.stroke();
-	}
-
-	private drawHexOnCanvas(
+	private drawHex(
 		ctx: CanvasRenderingContext2D,
 		x: number,
 		y: number,
-		size: number,
 		fillColor: string,
 		strokeColor: string,
 		lineWidth: number,
 	): void {
+		this.canvasManager.drawHexOnCanvas(ctx, x, y, this.renderer.hexSize, fillColor, strokeColor, lineWidth);
+	}
+
+	private drawHexOutline(ctx: CanvasRenderingContext2D, x: number, y: number): void {
 		ctx.beginPath();
 		for (let i = 0; i < 6; i++) {
 			const angle = (Math.PI / 3) * i;
-			const hx = x + size * Math.cos(angle);
-			const hy = y + size * Math.sin(angle);
+			const hx = x + this.renderer.hexSize * Math.cos(angle);
+			const hy = y + this.renderer.hexSize * Math.sin(angle);
 			if (i === 0) {
 				ctx.moveTo(hx, hy);
 			} else {
@@ -1019,12 +943,6 @@ class HexSeptominoGame {
 			}
 		}
 		ctx.closePath();
-
-		ctx.fillStyle = fillColor;
-		ctx.fill();
-
-		ctx.strokeStyle = strokeColor;
-		ctx.lineWidth = lineWidth;
 		ctx.stroke();
 	}
 
