@@ -36,6 +36,7 @@ export class GameState {
 	private redoStack: Move[];
 	private initialGridState: Map<string, number>;
 	private undoCount: number;
+	private hintCount: number;
 
 	constructor(radius: number, numPieces: number) {
 		this.settings = {radius, numPieces};
@@ -48,6 +49,7 @@ export class GameState {
 		this.redoStack = [];
 		this.initialGridState = new Map<string, number>();
 		this.undoCount = 0;
+		this.hintCount = 0;
 
 		this.generateLevel();
 	}
@@ -243,6 +245,7 @@ export class GameState {
 		this.redoStack = [];
 		this.currentPieceIndex = 0;
 		this.undoCount = 0;
+		this.hintCount = 0;
 	}
 
 	isGameWon(): boolean {
@@ -289,6 +292,14 @@ export class GameState {
 
 	getUndoCount(): number {
 		return this.undoCount;
+	}
+
+	getHintCount(): number {
+		return this.hintCount;
+	}
+
+	incrementHintCount(): void {
+		this.hintCount++;
 	}
 
 	getMoveCount(): number {
