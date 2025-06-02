@@ -218,8 +218,18 @@ export class GameState {
 		if (this.redoStack.length === 0) return false;
 
 		const move = this.redoStack.pop()!;
-		this.currentPieceIndex = move.pieceIndex;
-		return this.placePiece(move.q, move.r);
+
+		// Apply the move directly without clearing redo stack
+		move.heightChanges.forEach((change) => {
+			const hex = this.grid.getHex(change.q, change.r);
+			if (hex) hex.height = change.oldHeight - 1;
+		});
+
+		this.placedPieces.add(move.pieceIndex);
+		this.history.push(move);
+		this.findNextUnplacedPiece();
+
+		return true;
 	}
 
 	restart(): void {

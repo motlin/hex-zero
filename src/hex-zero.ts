@@ -740,6 +740,16 @@ class HexSeptominoGame {
 		this.render();
 	}
 
+	resetGame(): void {
+		// Undo all moves while maintaining redo history
+		while (this.gameState.canUndo()) {
+			this.gameState.undo();
+		}
+		this.hintPos = null;
+		this.updateUI();
+		this.render();
+	}
+
 	private showInvalidPlacementFeedback(position: HexCoordinate): void {
 		this.invalidPlacementAnimation = {
 			isActive: true,
