@@ -122,6 +122,7 @@ class HexSeptominoGame {
 	private panOffsetY: number;
 	private lastPinchDistance: number | null;
 	private showMobilePiecePreview: boolean;
+	private isMobileDevice: boolean;
 	private invalidPlacementAnimation: {
 		isActive: boolean;
 		startTime: number;
@@ -131,6 +132,13 @@ class HexSeptominoGame {
 
 	cleanup(): void {
 		// Cleanup is handled by removing event listeners if needed
+	}
+
+	private detectMobileDevice(): boolean {
+		return (
+			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+			(navigator.maxTouchPoints !== undefined && navigator.maxTouchPoints > 2)
+		);
 	}
 
 	constructor(radius: number, numPieces: number) {
@@ -156,7 +164,8 @@ class HexSeptominoGame {
 		this.panOffsetX = 0;
 		this.panOffsetY = 0;
 		this.lastPinchDistance = null;
-		this.showMobilePiecePreview = false;
+		this.isMobileDevice = this.detectMobileDevice();
+		this.showMobilePiecePreview = this.isMobileDevice;
 		this.invalidPlacementAnimation = null;
 		this.setupEventListeners();
 		this.updateUI();
@@ -548,12 +557,16 @@ class HexSeptominoGame {
 			if (grid.getHex(hex.q, hex.r)) {
 				this.touchHex = hex;
 				this.isTouching = true;
-				this.showMobilePiecePreview = true;
+				// On non-mobile devices, show preview only during touch
+				if (!this.isMobileDevice) {
+					this.showMobilePiecePreview = true;
+				}
 				this.render();
 			}
 		} else if (event.touches.length === 2) {
 			// Two touches - start pan/zoom
 			this.touchHex = null;
+			// Hide preview during pan/zoom gestures
 			this.showMobilePiecePreview = false;
 			this.isTouching = false;
 
@@ -638,20 +651,33 @@ class HexSeptominoGame {
 
 			this.touchHex = null;
 			this.isTouching = false;
-			this.showMobilePiecePreview = false;
+			// On mobile devices, restore the preview; on desktop, hide it
+			if (this.isMobileDevice) {
+				this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
+			} else {
+				this.showMobilePiecePreview = false;
+			}
 			this.lastPinchDistance = null;
 			this.render();
 		} else if (event.touches.length === 1) {
 			// Going from two touches to one
 			this.lastPinchDistance = null;
-			// Could restart single touch tracking here if needed
+			// Restore mobile preview on mobile devices when returning to single touch
+			if (this.isMobileDevice) {
+				this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
+			}
 		}
 	}
 
 	private handleTouchCancel(_event: TouchEvent): void {
 		this.touchHex = null;
 		this.isTouching = false;
-		this.showMobilePiecePreview = false;
+		// On mobile devices, restore the preview; on desktop, hide it
+		if (this.isMobileDevice) {
+			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
+		} else {
+			this.showMobilePiecePreview = false;
+		}
 		this.lastPinchDistance = null;
 		this.render();
 	}
@@ -784,6 +810,11 @@ class HexSeptominoGame {
 		if (!this.gameState.getAllPiecesPlaced()) {
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
+		}
+
+		// Update mobile preview state - show on mobile devices when piece is not placed
+		if (this.isMobileDevice) {
+			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(currentIndex);
 		}
 
 		this.renderPiecePreview();
