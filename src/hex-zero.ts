@@ -135,10 +135,23 @@ class HexSeptominoGame {
 	}
 
 	private detectMobileDevice(): boolean {
-		return (
-			/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-			(navigator.maxTouchPoints !== undefined && navigator.maxTouchPoints > 2)
+		// Check for mobile user agents - most reliable method for real devices
+		const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+			navigator.userAgent,
 		);
+
+		// Check if viewport is mobile-sized - works for DevTools testing
+		const mobileViewport = window.matchMedia('(max-width: 768px)').matches;
+
+		return mobileUserAgent || mobileViewport;
+	}
+
+	private updateMobilePreviewState(): void {
+		if (this.isMobileDevice) {
+			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
+		} else {
+			this.showMobilePiecePreview = false;
+		}
 	}
 
 	constructor(radius: number, numPieces: number) {
@@ -177,6 +190,15 @@ class HexSeptominoGame {
 		}, 100);
 
 		window.addEventListener('resize', () => {
+			// Update mobile detection on resize (for DevTools viewport changes)
+			const wasMobile = this.isMobileDevice;
+			this.isMobileDevice = this.detectMobileDevice();
+
+			// If mobile state changed, update preview visibility
+			if (wasMobile !== this.isMobileDevice) {
+				this.updateMobilePreviewState();
+			}
+
 			this.updateCanvasSize();
 			this.render();
 		});
@@ -812,10 +834,8 @@ class HexSeptominoGame {
 			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
 		}
 
-		// Update mobile preview state - show on mobile devices when piece is not placed
-		if (this.isMobileDevice) {
-			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(currentIndex);
-		}
+		// Update mobile preview state
+		this.updateMobilePreviewState();
 
 		this.renderPiecePreview();
 	}
