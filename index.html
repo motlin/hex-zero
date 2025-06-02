@@ -59,6 +59,10 @@
             </div>
             <div class="validation-error" id="validationError"></div>
         </div>
+
+        <div style="border-top: 1px solid #2a5080; padding-top: 20px; margin-top: 20px; text-align: center;">
+            <button id="showInstructionsFromMenu">How to Play</button>
+        </div>
     </div>
 
     <!-- Game Screen -->
@@ -91,6 +95,55 @@
         </div>
     </div>
 
+    <!-- Instructions Modal -->
+    <div id="instructionsModal" class="modal hidden">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <h2>How to Play Hex Zero</h2>
+            <div class="instructions-content">
+                <section class="instruction-section">
+                    <h3>🎯 Objective</h3>
+                    <p>Reduce all hexes to height zero by strategically placing every piece on the board.</p>
+                </section>
+
+                <section class="instruction-section">
+                    <h3>🧩 Game Mechanics</h3>
+                    <ul>
+                        <li><strong>Pieces:</strong> Multi-hex shapes that must all be placed to win</li>
+                        <li><strong>Heights:</strong> Each hex displays its current height as a number</li>
+                        <li><strong>Placement:</strong> Placing a piece reduces the height by 1 for each covered hex</li>
+                        <li><strong>Winning:</strong> The puzzle is solved when all hexes reach height 0</li>
+                    </ul>
+                </section>
+
+                <section class="instruction-section">
+                    <h3>🎮 Controls</h3>
+                    <ul>
+                        <li><strong>Mouse:</strong> Click to place the current piece</li>
+                        <li><strong>Arrows:</strong> ↑/↓ cycle pieces, ←/→ undo/redo</li>
+                        <li><strong>Scroll:</strong> Mouse wheel or trackpad to cycle pieces</li>
+                        <li><strong>Zoom:</strong> +/- keys or pinch gestures</li>
+                        <li><strong>Pan:</strong> Drag with mouse or two-finger drag on mobile</li>
+                        <li><strong>Hint:</strong> H key or Hint button for placement suggestions</li>
+                    </ul>
+                </section>
+
+                <section class="instruction-section">
+                    <h3>💡 Tips</h3>
+                    <ul>
+                        <li>Start with pieces that can only fit in specific locations</li>
+                        <li>Use hints sparingly to maintain the challenge</li>
+                        <li>Plan ahead - some placements make others impossible</li>
+                        <li>The undo feature lets you experiment freely</li>
+                    </ul>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button id="closeInstructionsBtn">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Keyboard Shortcuts Modal -->
     <div id="keyboardShortcutsModal" class="modal hidden">
         <div class="modal-overlay"></div>
@@ -100,6 +153,10 @@
                 <div class="shortcut-item">
                     <span class="key">?</span>
                     <span class="description">Show keyboard shortcuts</span>
+                </div>
+                <div class="shortcut-item">
+                    <span class="key">I</span>
+                    <span class="description">Show instructions</span>
                 </div>
                 <div class="shortcut-item">
                     <span class="key">H</span>
@@ -140,6 +197,7 @@
             </div>
             <div class="modal-footer">
                 <button id="closeShortcutsBtn">Close</button>
+                <button id="showInstructionsFromShortcuts">Instructions</button>
             </div>
         </div>
     </div>

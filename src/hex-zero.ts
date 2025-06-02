@@ -11,6 +11,7 @@ declare global {
 		startCustomGame: () => void;
 		validateCustomInputs: () => boolean;
 		showDifficultyScreen: () => void;
+		showInstructions: () => void;
 		game: HexSeptominoGame | null;
 	}
 }
@@ -58,6 +59,47 @@ function showDifficultyScreen(): void {
 	document.getElementById('mobileControls')!.classList.add('hidden');
 	document.getElementById('difficultyScreen')!.classList.remove('hidden');
 }
+
+function showInstructions(): void {
+	const modal = document.getElementById('instructionsModal');
+	if (modal) {
+		modal.classList.remove('hidden');
+	}
+}
+
+function hideInstructions(): void {
+	const modal = document.getElementById('instructionsModal');
+	if (modal) {
+		modal.classList.add('hidden');
+	}
+}
+
+// Set up global instructions modal event listeners
+window.addEventListener('DOMContentLoaded', () => {
+	const instructionsModal = document.getElementById('instructionsModal');
+	const instructionsOverlay = instructionsModal?.querySelector('.modal-overlay');
+	const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
+	const showInstructionsFromMenu = document.getElementById('showInstructionsFromMenu');
+
+	if (closeInstructionsBtn) {
+		closeInstructionsBtn.addEventListener('click', hideInstructions);
+	}
+
+	if (instructionsOverlay) {
+		instructionsOverlay.addEventListener('click', hideInstructions);
+	}
+
+	if (showInstructionsFromMenu) {
+		showInstructionsFromMenu.addEventListener('click', showInstructions);
+	}
+
+	// Handle ESC key for instructions modal
+	document.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape' && instructionsModal && !instructionsModal.classList.contains('hidden')) {
+			hideInstructions();
+		}
+	});
+});
 
 class HexSeptominoGame {
 	private canvasManager: CanvasManager;
@@ -183,10 +225,21 @@ class HexSeptominoGame {
 			modalOverlay.addEventListener('click', () => this.toggleKeyboardShortcuts());
 		}
 
-		// Close modal on ESC key
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape' && modal && !modal.classList.contains('hidden')) {
+		// Instructions navigation from shortcuts modal
+		const showInstructionsFromShortcuts = document.getElementById('showInstructionsFromShortcuts');
+		if (showInstructionsFromShortcuts) {
+			showInstructionsFromShortcuts.addEventListener('click', () => {
 				this.toggleKeyboardShortcuts();
+				showInstructions();
+			});
+		}
+
+		// Close modals on ESC key
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') {
+				if (modal && !modal.classList.contains('hidden')) {
+					this.toggleKeyboardShortcuts();
+				}
 			}
 		});
 	}
@@ -654,6 +707,10 @@ class HexSeptominoGame {
 			case '?':
 				this.toggleKeyboardShortcuts();
 				break;
+			case 'i':
+			case 'I':
+				showInstructions();
+				break;
 			case 'h':
 			case 'H':
 				this.toggleHint();
@@ -1007,6 +1064,7 @@ window.startGame = startGame;
 window.startCustomGame = startCustomGame;
 window.validateCustomInputs = validateCustomInputs;
 window.showDifficultyScreen = showDifficultyScreen;
+window.showInstructions = showInstructions;
 window.game = game;
 
 export {};

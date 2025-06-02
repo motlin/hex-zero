@@ -88,16 +88,19 @@ describe('GameState', () => {
 		it('prevents placing same piece twice', () => {
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
-			const currentIndex = gameState.getCurrentPieceIndex();
+			const originalIndex = gameState.getCurrentPieceIndex();
 
 			// Find a position where the entire piece can be placed
 			const positions = Array.from(grid.hexes.values());
 			const validPosition = positions.find((pos) => gameState.canPlacePiece(piece, pos.q, pos.r));
 			expect(validPosition).toBeDefined();
 
+			// Place the piece
 			gameState.placePiece(validPosition!.q, validPosition!.r);
-			expect(gameState.isPiecePlaced(currentIndex)).toBe(true);
+			expect(gameState.isPiecePlaced(originalIndex)).toBe(true);
 
+			// Set current piece back to the placed piece and try to place it again
+			gameState['currentPieceIndex'] = originalIndex;
 			const secondPlacement = gameState.placePiece(validPosition!.q, validPosition!.r);
 			expect(secondPlacement).toBe(false);
 		});
