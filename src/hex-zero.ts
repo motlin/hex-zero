@@ -434,9 +434,7 @@ class HexSeptominoGame {
 			victoryScreen.classList.remove('hidden');
 
 			// Update stats
-			(document.getElementById('victoryMoves') as HTMLElement).textContent = this.gameState
-				.getMoveCount()
-				.toString();
+			(document.getElementById('victoryDifficulty') as HTMLElement).textContent = this.gameState.getDifficulty();
 			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.gameState
 				.getUndoCount()
 				.toString();

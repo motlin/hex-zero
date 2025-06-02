@@ -371,6 +371,30 @@ describe('GameState', () => {
 		});
 	});
 
+	describe('difficulty detection', () => {
+		it('detects standard difficulty levels', () => {
+			const easyGame = new GameState(3, 4);
+			expect(easyGame.getDifficulty()).toBe('Easy');
+
+			const mediumGame = new GameState(3, 6);
+			expect(mediumGame.getDifficulty()).toBe('Medium');
+
+			const hardGame = new GameState(3, 8);
+			expect(hardGame.getDifficulty()).toBe('Hard');
+
+			const extremeGame = new GameState(4, 10);
+			expect(extremeGame.getDifficulty()).toBe('Extreme');
+
+			const impossibleGame = new GameState(4, 14);
+			expect(impossibleGame.getDifficulty()).toBe('Impossible');
+		});
+
+		it('detects custom difficulty for non-standard settings', () => {
+			const customGame = new GameState(5, 12);
+			expect(customGame.getDifficulty()).toBe('Custom');
+		});
+	});
+
 	describe('restart', () => {
 		it('resets all game state', () => {
 			const grid = gameState.getGrid();

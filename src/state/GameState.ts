@@ -257,6 +257,18 @@ export class GameState {
 		return solutionMove ? {q: solutionMove.q, r: solutionMove.r} : null;
 	}
 
+	getDifficulty(): string {
+		const {radius, numPieces} = this.settings;
+
+		if (radius === 3 && numPieces === 4) return 'Easy';
+		if (radius === 3 && numPieces === 6) return 'Medium';
+		if (radius === 3 && numPieces === 8) return 'Hard';
+		if (radius === 4 && numPieces === 10) return 'Extreme';
+		if (radius === 4 && numPieces === 14) return 'Impossible';
+
+		return 'Custom';
+	}
+
 	// Getters for read-only access to game state
 	getSettings(): GameSettings {
 		return {...this.settings};
