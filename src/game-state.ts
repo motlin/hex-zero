@@ -1,4 +1,3 @@
-// Re-export from extracted state modules for backward compatibility
 export {GameState} from './state/GameState';
 export {HexGrid} from './state/HexGrid';
 export {SeptominoGenerator} from './state/SeptominoGenerator';
