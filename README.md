@@ -89,13 +89,8 @@ The game board consists of a hexagonal grid arranged in a pointy-topped orientat
 
 -   **Valid placement** (all covered hexes have height > 0):
     -   Shows preview of board state after placement
-    -   Semi-transparent yellow fill: `rgba(255, 235, 59, 0.3)`
-    -   Yellow outlines: `#ffeb3b` with 3px width
 -   **Invalid placement**:
     -   Pieces can only be placed where all covered hexes have height greater than 0.
-    -   Semi-transparent red fill: `rgba(244, 67, 54, 0.3)`
-    -   Red outlines: `#f44336` with 3px width
--   **Hint display**: `#e94560` outline with 4px dashed line
 
 ### Layout
 
@@ -161,6 +156,16 @@ The game board consists of a hexagonal grid arranged in a pointy-topped orientat
 
 -   Available pieces: `#e94560` in preview
 -   Placing a piece clears the redo stack
+
+#### Hover/Preview System
+
+-   **Valid placement** (all covered hexes have height > 0):
+    -   Semi-transparent yellow fill: `rgba(255, 235, 59, 0.3)`
+    -   Yellow outlines: `#ffeb3b` with 3px width
+-   **Invalid placement**:
+    -   Semi-transparent red fill: `rgba(244, 67, 54, 0.3)`
+    -   Red outlines: `#f44336` with 3px width
+-   **Hint display**: `#e94560` outline with 4px dashed line
 
 ### Responsive Design
 
