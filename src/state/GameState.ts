@@ -62,7 +62,6 @@ export class GameState {
 		this.redoStack = [];
 		this.currentPieceIndex = 0;
 
-		// Reset grid
 		this.grid.hexes.forEach((hex) => (hex.height = 0));
 
 		// Try multiple times to ensure all pieces can be placed
@@ -221,7 +220,6 @@ export class GameState {
 
 		const move = this.redoStack.pop()!;
 
-		// Apply the move directly without clearing redo stack
 		move.heightChanges.forEach((change) => {
 			const hex = this.grid.getHex(change.q, change.r);
 			if (hex) hex.height = change.oldHeight - 1;
@@ -269,7 +267,6 @@ export class GameState {
 		return 'Custom';
 	}
 
-	// Getters for read-only access to game state
 	getSettings(): GameSettings {
 		return {...this.settings};
 	}

@@ -122,9 +122,7 @@ class HexSeptominoGame {
 		duration: number;
 	} | null;
 
-	cleanup(): void {
-		// Cleanup is handled by removing event listeners if needed
-	}
+	cleanup(): void {}
 
 	private detectMobileDevice(): boolean {
 		// Check for mobile user agents - most reliable method for real devices
@@ -284,7 +282,6 @@ class HexSeptominoGame {
 		const piece = this.gameState.getCurrentPiece();
 		const grid = this.gameState.getGrid();
 
-		// Create animation setup before placing piece
 		this.animatingHexes = [];
 
 		// Sort pieces by position for clockwise animation
@@ -327,14 +324,12 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Place the piece using GameState
 		const placed = this.gameState.placePiece(centerQ, centerR);
 		if (!placed) return;
 
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
 
-		// Update UI immediately
 		this.updateUI();
 
 		setTimeout(() => {
@@ -421,7 +416,6 @@ class HexSeptominoGame {
 
 	private checkWinCondition(): void {
 		if (this.gameState.isGameWon()) {
-			// Show victory screen
 			const victoryScreen = document.getElementById('victoryScreen')!;
 			victoryScreen.classList.remove('hidden');
 
@@ -433,8 +427,6 @@ class HexSeptominoGame {
 			(document.getElementById('victoryHints') as HTMLElement).textContent = this.gameState
 				.getHintCount()
 				.toString();
-
-			// Fire confetti!
 			const duration = 3000;
 			const animationEnd = Date.now() + duration;
 			const defaults = {startVelocity: 30, spread: 360, ticks: 60, zIndex: 2100};
@@ -466,7 +458,6 @@ class HexSeptominoGame {
 				});
 			}, 250);
 
-			// Also update the status text for accessibility
 			const message = 'Congratulations! You solved it!';
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = message;
 			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = message;
@@ -501,7 +492,6 @@ class HexSeptominoGame {
 
 	private handleMouseDown(event: MouseEvent): void {
 		if (event.button === 0) {
-			// Left button
 			this.isPanning = true;
 			this.panStartX = event.clientX - this.panOffsetX;
 			this.panStartY = event.clientY - this.panOffsetY;
@@ -535,7 +525,6 @@ class HexSeptominoGame {
 		// but with rate limiting to prevent too fast scrolling
 		const direction = Math.sign(normalizedDelta);
 
-		// No movement
 		if (direction === 0) return;
 
 		// Track consecutive small deltas to detect trackpad
@@ -582,18 +571,14 @@ class HexSeptominoGame {
 		} else if (event.touches.length === 2) {
 			// Two touches - start pan/zoom
 			this.touchHex = null;
-			// Hide preview during pan/zoom gestures
 			this.showMobilePiecePreview = false;
 			this.isTouching = false;
 
-			// Calculate initial pinch distance
 			const touch1 = event.touches[0];
 			const touch2 = event.touches[1];
 			const dx = touch2.clientX - touch1.clientX;
 			const dy = touch2.clientY - touch1.clientY;
 			this.lastPinchDistance = Math.sqrt(dx * dx + dy * dy);
-
-			// Calculate center point for panning
 			const centerX = (touch1.clientX + touch2.clientX) / 2;
 			const centerY = (touch1.clientY + touch2.clientY) / 2;
 			this.panStartX = centerX - this.panOffsetX;
@@ -625,19 +610,15 @@ class HexSeptominoGame {
 			const touch1 = event.touches[0];
 			const touch2 = event.touches[1];
 
-			// Calculate new pinch distance
 			const dx = touch2.clientX - touch1.clientX;
 			const dy = touch2.clientY - touch1.clientY;
 			const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
-
-			// Handle zoom
 			if (this.lastPinchDistance !== null) {
 				const scale = newPinchDistance / this.lastPinchDistance;
 				this.zoom(scale);
 			}
 			this.lastPinchDistance = newPinchDistance;
 
-			// Handle pan
 			const centerX = (touch1.clientX + touch2.clientX) / 2;
 			const centerY = (touch1.clientY + touch2.clientY) / 2;
 			this.panOffsetX = centerX - this.panStartX;
@@ -783,7 +764,6 @@ class HexSeptominoGame {
 	}
 
 	resetGame(): void {
-		// Undo all moves while maintaining redo history
 		while (this.gameState.canUndo()) {
 			this.gameState.undo();
 		}
