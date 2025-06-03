@@ -171,12 +171,13 @@ button:disabled {
 }
 
 .custom-form {
-	display: flex;
+	display: grid;
+	grid-template-columns: auto auto auto auto auto;
 	gap: 10px;
 	align-items: center;
 	justify-content: center;
 	margin-top: 20px;
-	flex-wrap: wrap;
+	position: relative;
 }
 
 .custom-form input {
@@ -187,23 +188,68 @@ button:disabled {
 	border-radius: 4px;
 	width: 80px;
 	font-size: 14px;
-	transition: border-color 0.2s;
+	transition:
+		border-color 0.2s,
+		background-color 0.2s;
 }
 
-.custom-form input.invalid {
+.custom-form input:invalid {
 	border-color: #e94560;
 	background-color: rgba(233, 69, 96, 0.1);
+}
+
+.custom-form input:valid {
+	border-color: #2a5080;
+	background-color: #0f3460;
 }
 
 .custom-form label {
 	font-size: 14px;
 }
 
-.validation-error {
+.error-message {
+	display: none;
 	color: #e94560;
 	font-size: 12px;
-	margin-top: 5px;
-	min-height: 18px;
+	white-space: nowrap;
+	grid-column: 1 / -1;
+	text-align: center;
+	margin-top: -5px;
+}
+
+.error-message[data-for='customRadius'] {
+	grid-row: 2;
+}
+
+.error-message[data-for='customPieces'] {
+	grid-row: 3;
+}
+
+.custom-form:has(#customRadius:invalid:focus) .error-message[data-for='customRadius'],
+.custom-form:has(#customRadius:invalid:not(:placeholder-shown)) .error-message[data-for='customRadius'] {
+	display: block;
+}
+
+.custom-form:has(#customPieces:invalid:focus) .error-message[data-for='customPieces'],
+.custom-form:has(#customPieces:invalid:not(:placeholder-shown)) .error-message[data-for='customPieces'] {
+	display: block;
+}
+
+.custom-form button[type='submit'] {
+	background-color: #e94560;
+	color: white;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	transition: opacity 0.2s;
+}
+
+.custom-form:invalid button[type='submit'] {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
 }
 
 .hidden {

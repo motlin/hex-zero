@@ -2,14 +2,12 @@ import confetti from 'canvas-confetti';
 import {GameState, type HexCoordinate, type Piece} from './game-state';
 import {HexRenderer} from './renderer/HexRenderer';
 import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
-import {validateCustomInputs} from './ui/InputValidator';
 import {CanvasManager} from './canvas/CanvasManager';
 
 declare global {
 	interface Window {
 		startGame: (radius: number, numPieces: number) => void;
 		startCustomGame: () => void;
-		validateCustomInputs: () => boolean;
 		showDifficultyScreen: () => void;
 		showInstructions: () => void;
 		game: HexSeptominoGame | null;
@@ -29,10 +27,6 @@ interface AnimatingHex {
 
 let game: HexSeptominoGame | null = null;
 
-window.addEventListener('DOMContentLoaded', () => {
-	validateCustomInputs();
-});
-
 function startGame(radius: number, numPieces: number): void {
 	document.getElementById('difficultyScreen')!.classList.add('hidden');
 	document.getElementById('gameScreen')!.classList.remove('hidden');
@@ -47,11 +41,9 @@ function startGame(radius: number, numPieces: number): void {
 }
 
 function startCustomGame(): void {
-	if (validateCustomInputs()) {
-		const radius = parseInt((document.getElementById('customRadius') as HTMLInputElement).value);
-		const pieces = parseInt((document.getElementById('customPieces') as HTMLInputElement).value);
-		startGame(radius, pieces);
-	}
+	const radius = parseInt((document.getElementById('customRadius') as HTMLInputElement).value);
+	const pieces = parseInt((document.getElementById('customPieces') as HTMLInputElement).value);
+	startGame(radius, pieces);
 }
 
 function showDifficultyScreen(): void {
@@ -1125,7 +1117,6 @@ class HexSeptominoGame {
 
 window.startGame = startGame;
 window.startCustomGame = startCustomGame;
-window.validateCustomInputs = validateCustomInputs;
 window.showDifficultyScreen = showDifficultyScreen;
 window.showInstructions = showInstructions;
 window.game = game;

@@ -50,14 +50,15 @@
 
         <div style="border-top: 1px solid #2a5080; padding-top: 20px;">
             <h3 style="color: #f39c12; margin-bottom: 15px;">Custom Game</h3>
-            <div class="custom-form">
+            <form class="custom-form" onsubmit="event.preventDefault(); startCustomGame();">
                 <label>Radius:</label>
-                <input type="number" id="customRadius" min="2" max="8" value="4" oninput="validateCustomInputs()">
+                <input type="number" id="customRadius" min="2" max="8" value="4" required>
                 <label>Pieces:</label>
-                <input type="number" id="customPieces" min="3" max="15" value="8" oninput="validateCustomInputs()">
-                <button id="customStartBtn" onclick="startCustomGame()">Start</button>
-            </div>
-            <div class="validation-error" id="validationError"></div>
+                <input type="number" id="customPieces" min="3" max="15" value="8" required>
+                <button type="submit" id="customStartBtn">Start</button>
+                <span class="error-message" data-for="customRadius">Radius must be between 2 and 8</span>
+                <span class="error-message" data-for="customPieces">Pieces must be between 3 and 15</span>
+            </form>
         </div>
 
         <div style="border-top: 1px solid #2a5080; padding-top: 20px; margin-top: 20px; text-align: center;">
