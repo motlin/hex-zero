@@ -64,63 +64,27 @@ export class GameState {
 
 		this.grid.hexes.forEach((hex) => (hex.height = 0));
 
-		// Try multiple times to ensure all pieces can be placed
-		let attempts = 0;
-		const maxAttempts = 10;
+		const positions = Array.from(this.grid.hexes.values());
 
-		while (attempts < maxAttempts) {
-			this.grid.hexes.forEach((hex) => (hex.height = 0));
-			this.solution = [];
-			let allPiecesPlaced = true;
+		this.pieces.forEach((piece, index) => {
+			const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
 
-			const positions = Array.from(this.grid.hexes.values());
+			if (validPositions.length === 0) {
+				// Skip pieces that can't be placed during initial generation
+				// They remain in the pieces array for the player to place
+				return;
+			}
 
-			this.pieces.forEach((piece, index) => {
-				const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
+			const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
+			this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
 
-				if (validPositions.length > 0) {
-					const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
-
-					this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
-
-					piece.forEach((tile) => {
-						const hex = this.grid.getHex(pos.q + tile.q, pos.r + tile.r);
-						if (hex) {
-							hex.height = Math.min(hex.height + 1, 6);
-						}
-					});
-				} else {
-					allPiecesPlaced = false;
+			piece.forEach((tile) => {
+				const hex = this.grid.getHex(pos.q + tile.q, pos.r + tile.r);
+				if (hex) {
+					hex.height = hex.height + 1;
 				}
 			});
-
-			if (allPiecesPlaced) {
-				break;
-			}
-
-			attempts++;
-			if (attempts >= maxAttempts) {
-				// Generate simpler pieces if we can't place all of them
-				this.pieces = this.pieces.map(() => [{q: 0, r: 0}]);
-				this.grid.hexes.forEach((hex) => (hex.height = 0));
-				this.solution = [];
-
-				this.pieces.forEach((piece, index) => {
-					const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
-					if (validPositions.length > 0) {
-						const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
-						this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
-						piece.forEach((tile) => {
-							const hex = this.grid.getHex(pos.q + tile.q, pos.r + tile.r);
-							if (hex) {
-								hex.height = Math.min(hex.height + 1, 6);
-							}
-						});
-					}
-				});
-				break;
-			}
-		}
+		});
 
 		this.grid.hexes.forEach((hex, key) => {
 			this.initialGridState.set(key, hex.height);

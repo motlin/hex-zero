@@ -836,7 +836,9 @@ class HexSeptominoGame {
 				displayHeight = animatingHex.targetHeight;
 			}
 
-			this.drawHex(ctx, pos.x, pos.y, this.colors[displayHeight] || '#000', '#0f3460', 2);
+			// For heights > 10, cycle through darker grays
+			const color = this.colors[displayHeight] || (displayHeight > 10 ? '#1a1a1a' : '#000');
+			this.drawHex(ctx, pos.x, pos.y, color, '#0f3460', 2);
 
 			if (displayHeight > 0) {
 				ctx.fillStyle = '#fff';
@@ -872,7 +874,7 @@ class HexSeptominoGame {
 				0,
 				0,
 				this.renderer.hexSize,
-				this.colors[animatingHex.startHeight] || '#000',
+				this.colors[animatingHex.startHeight] || (animatingHex.startHeight > 10 ? '#1a1a1a' : '#000'),
 				'#0f3460',
 				2,
 			);

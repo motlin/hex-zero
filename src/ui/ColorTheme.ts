@@ -8,6 +8,10 @@ export const DEFAULT_COLORS: ColorMap = {
 	4: '#3498db',
 	5: '#9b59b6',
 	6: '#c0392b',
+	7: '#8b7355',
+	8: '#696969',
+	9: '#4b4b4d',
+	10: '#2f2f2f',
 };
 
 export type {ColorMap};
