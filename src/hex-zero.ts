@@ -33,7 +33,7 @@ function startGame(radius: number, numPieces: number): void {
 	document.getElementById('mobileControls')!.classList.remove('hidden');
 
 	if (game) {
-		game.cleanup();
+		// Game instance exists, will be replaced
 	}
 
 	game = new HexSeptominoGame(radius, numPieces);
@@ -122,8 +122,6 @@ class HexSeptominoGame {
 		position: HexCoordinate;
 		duration: number;
 	} | null;
-
-	cleanup(): void {}
 
 	private detectMobileDevice(): boolean {
 		// Check for mobile user agents - most reliable method for real devices
