@@ -135,15 +135,20 @@ The game board consists of a hexagonal grid arranged in a pointy-topped orientat
 
 #### Hex Color Coding
 
-| Height | Color     | Description |
-| ------ | --------- | ----------- |
-| 0      | `#16213e` | Dark blue   |
-| 1      | `#e94560` | Pink/red    |
-| 2      | `#e67e22` | Orange      |
-| 3      | `#2ecc71` | Green       |
-| 4      | `#3498db` | Bright blue |
-| 5      | `#9b59b6` | Purple      |
-| 6      | `#c0392b` | Dark red    |
+| Height | Color     | Description    |
+| ------ | --------- | -------------- |
+| 0      | `#16213e` | Dark blue      |
+| 1      | `#e94560` | Pink/red       |
+| 2      | `#e67e22` | Orange         |
+| 3      | `#2ecc71` | Green          |
+| 4      | `#3498db` | Bright blue    |
+| 5      | `#9b59b6` | Purple         |
+| 6      | `#c0392b` | Dark red       |
+| 7      | `#8b7355` | Saddle brown   |
+| 8      | `#696969` | Dim gray       |
+| 9      | `#4b4b4d` | Dark gray      |
+| 10     | `#2f2f2f` | Very dark gray |
+| 11+    | `#1a1a1a` | Near black     |
 
 #### Dimensions
 
