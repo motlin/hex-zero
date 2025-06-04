@@ -271,13 +271,7 @@ class HexSeptominoGame {
 
 	private placePiece(centerQ: number, centerR: number): void {
 		// Clear any active hint when placing a piece
-		if (this.hintPos) {
-			this.hintPos = null;
-			if (this.hintTimeout) {
-				clearTimeout(this.hintTimeout);
-				this.hintTimeout = null;
-			}
-		}
+		this.clearHint();
 
 		const piece = this.gameState.getCurrentPiece();
 		const grid = this.gameState.getGrid();
@@ -362,6 +356,14 @@ class HexSeptominoGame {
 		}
 	}
 
+	private clearHint(): void {
+		this.hintPos = null;
+		if (this.hintTimeout) {
+			clearTimeout(this.hintTimeout);
+			this.hintTimeout = null;
+		}
+	}
+
 	toggleHint(): void {
 		// Don't show hints while animations are active
 		if (this.animationStartTime !== null || this.animatingHexes.length > 0) {
@@ -370,11 +372,7 @@ class HexSeptominoGame {
 
 		// If hint is already showing, hide it
 		if (this.hintPos) {
-			this.hintPos = null;
-			if (this.hintTimeout) {
-				clearTimeout(this.hintTimeout);
-				this.hintTimeout = null;
-			}
+			this.clearHint();
 			this.render();
 			return;
 		}
@@ -396,7 +394,7 @@ class HexSeptominoGame {
 
 	private restart(): void {
 		this.gameState.restart();
-		this.hintPos = null;
+		this.clearHint();
 
 		(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 		(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
@@ -767,7 +765,7 @@ class HexSeptominoGame {
 		while (this.gameState.canUndo()) {
 			this.gameState.undo();
 		}
-		this.hintPos = null;
+		this.clearHint();
 		this.updateUI();
 		this.render();
 	}
