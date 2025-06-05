@@ -142,6 +142,10 @@ class HexSeptominoGame {
 		} else {
 			this.showMobilePiecePreview = false;
 		}
+		// Start animation if mobile preview is now visible
+		if (this.showMobilePiecePreview) {
+			this.requestAnimationFrame();
+		}
 	}
 
 	constructor(radius: number, numPieces: number) {
@@ -979,6 +983,22 @@ class HexSeptominoGame {
 				this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
 			});
 
+			// Draw pulsing indicator on center hex (0,0)
+			const time = performance.now();
+			// 0 to 1 over 1 second
+			const pulsePhase = (time % 1000) / 1000;
+			// 2 to 6 radius
+			const pulseSize = 4 + Math.sin(pulsePhase * Math.PI * 2) * 2;
+			// 0.3 to 0.9 opacity
+			const pulseOpacity = 0.6 + Math.sin(pulsePhase * Math.PI * 2) * 0.3;
+
+			ctx.save();
+			ctx.fillStyle = `rgba(255, 255, 255, ${pulseOpacity})`;
+			ctx.beginPath();
+			ctx.arc(0, 0, pulseSize, 0, Math.PI * 2);
+			ctx.fill();
+			ctx.restore();
+
 			ctx.restore();
 		}
 	}
@@ -1036,7 +1056,8 @@ class HexSeptominoGame {
 	private requestAnimationFrame(): void {
 		if (
 			(this.animationStartTime !== null && this.animatingHexes.length > 0) ||
-			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive)
+			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) ||
+			(this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()))
 		) {
 			requestAnimationFrame(() => this.animate());
 		}
@@ -1080,6 +1101,11 @@ class HexSeptominoGame {
 			} else {
 				needsMoreFrames = true;
 			}
+		}
+
+		// Continue animating if mobile preview is shown
+		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+			needsMoreFrames = true;
 		}
 
 		this.render();
