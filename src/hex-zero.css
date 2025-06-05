@@ -325,6 +325,11 @@ button:disabled {
 }
 
 @media (max-width: 768px) {
+	body {
+		min-height: 100vh;
+		min-height: 100dvh; /* Use dynamic viewport height for mobile */
+	}
+
 	h1 {
 		font-size: 20px;
 		margin: 5px 0;
@@ -333,6 +338,8 @@ button:disabled {
 	.game-container {
 		flex-direction: column;
 		padding: 5px;
+		height: calc(100vh - 60px); /* Adjust for mobile header */
+		height: calc(100dvh - 60px); /* Use dynamic viewport height */
 	}
 
 	.controls {
@@ -341,20 +348,67 @@ button:disabled {
 
 	.mobile-controls {
 		display: block;
+		padding-bottom: env(safe-area-inset-bottom); /* Account for home indicator */
 	}
 
 	.difficulty-screen {
-		padding: 20px;
-		margin: 10px;
+		padding: 10px;
+		margin: 5px;
+		max-height: calc(100vh - 50px); /* Tighter height */
+		max-height: calc(100dvh - 50px); /* Use dynamic viewport height */
+		overflow-y: auto;
+		box-sizing: border-box; /* Ensure padding is included in height calculation */
+	}
+
+	.difficulty-screen h2 {
+		margin-bottom: 10px;
+		font-size: 18px;
 	}
 
 	.difficulty-options {
 		grid-template-columns: 1fr;
+		gap: 8px;
+		margin-bottom: 10px;
+	}
+
+	.difficulty-card {
+		padding: 12px;
+	}
+
+	.difficulty-card h3 {
+		font-size: 15px;
+		margin: 0 0 5px 0;
+	}
+
+	.difficulty-card p {
+		font-size: 12px;
+		margin: 0;
+	}
+
+	.custom-form {
+		grid-template-columns: auto 1fr auto 1fr auto;
+		gap: 5px;
+		margin-top: 10px;
+		align-items: center;
+	}
+
+	.custom-form input {
+		width: 50px;
+		padding: 4px 6px;
+		font-size: 12px;
+	}
+
+	.custom-form button {
+		padding: 4px 8px;
+		font-size: 12px;
 	}
 
 	.canvas-container {
 		width: 100%;
-		height: calc(100vh - 120px);
+		height: calc(100% - 60px); /* Move up by half the mobile control panel height */
+		flex: 1;
+		min-height: 0; /* Allow flex item to shrink */
+		margin-bottom: 60px; /* Add bottom margin to prevent overlap with controls */
 	}
 }
 

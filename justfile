@@ -3,35 +3,39 @@ default:
     @just --list --unsorted
 
 # `npm run ci:typecheck`
-typecheck:
+typecheck: install
     npm run ci:typecheck
 
 # `npm run ci:prettier`
-prettier:
+prettier: install
     npm run ci:prettier
 
 # `npm run ci:eslint`
-eslint:
+eslint: install
     npm run ci:eslint
 
 # `npm run build`
-build:
+build: install
     npm run build
 
 # `npm run lint:fix`
-fix:
+fix: install
     npm run lint:fix
 
 # `npm run test:run`
-test:
+test: install
     npm run test:run
 
 # Run development server
-dev:
+dev: install
     npm run dev
 
+# Install dependencies
+install:
+    npm install
+
 # Preview production build
-preview:
+preview: install
     npm run preview
 
 # Run all pre-commit checks
