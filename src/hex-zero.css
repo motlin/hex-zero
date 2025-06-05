@@ -818,3 +818,27 @@ button:disabled {
 		font-size: 14px;
 	}
 }
+
+/* Mobile Preview Touch Indicator */
+.mobile-preview-indicator {
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	background: rgba(255, 255, 255, 0.9);
+	border-radius: 50%;
+	pointer-events: none;
+	z-index: 1001;
+	animation: pulse 1s ease-in-out 2;
+	animation-fill-mode: forwards;
+}
+
+@keyframes pulse {
+	0%, 100% {
+		transform: scale(1);
+		opacity: 0.6;
+	}
+	50% {
+		transform: scale(1.5);
+		opacity: 0.9;
+	}
+}

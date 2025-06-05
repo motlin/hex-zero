@@ -115,7 +115,7 @@ class HexSeptominoGame {
 	private lastPinchDistance: number | null;
 	private showMobilePiecePreview: boolean;
 	private isMobileDevice: boolean;
-	private mobilePreviewStartTime: number | null;
+	private currentPreviewIndex: number;
 	private invalidPlacementAnimation: {
 		isActive: boolean;
 		startTime: number;
@@ -136,20 +136,90 @@ class HexSeptominoGame {
 	}
 
 	private updateMobilePreviewState(): void {
-		const wasVisible = this.showMobilePiecePreview;
+		const previousIndex = this.currentPreviewIndex;
+		this.currentPreviewIndex = this.gameState.getCurrentPieceIndex();
+
 		if (this.isMobileDevice) {
-			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
+			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.currentPreviewIndex);
 		} else {
 			this.showMobilePiecePreview = false;
 		}
-		// Reset start time when preview becomes visible for the first time
-		if (this.showMobilePiecePreview && !wasVisible) {
-			this.mobilePreviewStartTime = performance.now();
+
+		// Reset animation when showing a different piece
+		if (this.showMobilePiecePreview && previousIndex !== this.currentPreviewIndex) {
+			this.resetMobilePreviewAnimation();
 		}
-		// Start animation if mobile preview is now visible
+
+		this.updateMobilePreviewIndicator();
+	}
+
+	private resetMobilePreviewAnimation(): void {
+		const indicator = document.getElementById('mobilePreviewIndicator');
+		if (indicator) {
+			// Force animation restart by removing and re-adding the class
+			indicator.style.animation = 'none';
+			// Force reflow
+			void indicator.offsetHeight;
+			indicator.style.animation = '';
+		}
+	}
+
+	private updateMobilePreviewIndicator(): void {
+		const indicator = document.getElementById('mobilePreviewIndicator');
 		if (this.showMobilePiecePreview) {
-			this.requestAnimationFrame();
+			if (!indicator) {
+				this.createMobilePreviewIndicator();
+			} else {
+				indicator.style.display = 'block';
+				this.positionMobilePreviewIndicator(indicator);
+			}
+		} else if (indicator) {
+			indicator.style.display = 'none';
 		}
+	}
+
+	private positionMobilePreviewIndicator(indicator: HTMLElement): void {
+		const canvas = this.canvasManager.getCanvas();
+		const piece = this.gameState.getCurrentPiece();
+		const previewSize = 80;
+		const previewHexSize = 15;
+
+		// Base position of preview area
+		const baseX = canvas.width - previewSize - 20;
+		const baseY = 20;
+
+		// Center of preview area
+		const previewCenterX = baseX + previewSize / 2;
+		const previewCenterY = baseY + previewSize / 2;
+
+		// Calculate where the center hex (0,0) is actually drawn
+		// The piece is adjusted by its center offset, so hex at (0,0) in piece coordinates
+		// is at (-piece.center.q, -piece.center.r) in the adjusted coordinates
+		const adjustedQ = 0 - piece.center.q;
+		const adjustedR = 0 - piece.center.r;
+		const hexX = previewHexSize * ((3 / 2) * adjustedQ);
+		const hexY = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
+
+		// Final position
+		const centerX = previewCenterX + hexX;
+		const centerY = previewCenterY + hexY;
+
+		// Position indicator at center (subtract half indicator size)
+		// Adjust 4 pixels left to correct positioning
+		indicator.style.left = `${centerX - 8}px`;
+		indicator.style.top = `${centerY - 4}px`;
+	}
+
+	private createMobilePreviewIndicator(): void {
+		const canvas = this.canvasManager.getCanvas();
+		const canvasContainer = canvas.parentElement;
+		if (!canvasContainer) return;
+
+		const indicator = document.createElement('div');
+		indicator.id = 'mobilePreviewIndicator';
+		indicator.className = 'mobile-preview-indicator';
+		canvasContainer.appendChild(indicator);
+		this.positionMobilePreviewIndicator(indicator);
 	}
 
 	constructor(radius: number, numPieces: number) {
@@ -177,7 +247,7 @@ class HexSeptominoGame {
 		this.lastPinchDistance = null;
 		this.isMobileDevice = this.detectMobileDevice();
 		this.showMobilePiecePreview = this.isMobileDevice;
-		this.mobilePreviewStartTime = null;
+		this.currentPreviewIndex = 0;
 		this.invalidPlacementAnimation = null;
 		this.setupEventListeners();
 		this.updateUI();
@@ -203,6 +273,12 @@ class HexSeptominoGame {
 			this.updateCanvasSize();
 			this.render();
 			this.renderPieceNavigation();
+
+			// Update indicator position on resize
+			const indicator = document.getElementById('mobilePreviewIndicator');
+			if (indicator && this.showMobilePiecePreview) {
+				this.positionMobilePreviewIndicator(indicator);
+			}
 		});
 	}
 
@@ -1005,30 +1081,6 @@ class HexSeptominoGame {
 				this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
 			});
 
-			// Draw indicator on center hex (0,0) - pulse twice then stay static
-			let pulseSize = 4;
-			let pulseOpacity = 0.6;
-
-			if (this.mobilePreviewStartTime !== null) {
-				const elapsed = performance.now() - this.mobilePreviewStartTime;
-				// Pulse for 2 seconds (2 pulses), then stay static
-				if (elapsed < 2000) {
-					// 0 to 2 over 2 seconds (two complete pulses)
-					const pulsePhase = (elapsed % 1000) / 1000;
-					// 2 to 6 radius
-					pulseSize = 4 + Math.sin(pulsePhase * Math.PI * 2) * 2;
-					// 0.3 to 0.9 opacity
-					pulseOpacity = 0.6 + Math.sin(pulsePhase * Math.PI * 2) * 0.3;
-				}
-			}
-
-			ctx.save();
-			ctx.fillStyle = `rgba(255, 255, 255, ${pulseOpacity})`;
-			ctx.beginPath();
-			ctx.arc(0, 0, pulseSize, 0, Math.PI * 2);
-			ctx.fill();
-			ctx.restore();
-
 			ctx.restore();
 		}
 	}
@@ -1166,14 +1218,9 @@ class HexSeptominoGame {
 	}
 
 	private requestAnimationFrame(): void {
-		const now = performance.now();
 		if (
 			(this.animationStartTime !== null && this.animatingHexes.length > 0) ||
-			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) ||
-			(this.showMobilePiecePreview &&
-				!this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) &&
-				this.mobilePreviewStartTime !== null &&
-				now - this.mobilePreviewStartTime < 2000)
+			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive)
 		) {
 			requestAnimationFrame(() => this.animate());
 		}
@@ -1229,13 +1276,6 @@ class HexSeptominoGame {
 
 		needsMoreFrames = this.handlePiecePlacementAnimation(now) || needsMoreFrames;
 		needsMoreFrames = this.handleInvalidPlacementAnimation(now) || needsMoreFrames;
-
-		// Continue animating if mobile preview is shown and still pulsing
-		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
-			if (this.mobilePreviewStartTime !== null && now - this.mobilePreviewStartTime < 2000) {
-				needsMoreFrames = true;
-			}
-		}
 
 		this.render();
 
