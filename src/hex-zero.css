@@ -104,6 +104,49 @@ button:disabled {
 	line-height: 1.5;
 }
 
+/* Piece navigation */
+.piece-navigation {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	margin-bottom: 10px;
+	flex-wrap: nowrap;
+}
+
+.piece-nav-button {
+	cursor: pointer;
+	border: 2px solid #0f3460;
+	border-radius: 6px;
+	padding: 3px;
+	background-color: #16213e;
+	transition: all 0.2s;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.piece-nav-button:hover {
+	border-color: #e94560;
+	background-color: #1a4a7a;
+	transform: scale(1.05);
+}
+
+.piece-nav-button:active {
+	transform: scale(0.95);
+}
+
+.piece-nav-button.disabled {
+	opacity: 0.3;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
+.piece-nav-button canvas {
+	display: block;
+}
+
 /* Difficulty selection screen */
 .difficulty-screen {
 	background-color: #16213e;

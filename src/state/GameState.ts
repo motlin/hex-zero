@@ -161,6 +161,36 @@ export class GameState {
 		return false;
 	}
 
+	getNextPieceIndex(): number | null {
+		if (this.placedPieces.size >= this.pieces.length) return null;
+
+		let attempts = 0;
+		let newIndex = this.currentPieceIndex;
+
+		do {
+			newIndex = (newIndex + 1 + this.pieces.length) % this.pieces.length;
+			attempts++;
+			if (attempts > this.pieces.length) return null;
+		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
+
+		return newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex) ? newIndex : null;
+	}
+
+	getPreviousPieceIndex(): number | null {
+		if (this.placedPieces.size >= this.pieces.length) return null;
+
+		let attempts = 0;
+		let newIndex = this.currentPieceIndex;
+
+		do {
+			newIndex = (newIndex - 1 + this.pieces.length) % this.pieces.length;
+			attempts++;
+			if (attempts > this.pieces.length) return null;
+		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
+
+		return newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex) ? newIndex : null;
+	}
+
 	undo(): boolean {
 		if (this.history.length === 0) return false;
 
@@ -249,6 +279,11 @@ export class GameState {
 
 	getCurrentPiece(): Piece {
 		return [...this.pieces[this.currentPieceIndex]];
+	}
+
+	getPieceByIndex(index: number): Piece | null {
+		if (index < 0 || index >= this.pieces.length) return null;
+		return [...this.pieces[index]];
 	}
 
 	getPlacedPieces(): Set<number> {

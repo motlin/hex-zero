@@ -177,10 +177,12 @@ class HexSeptominoGame {
 		this.setupEventListeners();
 		this.updateUI();
 		this.render();
+		this.renderPieceNavigation();
 
 		setTimeout(() => {
 			this.updateCanvasSize();
 			this.render();
+			this.renderPieceNavigation();
 		}, 100);
 
 		window.addEventListener('resize', () => {
@@ -195,6 +197,7 @@ class HexSeptominoGame {
 
 			this.updateCanvasSize();
 			this.render();
+			this.renderPieceNavigation();
 		});
 	}
 
@@ -333,6 +336,7 @@ class HexSeptominoGame {
 		setTimeout(() => {
 			this.checkWinCondition();
 			this.render();
+			this.renderPieceNavigation();
 		}, this.animationDuration);
 	}
 
@@ -341,6 +345,7 @@ class HexSeptominoGame {
 		if (cycled) {
 			this.updateUI();
 			this.render();
+			this.renderPieceNavigation();
 		}
 	}
 
@@ -349,6 +354,7 @@ class HexSeptominoGame {
 		if (undone) {
 			this.updateUI();
 			this.render();
+			this.renderPieceNavigation();
 		}
 	}
 
@@ -357,6 +363,7 @@ class HexSeptominoGame {
 		if (redone) {
 			this.updateUI();
 			this.render();
+			this.renderPieceNavigation();
 		}
 	}
 
@@ -399,6 +406,7 @@ class HexSeptominoGame {
 		(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
 		this.updateUI();
 		this.render();
+		this.renderPieceNavigation();
 	}
 
 	startNewGame(): void {
@@ -767,6 +775,7 @@ class HexSeptominoGame {
 		this.clearHint();
 		this.updateUI();
 		this.render();
+		this.renderPieceNavigation();
 	}
 
 	private showInvalidPlacementFeedback(position: HexCoordinate): void {
@@ -1024,6 +1033,82 @@ class HexSeptominoGame {
 		});
 
 		ctx.restore();
+	}
+
+	private renderPieceNavigation(): void {
+		this.renderPieceNavigationCanvas('prevPiece', this.gameState.getPreviousPieceIndex());
+		this.renderPieceNavigationCanvas('nextPiece', this.gameState.getNextPieceIndex());
+		this.renderPieceNavigationCanvas('mobilePrevPiece', this.gameState.getPreviousPieceIndex());
+		this.renderPieceNavigationCanvas('mobileNextPiece', this.gameState.getNextPieceIndex());
+	}
+
+	private renderPieceNavigationCanvas(canvasId: string, pieceIndex: number | null): void {
+		const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+		if (!canvas) return;
+
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
+
+		const parent = canvas.parentElement;
+		if (!parent) return;
+
+		// Clear canvas
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		if (pieceIndex === null) {
+			// No piece available - show disabled state
+			parent.classList.add('disabled');
+			ctx.fillStyle = '#333';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			return;
+		}
+
+		// Enable button
+		parent.classList.remove('disabled');
+
+		const piece = this.gameState.getPieceByIndex(pieceIndex);
+		if (!piece) return;
+
+		const previewHexSize = Math.min(canvas.width, canvas.height) / 8;
+
+		ctx.save();
+		ctx.translate(canvas.width / 2, canvas.height / 2);
+
+		const color = this.gameState.isPiecePlaced(pieceIndex) ? '#666' : '#e94560';
+
+		piece.forEach((tile) => {
+			const x = previewHexSize * ((3 / 2) * tile.q);
+			const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
+			this.drawPieceNavigationHex(ctx, x, y, previewHexSize, color);
+		});
+
+		ctx.restore();
+	}
+
+	private drawPieceNavigationHex(
+		ctx: CanvasRenderingContext2D,
+		x: number,
+		y: number,
+		size: number,
+		color: string,
+	): void {
+		ctx.beginPath();
+		for (let i = 0; i < 6; i++) {
+			const angle = (Math.PI / 3) * i;
+			const hx = x + size * Math.cos(angle);
+			const hy = y + size * Math.sin(angle);
+			if (i === 0) {
+				ctx.moveTo(hx, hy);
+			} else {
+				ctx.lineTo(hx, hy);
+			}
+		}
+		ctx.closePath();
+		ctx.fillStyle = color;
+		ctx.fill();
+		ctx.strokeStyle = '#0f3460';
+		ctx.lineWidth = 1;
+		ctx.stroke();
 	}
 
 	private drawHex(

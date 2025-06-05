@@ -87,7 +87,15 @@
 
         <div class="controls">
             <h3 style="margin: 0;">Current Piece</h3>
-            <canvas id="piecePreview" width="180" height="180"></canvas>
+            <div class="piece-navigation">
+                <div class="piece-nav-button" onclick="game.cyclePiece(-1)">
+                    <canvas id="prevPiece" width="50" height="50"></canvas>
+                </div>
+                <canvas id="piecePreview" width="130" height="130"></canvas>
+                <div class="piece-nav-button" onclick="game.cyclePiece(1)">
+                    <canvas id="nextPiece" width="50" height="50"></canvas>
+                </div>
+            </div>
             <div class="piece-info">
                 <div id="pieceNumber">Piece 1 of 8</div>
                 <div id="piecePlaced" style="color: #666; display: none;">Already Placed</div>
@@ -245,9 +253,13 @@
     <!-- Mobile Controls -->
     <div id="mobileControls" class="mobile-controls hidden">
         <div class="mobile-controls-grid">
-            <button onclick="game.cyclePiece(-1)">Prev</button>
+            <div class="piece-nav-button" onclick="game.cyclePiece(-1)">
+                <canvas id="mobilePrevPiece" width="50" height="50"></canvas>
+            </div>
             <button onclick="game.toggleHint()">Hint</button>
-            <button onclick="game.cyclePiece(1)">Next</button>
+            <div class="piece-nav-button" onclick="game.cyclePiece(1)">
+                <canvas id="mobileNextPiece" width="50" height="50"></canvas>
+            </div>
             <button onclick="game.undo()">Undo</button>
             <button onclick="game.resetGame()">Reset</button>
             <button onclick="game.redo()">Redo</button>
