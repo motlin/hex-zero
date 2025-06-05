@@ -1158,8 +1158,10 @@ class HexSeptominoGame {
 		if (
 			(this.animationStartTime !== null && this.animatingHexes.length > 0) ||
 			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) ||
-			(this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) &&
-			 this.mobilePreviewStartTime !== null && (now - this.mobilePreviewStartTime) < 2000)
+			(this.showMobilePiecePreview &&
+				!this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) &&
+				this.mobilePreviewStartTime !== null &&
+				now - this.mobilePreviewStartTime < 2000)
 		) {
 			requestAnimationFrame(() => this.animate());
 		}
@@ -1207,7 +1209,7 @@ class HexSeptominoGame {
 
 		// Continue animating if mobile preview is shown and still pulsing
 		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
-			if (this.mobilePreviewStartTime !== null && (now - this.mobilePreviewStartTime) < 2000) {
+			if (this.mobilePreviewStartTime !== null && now - this.mobilePreviewStartTime < 2000) {
 				needsMoreFrames = true;
 			}
 		}
