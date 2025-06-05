@@ -1179,45 +1179,56 @@ class HexSeptominoGame {
 		}
 	}
 
+	private handlePiecePlacementAnimation(now: number): boolean {
+		if (this.animationStartTime === null) {
+			return false;
+		}
+
+		const elapsed = now - this.animationStartTime;
+		const progress = Math.min(elapsed / this.animationDuration, 1);
+
+		const easeInOutCubic = (t: number): number => {
+			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+		};
+
+		this.animatingHexes.forEach((hex) => {
+			// Apply delay to each hex
+			const hexElapsed = Math.max(0, elapsed - hex.delay);
+			// 400ms per hex animation
+			const hexProgress = Math.min(hexElapsed / 400, 1);
+			const easedHexProgress = easeInOutCubic(hexProgress);
+			hex.progress = easedHexProgress;
+		});
+
+		if (progress < 1) {
+			return true;
+		} else {
+			this.animatingHexes = [];
+			this.animationStartTime = null;
+			return false;
+		}
+	}
+
+	private handleInvalidPlacementAnimation(now: number): boolean {
+		if (!this.invalidPlacementAnimation || !this.invalidPlacementAnimation.isActive) {
+			return false;
+		}
+
+		const elapsed = now - this.invalidPlacementAnimation.startTime;
+		if (elapsed >= this.invalidPlacementAnimation.duration) {
+			this.invalidPlacementAnimation = null;
+			return false;
+		} else {
+			return true;
+		}
+	}
+
 	private animate(): void {
 		const now = performance.now();
 		let needsMoreFrames = false;
 
-		// Handle piece placement animation
-		if (this.animationStartTime !== null) {
-			const elapsed = now - this.animationStartTime;
-			const progress = Math.min(elapsed / this.animationDuration, 1);
-
-			const easeInOutCubic = (t: number): number => {
-				return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-			};
-
-			this.animatingHexes.forEach((hex) => {
-				// Apply delay to each hex
-				const hexElapsed = Math.max(0, elapsed - hex.delay);
-				// 400ms per hex animation
-				const hexProgress = Math.min(hexElapsed / 400, 1);
-				const easedHexProgress = easeInOutCubic(hexProgress);
-				hex.progress = easedHexProgress;
-			});
-
-			if (progress < 1) {
-				needsMoreFrames = true;
-			} else {
-				this.animatingHexes = [];
-				this.animationStartTime = null;
-			}
-		}
-
-		// Handle invalid placement animation
-		if (this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) {
-			const elapsed = now - this.invalidPlacementAnimation.startTime;
-			if (elapsed >= this.invalidPlacementAnimation.duration) {
-				this.invalidPlacementAnimation = null;
-			} else {
-				needsMoreFrames = true;
-			}
-		}
+		needsMoreFrames = this.handlePiecePlacementAnimation(now) || needsMoreFrames;
+		needsMoreFrames = this.handleInvalidPlacementAnimation(now) || needsMoreFrames;
 
 		// Continue animating if mobile preview is shown and still pulsing
 		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
