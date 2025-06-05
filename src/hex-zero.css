@@ -405,10 +405,8 @@ button:disabled {
 
 	.canvas-container {
 		width: 100%;
-		height: calc(100% - 60px); /* Move up by half the mobile control panel height */
-		flex: 1;
-		min-height: 0; /* Allow flex item to shrink */
-		margin-bottom: 60px; /* Add bottom margin to prevent overlap with controls */
+		height: calc(100dvh - 80px);
+		min-height: 300px;
 	}
 }
 
@@ -833,7 +831,8 @@ button:disabled {
 }
 
 @keyframes pulse {
-	0%, 100% {
+	0%,
+	100% {
 		transform: scale(1);
 		opacity: 0.6;
 	}
