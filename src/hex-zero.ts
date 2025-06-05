@@ -293,7 +293,7 @@ class HexSeptominoGame {
 		this.animatingHexes = [];
 
 		// Sort pieces by position for clockwise animation
-		const sortedPieces = piece.slice().sort((a, b) => {
+		const sortedPieces = piece.tiles.slice().sort((a, b) => {
 			// Center hex goes first
 			if (a.q === 0 && a.r === 0) return -1;
 			if (b.q === 0 && b.r === 0) return 1;
@@ -314,7 +314,9 @@ class HexSeptominoGame {
 		});
 
 		sortedPieces.forEach((tile, index) => {
-			const hex = grid.getHex(centerQ + tile.q, centerR + tile.r);
+			const adjustedQ = centerQ + tile.q - piece.center.q;
+			const adjustedR = centerR + tile.r - piece.center.r;
+			const hex = grid.getHex(adjustedQ, adjustedR);
 			if (hex && hex.height > 0) {
 				// Stagger the animations - 100ms between each hex
 				const delay = index * 100;
@@ -911,8 +913,10 @@ class HexSeptominoGame {
 			const piece = this.gameState.getCurrentPiece();
 			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
-			piece.forEach((tile) => {
-				const hex = grid.getHex(previewHex.q + tile.q, previewHex.r + tile.r);
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = previewHex.q + tile.q - piece.center.q;
+				const adjustedR = previewHex.r + tile.r - piece.center.r;
+				const hex = grid.getHex(adjustedQ, adjustedR);
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 					if (canPlace) {
@@ -926,8 +930,10 @@ class HexSeptominoGame {
 
 		if (this.hintPos) {
 			const piece = this.gameState.getCurrentPiece();
-			piece.forEach((tile) => {
-				const hex = grid.getHex(this.hintPos!.q + tile.q, this.hintPos!.r + tile.r);
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = this.hintPos!.q + tile.q - piece.center.q;
+				const adjustedR = this.hintPos!.r + tile.r - piece.center.r;
+				const hex = grid.getHex(adjustedQ, adjustedR);
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 					ctx.strokeStyle = '#e94560';
@@ -952,11 +958,10 @@ class HexSeptominoGame {
 			const opacity = Math.max(0, 1 - progress);
 
 			const piece = this.gameState.getCurrentPiece();
-			piece.forEach((tile) => {
-				const hex = grid.getHex(
-					this.invalidPlacementAnimation!.position.q + tile.q,
-					this.invalidPlacementAnimation!.position.r + tile.r,
-				);
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = this.invalidPlacementAnimation!.position.q + tile.q - piece.center.q;
+				const adjustedR = this.invalidPlacementAnimation!.position.r + tile.r - piece.center.r;
+				const hex = grid.getHex(adjustedQ, adjustedR);
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
@@ -993,9 +998,12 @@ class HexSeptominoGame {
 
 			// Draw piece
 			ctx.translate(previewSize / 2, previewSize / 2);
-			piece.forEach((tile) => {
-				const x = previewHexSize * ((3 / 2) * tile.q);
-				const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
+			piece.tiles.forEach((tile) => {
+				// Adjust for piece center
+				const adjustedQ = tile.q - piece.center.q;
+				const adjustedR = tile.r - piece.center.r;
+				const x = previewHexSize * ((3 / 2) * adjustedQ);
+				const y = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
 				this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
 			});
 
@@ -1041,9 +1049,12 @@ class HexSeptominoGame {
 
 		const color = this.gameState.isPiecePlaced(currentIndex) ? '#666' : '#e94560';
 
-		piece.forEach((tile) => {
-			const x = previewHexSize * ((3 / 2) * tile.q);
-			const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
+		piece.tiles.forEach((tile) => {
+			// Adjust for piece center
+			const adjustedQ = tile.q - piece.center.q;
+			const adjustedR = tile.r - piece.center.r;
+			const x = previewHexSize * ((3 / 2) * adjustedQ);
+			const y = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
 			this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, color, '#0f3460', 2);
 		});
 
@@ -1091,9 +1102,12 @@ class HexSeptominoGame {
 
 		const color = this.gameState.isPiecePlaced(pieceIndex) ? '#666' : '#e94560';
 
-		piece.forEach((tile) => {
-			const x = previewHexSize * ((3 / 2) * tile.q);
-			const y = previewHexSize * ((Math.sqrt(3) / 2) * tile.q + Math.sqrt(3) * tile.r);
+		piece.tiles.forEach((tile) => {
+			// Adjust for piece center
+			const adjustedQ = tile.q - piece.center.q;
+			const adjustedR = tile.r - piece.center.r;
+			const x = previewHexSize * ((3 / 2) * adjustedQ);
+			const y = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
 			this.drawPieceNavigationHex(ctx, x, y, previewHexSize, color);
 		});
 

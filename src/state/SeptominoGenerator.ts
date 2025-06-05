@@ -1,10 +1,17 @@
 import type {HexCoordinate} from './HexGrid';
 
-type Piece = HexCoordinate[];
+interface PieceData {
+	tiles: HexCoordinate[];
+	center: HexCoordinate;
+}
+
+type Piece = PieceData;
 
 export class SeptominoGenerator {
 	static generatePiece(): Piece {
-		const tiles: Piece = [{q: 0, r: 0}];
+		const tiles: HexCoordinate[] = [{q: 0, r: 0}];
+		// The starting tile is our center
+		const center: HexCoordinate = {q: 0, r: 0};
 
 		const numTiles = 2 + Math.floor(Math.random() * 5);
 
@@ -26,7 +33,7 @@ export class SeptominoGenerator {
 			}
 		}
 
-		return tiles;
+		return {tiles, center};
 	}
 
 	static generateSet(count: number): Piece[] {

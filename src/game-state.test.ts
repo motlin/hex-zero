@@ -147,7 +147,7 @@ describe('GameState', () => {
 			expect(validPosition).toBeDefined();
 
 			// Get the hex that will be affected by the first tile of the piece
-			const affectedHex = grid.getHex(validPosition!.q + piece[0].q, validPosition!.r + piece[0].r);
+			const affectedHex = grid.getHex(validPosition!.q + piece.tiles[0].q, validPosition!.r + piece.tiles[0].r);
 			const initialHeight = affectedHex!.height;
 
 			gameState.placePiece(validPosition!.q, validPosition!.r);
@@ -236,7 +236,7 @@ describe('GameState', () => {
 			expect(validPosition).toBeDefined();
 
 			// Get the hex that will be affected by the first tile of the piece
-			const affectedHex = grid.getHex(validPosition!.q + piece[0].q, validPosition!.r + piece[0].r);
+			const affectedHex = grid.getHex(validPosition!.q + piece.tiles[0].q, validPosition!.r + piece.tiles[0].r);
 			const initialHeight = affectedHex!.height;
 
 			gameState.placePiece(validPosition!.q, validPosition!.r);
@@ -260,7 +260,7 @@ describe('GameState', () => {
 			expect(validPosition).toBeDefined();
 
 			// Get the hex that will be affected by the first tile of the piece
-			const affectedHex = grid.getHex(validPosition!.q + piece[0].q, validPosition!.r + piece[0].r);
+			const affectedHex = grid.getHex(validPosition!.q + piece.tiles[0].q, validPosition!.r + piece.tiles[0].r);
 			const initialHeight = affectedHex!.height;
 
 			gameState.placePiece(validPosition!.q, validPosition!.r);
@@ -433,18 +433,18 @@ describe('GameState', () => {
 	describe('getters', () => {
 		it('returns immutable copies of pieces', () => {
 			const pieces = gameState.getPieces();
-			const originalLength = pieces[0].length;
+			const originalLength = pieces[0].tiles.length;
 
-			pieces[0].push({q: 99, r: 99});
-			expect(gameState.getPieces()[0]).toHaveLength(originalLength);
+			pieces[0].tiles.push({q: 99, r: 99});
+			expect(gameState.getPieces()[0].tiles).toHaveLength(originalLength);
 		});
 
 		it('returns copy of current piece', () => {
 			const piece = gameState.getCurrentPiece();
-			const originalLength = piece.length;
+			const originalLength = piece.tiles.length;
 
-			piece.push({q: 99, r: 99});
-			expect(gameState.getCurrentPiece()).toHaveLength(originalLength);
+			piece.tiles.push({q: 99, r: 99});
+			expect(gameState.getCurrentPiece().tiles).toHaveLength(originalLength);
 		});
 
 		it('returns copy of placed pieces set', () => {

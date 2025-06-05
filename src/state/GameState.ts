@@ -78,8 +78,11 @@ export class GameState {
 			const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
 			this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
 
-			piece.forEach((tile) => {
-				const hex = this.grid.getHex(pos.q + tile.q, pos.r + tile.r);
+			piece.tiles.forEach((tile) => {
+				// During generation, pos represents where the center should go
+				const adjustedQ = pos.q + tile.q - piece.center.q;
+				const adjustedR = pos.r + tile.r - piece.center.r;
+				const hex = this.grid.getHex(adjustedQ, adjustedR);
 				if (hex) {
 					hex.height = hex.height + 1;
 				}
@@ -92,7 +95,7 @@ export class GameState {
 	}
 
 	canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
-		return piece.every((tile) => {
+		return piece.tiles.every((tile) => {
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (checkHeight) {
 				return hex !== undefined && hex.height > 0;
@@ -116,7 +119,7 @@ export class GameState {
 			heightChanges: [],
 		};
 
-		piece.forEach((tile) => {
+		piece.tiles.forEach((tile) => {
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
 			if (hex && hex.height > 0) {
 				move.heightChanges.push({q: hex.q, r: hex.r, oldHeight: hex.height});
@@ -270,7 +273,10 @@ export class GameState {
 	}
 
 	getPieces(): Piece[] {
-		return this.pieces.map((piece) => [...piece]);
+		return this.pieces.map((piece) => ({
+			tiles: [...piece.tiles],
+			center: {...piece.center},
+		}));
 	}
 
 	getCurrentPieceIndex(): number {
@@ -278,12 +284,20 @@ export class GameState {
 	}
 
 	getCurrentPiece(): Piece {
-		return [...this.pieces[this.currentPieceIndex]];
+		const piece = this.pieces[this.currentPieceIndex];
+		return {
+			tiles: [...piece.tiles],
+			center: {...piece.center},
+		};
 	}
 
 	getPieceByIndex(index: number): Piece | null {
 		if (index < 0 || index >= this.pieces.length) return null;
-		return [...this.pieces[index]];
+		const piece = this.pieces[index];
+		return {
+			tiles: [...piece.tiles],
+			center: {...piece.center},
+		};
 	}
 
 	getPlacedPieces(): Set<number> {
