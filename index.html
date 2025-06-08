@@ -32,7 +32,7 @@
          crossorigin="anonymous"></script>
 </head>
 <body>
-    <h1>Hex Zero</h1>
+    <h1 class="game-title">Hex Zero</h1>
 
     <!-- Difficulty Selection Screen -->
     <div id="difficultyScreen" class="difficulty-screen">
@@ -83,9 +83,35 @@
     <div id="gameScreen" class="game-container hidden">
         <div class="canvas-container">
             <canvas id="gameCanvas"></canvas>
+            <!-- Hamburger menu in canvas top right -->
+            <div class="hamburger-menu-container">
+                <button id="hamburgerBtn" class="hamburger-button">☰</button>
+                <div id="hamburgerMenu" class="hamburger-dropdown hidden">
+                    <button id="newGameBtn">New Game</button>
+                    <button id="restartBtn">Restart</button>
+                </div>
+            </div>
         </div>
 
-        <div class="controls">
+        <!-- Control Panel for 1010-style piece drag/drop -->
+        <div id="controlPanel" class="control-panel">
+            <div class="piece-panel">
+                <div id="piecesContainer" class="pieces-container">
+                    <!-- Pieces will be dynamically added here -->
+                </div>
+                <button id="morePiecesBtn" class="more-pieces-button">More Pieces</button>
+            </div>
+
+            <div class="bottom-controls">
+                <button id="undoBtn">Undo</button>
+                <button id="hintBtn">Hint</button>
+                <button id="redoBtn">Redo</button>
+                <div class="solution-status" id="solutionStatus"></div>
+            </div>
+        </div>
+
+        <!-- Old controls - hidden for now, will be removed later -->
+        <div class="controls hidden">
             <h3 style="margin: 0;">Current Piece</h3>
             <div class="piece-navigation">
                 <div class="piece-nav-button" onclick="game.cyclePiece(-1)">
@@ -101,11 +127,11 @@
                 <div id="piecePlaced" style="color: #666; display: none;">Already Placed</div>
             </div>
 
-            <button id="hintBtn">Show Hint</button>
-            <button id="newGameBtn">New Game</button>
-            <button id="restartBtn">Restart Level</button>
+            <button id="hintBtnOld">Show Hint</button>
+            <button id="newGameBtnOld">New Game</button>
+            <button id="restartBtnOld">Restart Level</button>
 
-            <div class="solution-status" id="solutionStatus"></div>
+            <div class="solution-status" id="solutionStatusOld"></div>
 
             <div class="instructions">
                 <strong>Controls:</strong><br>
@@ -250,7 +276,7 @@
         </div>
     </div>
 
-    <!-- Mobile Controls -->
+    <!-- Mobile Controls - replaced by bottom panel -->
     <div id="mobileControls" class="mobile-controls hidden">
         <div class="mobile-controls-grid">
             <div class="piece-nav-button" onclick="game.cyclePiece(-1)">

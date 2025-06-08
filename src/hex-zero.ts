@@ -30,7 +30,6 @@ let game: HexSeptominoGame | null = null;
 function startGame(radius: number, numPieces: number): void {
 	document.getElementById('difficultyScreen')!.classList.add('hidden');
 	document.getElementById('gameScreen')!.classList.remove('hidden');
-	document.getElementById('mobileControls')!.classList.remove('hidden');
 
 	if (game) {
 		// Game instance exists, will be replaced
@@ -48,7 +47,6 @@ function startCustomGame(): void {
 
 function showDifficultyScreen(): void {
 	document.getElementById('gameScreen')!.classList.add('hidden');
-	document.getElementById('mobileControls')!.classList.add('hidden');
 	document.getElementById('difficultyScreen')!.classList.remove('hidden');
 }
 
@@ -113,9 +111,6 @@ class HexSeptominoGame {
 	private panOffsetX: number;
 	private panOffsetY: number;
 	private lastPinchDistance: number | null;
-	private showMobilePiecePreview: boolean;
-	private isMobileDevice: boolean;
-	private currentPreviewIndex: number;
 	private invalidPlacementAnimation: {
 		isActive: boolean;
 		startTime: number;
@@ -123,104 +118,14 @@ class HexSeptominoGame {
 		duration: number;
 	} | null;
 
-	private detectMobileDevice(): boolean {
-		// Check for mobile user agents - most reliable method for real devices
-		const mobileUserAgent = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-			navigator.userAgent,
-		);
-
-		// Check if viewport is mobile-sized - works for DevTools testing
-		const mobileViewport = window.matchMedia('(max-width: 768px)').matches;
-
-		return mobileUserAgent || mobileViewport;
-	}
-
-	private updateMobilePreviewState(): void {
-		const previousIndex = this.currentPreviewIndex;
-		this.currentPreviewIndex = this.gameState.getCurrentPieceIndex();
-
-		if (this.isMobileDevice) {
-			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.currentPreviewIndex);
-		} else {
-			this.showMobilePiecePreview = false;
-		}
-
-		// Reset animation when showing a different piece
-		if (this.showMobilePiecePreview && previousIndex !== this.currentPreviewIndex) {
-			this.resetMobilePreviewAnimation();
-		}
-
-		this.updateMobilePreviewIndicator();
-	}
-
-	private resetMobilePreviewAnimation(): void {
-		const indicator = document.getElementById('mobilePreviewIndicator');
-		if (indicator) {
-			// Force animation restart by removing and re-adding the class
-			indicator.style.animation = 'none';
-			// Force reflow
-			void indicator.offsetHeight;
-			indicator.style.animation = '';
-		}
-	}
-
-	private updateMobilePreviewIndicator(): void {
-		const indicator = document.getElementById('mobilePreviewIndicator');
-		if (this.showMobilePiecePreview) {
-			if (!indicator) {
-				this.createMobilePreviewIndicator();
-			} else {
-				indicator.style.display = 'block';
-				this.positionMobilePreviewIndicator(indicator);
-			}
-		} else if (indicator) {
-			indicator.style.display = 'none';
-		}
-	}
-
-	private positionMobilePreviewIndicator(indicator: HTMLElement): void {
-		const canvas = this.canvasManager.getCanvas();
-		const piece = this.gameState.getCurrentPiece();
-		const previewSize = 80;
-		const previewHexSize = 15;
-
-		// Base position of preview area
-		const baseX = canvas.width - previewSize - 20;
-		const baseY = 20;
-
-		// Center of preview area
-		const previewCenterX = baseX + previewSize / 2;
-		const previewCenterY = baseY + previewSize / 2;
-
-		// Calculate where the center hex (0,0) is actually drawn
-		// The piece is adjusted by its center offset, so hex at (0,0) in piece coordinates
-		// is at (-piece.center.q, -piece.center.r) in the adjusted coordinates
-		const adjustedQ = 0 - piece.center.q;
-		const adjustedR = 0 - piece.center.r;
-		const hexX = previewHexSize * ((3 / 2) * adjustedQ);
-		const hexY = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
-
-		// Final position
-		const centerX = previewCenterX + hexX;
-		const centerY = previewCenterY + hexY;
-
-		// Position indicator at center (subtract half indicator size)
-		// Adjust 4 pixels left to correct positioning
-		indicator.style.left = `${centerX - 8}px`;
-		indicator.style.top = `${centerY - 4}px`;
-	}
-
-	private createMobilePreviewIndicator(): void {
-		const canvas = this.canvasManager.getCanvas();
-		const canvasContainer = canvas.parentElement;
-		if (!canvasContainer) return;
-
-		const indicator = document.createElement('div');
-		indicator.id = 'mobilePreviewIndicator';
-		indicator.className = 'mobile-preview-indicator';
-		canvasContainer.appendChild(indicator);
-		this.positionMobilePreviewIndicator(indicator);
-	}
+	// Bottom panel drag and drop state
+	private currentPage: number;
+	private piecesPerPage: number;
+	private isDragging: boolean;
+	private draggedPieceIndex: number | null;
+	private draggedPieceElement: HTMLElement | null;
+	private dragPreviewElement: HTMLElement | null;
+	private dragHoverHex: HexCoordinate | null;
 
 	constructor(radius: number, numPieces: number) {
 		this.canvasManager = new CanvasManager('gameCanvas', 'piecePreview');
@@ -245,40 +150,32 @@ class HexSeptominoGame {
 		this.panOffsetX = 0;
 		this.panOffsetY = 0;
 		this.lastPinchDistance = null;
-		this.isMobileDevice = this.detectMobileDevice();
-		this.showMobilePiecePreview = this.isMobileDevice;
-		this.currentPreviewIndex = 0;
 		this.invalidPlacementAnimation = null;
+
+		// Initialize bottom panel state
+		this.currentPage = 0;
+		// Start with 3 pieces per page as suggested
+		this.piecesPerPage = 3;
+		this.isDragging = false;
+		this.draggedPieceIndex = null;
+		this.draggedPieceElement = null;
+		this.dragPreviewElement = null;
+		this.dragHoverHex = null;
 		this.setupEventListeners();
 		this.updateUI();
 		this.render();
-		this.renderPieceNavigation();
+		this.renderBottomPanel();
 
 		setTimeout(() => {
 			this.updateCanvasSize();
 			this.render();
-			this.renderPieceNavigation();
+			this.renderBottomPanel();
 		}, 100);
 
 		window.addEventListener('resize', () => {
-			// Update mobile detection on resize (for DevTools viewport changes)
-			const wasMobile = this.isMobileDevice;
-			this.isMobileDevice = this.detectMobileDevice();
-
-			// If mobile state changed, update preview visibility
-			if (wasMobile !== this.isMobileDevice) {
-				this.updateMobilePreviewState();
-			}
-
 			this.updateCanvasSize();
 			this.render();
-			this.renderPieceNavigation();
-
-			// Update indicator position on resize
-			const indicator = document.getElementById('mobilePreviewIndicator');
-			if (indicator && this.showMobilePiecePreview) {
-				this.positionMobilePreviewIndicator(indicator);
-			}
+			this.renderBottomPanel();
 		});
 	}
 
@@ -320,6 +217,34 @@ class HexSeptominoGame {
 		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.toggleHint());
 		(document.getElementById('restartBtn') as HTMLElement).addEventListener('click', () => this.restart());
 		(document.getElementById('newGameBtn') as HTMLElement).addEventListener('click', () => showDifficultyScreen());
+
+		// Undo/Redo buttons
+		(document.getElementById('undoBtn') as HTMLElement).addEventListener('click', () => this.undo());
+		(document.getElementById('redoBtn') as HTMLElement).addEventListener('click', () => this.redo());
+
+		// More pieces button
+		(document.getElementById('morePiecesBtn') as HTMLElement).addEventListener('click', () => this.morePieces());
+
+		// Hamburger menu
+		const hamburgerBtn = document.getElementById('hamburgerBtn') as HTMLElement;
+		const hamburgerMenu = document.getElementById('hamburgerMenu') as HTMLElement;
+
+		hamburgerBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			hamburgerMenu.classList.toggle('hidden');
+		});
+
+		// Close hamburger menu when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!hamburgerBtn.contains(e.target as Node) && !hamburgerMenu.contains(e.target as Node)) {
+				hamburgerMenu.classList.add('hidden');
+			}
+		});
+
+		// Close hamburger menu after clicking a menu item
+		hamburgerMenu.addEventListener('click', () => {
+			setTimeout(() => hamburgerMenu.classList.add('hidden'), 100);
+		});
 
 		// Keyboard shortcuts modal event listeners
 		const closeBtn = document.getElementById('closeShortcutsBtn');
@@ -428,8 +353,44 @@ class HexSeptominoGame {
 		if (cycled) {
 			this.updateUI();
 			this.render();
-			this.renderPieceNavigation();
+			this.renderBottomPanel();
 		}
+	}
+
+	morePieces(): void {
+		const pieces = this.gameState.getPieces();
+		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
+
+		// If only one page total, nothing to cycle
+		if (maxPages <= 1) return;
+
+		// Find the next page with unplaced pieces
+		let nextPage = this.currentPage;
+		let attempts = 0;
+
+		do {
+			nextPage = (nextPage + 1) % maxPages;
+			attempts++;
+
+			// Check if this page has any unplaced pieces
+			const startIndex = nextPage * this.piecesPerPage;
+			const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
+			let hasUnplaced = false;
+
+			for (let i = startIndex; i < endIndex; i++) {
+				if (!this.gameState.isPiecePlaced(i)) {
+					hasUnplaced = true;
+					break;
+				}
+			}
+
+			if (hasUnplaced) {
+				this.currentPage = nextPage;
+				break;
+			}
+		} while (attempts < maxPages);
+
+		this.renderBottomPanel();
 	}
 
 	undo(): void {
@@ -437,7 +398,7 @@ class HexSeptominoGame {
 		if (undone) {
 			this.updateUI();
 			this.render();
-			this.renderPieceNavigation();
+			this.renderBottomPanel();
 		}
 	}
 
@@ -446,7 +407,7 @@ class HexSeptominoGame {
 		if (redone) {
 			this.updateUI();
 			this.render();
-			this.renderPieceNavigation();
+			this.renderBottomPanel();
 		}
 	}
 
@@ -486,10 +447,9 @@ class HexSeptominoGame {
 		this.clearHint();
 
 		(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
-		(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
 		this.updateUI();
 		this.render();
-		this.renderPieceNavigation();
+		this.renderBottomPanel();
 	}
 
 	startNewGame(): void {
@@ -548,7 +508,6 @@ class HexSeptominoGame {
 
 			const message = 'Congratulations! You solved it!';
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = message;
-			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = message;
 		}
 	}
 
@@ -650,16 +609,11 @@ class HexSeptominoGame {
 			if (grid.getHex(hex.q, hex.r)) {
 				this.touchHex = hex;
 				this.isTouching = true;
-				// On non-mobile devices, show preview only during touch
-				if (!this.isMobileDevice) {
-					this.showMobilePiecePreview = true;
-				}
 				this.render();
 			}
 		} else if (event.touches.length === 2) {
 			// Two touches - start pan/zoom
 			this.touchHex = null;
-			this.showMobilePiecePreview = false;
 			this.isTouching = false;
 
 			const touch1 = event.touches[0];
@@ -736,33 +690,17 @@ class HexSeptominoGame {
 
 			this.touchHex = null;
 			this.isTouching = false;
-			// On mobile devices, restore the preview; on desktop, hide it
-			if (this.isMobileDevice) {
-				this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
-			} else {
-				this.showMobilePiecePreview = false;
-			}
 			this.lastPinchDistance = null;
 			this.render();
 		} else if (event.touches.length === 1) {
 			// Going from two touches to one
 			this.lastPinchDistance = null;
-			// Restore mobile preview on mobile devices when returning to single touch
-			if (this.isMobileDevice) {
-				this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
-			}
 		}
 	}
 
 	private handleTouchCancel(_event: TouchEvent): void {
 		this.touchHex = null;
 		this.isTouching = false;
-		// On mobile devices, restore the preview; on desktop, hide it
-		if (this.isMobileDevice) {
-			this.showMobilePiecePreview = !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex());
-		} else {
-			this.showMobilePiecePreview = false;
-		}
 		this.lastPinchDistance = null;
 		this.render();
 	}
@@ -858,7 +796,7 @@ class HexSeptominoGame {
 		this.clearHint();
 		this.updateUI();
 		this.render();
-		this.renderPieceNavigation();
+		this.renderBottomPanel();
 	}
 
 	private showInvalidPlacementFeedback(position: HexCoordinate): void {
@@ -880,27 +818,23 @@ class HexSeptominoGame {
 	}
 
 	private updateUI(): void {
-		const currentIndex = this.gameState.getCurrentPieceIndex();
-		const pieces = this.gameState.getPieces();
-		const pieceText = `Piece ${currentIndex + 1} of ${pieces.length}`;
-		(document.getElementById('pieceNumber') as HTMLElement).textContent = pieceText;
-		(document.getElementById('mobilePieceInfo') as HTMLElement).textContent = pieceText;
-
-		(document.getElementById('piecePlaced') as HTMLElement).style.display = this.gameState.isPiecePlaced(
-			currentIndex,
-		)
-			? 'block'
-			: 'none';
-
 		if (!this.gameState.getAllPiecesPlaced()) {
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
-			(document.getElementById('mobileSolutionStatus') as HTMLElement).textContent = '';
 		}
 
-		// Update mobile preview state
-		this.updateMobilePreviewState();
+		// Update undo/redo button states
+		const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
+		const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
 
-		this.renderPiecePreview();
+		if (undoBtn) {
+			undoBtn.disabled = !this.gameState.canUndo();
+		}
+
+		if (redoBtn) {
+			redoBtn.disabled = !this.gameState.canRedo();
+		}
+
+		this.renderBottomPanel();
 	}
 
 	private render(): void {
@@ -982,8 +916,31 @@ class HexSeptominoGame {
 			ctx.restore();
 		});
 
+		// Handle drag hover effects
+		if (this.isDragging && this.draggedPieceIndex !== null && this.dragHoverHex) {
+			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
+			if (piece) {
+				const canPlace = this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r);
+
+				piece.tiles.forEach((tile) => {
+					const adjustedQ = this.dragHoverHex!.q + tile.q - piece.center.q;
+					const adjustedR = this.dragHoverHex!.r + tile.r - piece.center.r;
+					const hex = grid.getHex(adjustedQ, adjustedR);
+					if (hex) {
+						const pos = this.renderer.hexToPixel(hex.q, hex.r);
+						if (canPlace) {
+							// Light yellow halo effect for placeable
+							this.drawHaloEffect(ctx, pos.x, pos.y);
+						}
+						// No red effect for invalid - just no visual feedback as requested
+					}
+				});
+			}
+		}
+
+		// Original preview hex for old click-to-place system (keeping for backwards compatibility during transition)
 		const previewHex = this.mouseHex || this.touchHex;
-		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) && !this.isDragging) {
 			const piece = this.gameState.getCurrentPiece();
 			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
@@ -1052,63 +1009,345 @@ class HexSeptominoGame {
 		}
 
 		ctx.restore();
+	}
 
-		// Draw mobile piece preview overlay
-		if (this.showMobilePiecePreview && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
-			const piece = this.gameState.getCurrentPiece();
-			const previewSize = 80;
-			const previewHexSize = 15;
+	private renderBottomPanel(): void {
+		const piecesContainer = document.getElementById('piecesContainer');
+		if (!piecesContainer) return;
 
-			// Draw preview in top-right corner
-			ctx.save();
-			ctx.translate(canvas.width - previewSize - 20, 20);
+		// Clear existing pieces
+		piecesContainer.innerHTML = '';
 
-			// Background
-			ctx.fillStyle = 'rgba(22, 33, 62, 0.9)';
-			ctx.fillRect(-10, -10, previewSize + 20, previewSize + 20);
-			ctx.strokeStyle = '#0f3460';
-			ctx.lineWidth = 2;
-			ctx.strokeRect(-10, -10, previewSize + 20, previewSize + 20);
+		const pieces = this.gameState.getPieces();
+		const startIndex = this.currentPage * this.piecesPerPage;
+		const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
 
-			// Draw piece
-			ctx.translate(previewSize / 2, previewSize / 2);
-			piece.tiles.forEach((tile) => {
-				// Adjust for piece center
-				const adjustedQ = tile.q - piece.center.q;
-				const adjustedR = tile.r - piece.center.r;
-				const x = previewHexSize * ((3 / 2) * adjustedQ);
-				const y = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
-				this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, '#e94560', '#0f3460', 2);
-			});
+		for (let i = startIndex; i < endIndex; i++) {
+			const piece = pieces[i];
+			const isPlaced = this.gameState.isPiecePlaced(i);
 
-			ctx.restore();
+			// Create piece container
+			const pieceContainer = document.createElement('div');
+			pieceContainer.className = `draggable-piece ${isPlaced ? 'empty-slot' : ''}`;
+			pieceContainer.dataset.pieceIndex = i.toString();
+
+			// Create SVG for the piece
+			const svg = this.createPieceSVG(piece, isPlaced);
+			pieceContainer.appendChild(svg);
+
+			// Set up drag handlers if not placed
+			if (!isPlaced) {
+				this.setupPieceDragHandlers(pieceContainer, i);
+			}
+
+			piecesContainer.appendChild(pieceContainer);
+		}
+
+		// Update more pieces button
+		const morePiecesBtn = document.getElementById('morePiecesBtn') as HTMLButtonElement;
+		if (morePiecesBtn) {
+			const totalPages = Math.ceil(pieces.length / this.piecesPerPage);
+
+			// Disable button only if there's one page or less
+			if (totalPages <= 1) {
+				morePiecesBtn.disabled = true;
+			} else {
+				// Check if there are any unplaced pieces on OTHER pages
+				let hasUnplacedOnOtherPages = false;
+
+				for (let page = 0; page < totalPages; page++) {
+					// Skip current page
+					if (page === this.currentPage) continue;
+
+					const pageStart = page * this.piecesPerPage;
+					const pageEnd = Math.min(pageStart + this.piecesPerPage, pieces.length);
+
+					for (let i = pageStart; i < pageEnd; i++) {
+						if (!this.gameState.isPiecePlaced(i)) {
+							hasUnplacedOnOtherPages = true;
+							break;
+						}
+					}
+
+					if (hasUnplacedOnOtherPages) break;
+				}
+
+				// Enable button if there are unplaced pieces on other pages
+				morePiecesBtn.disabled = !hasUnplacedOnOtherPages;
+			}
 		}
 	}
 
-	private renderPiecePreview(): void {
-		this.canvasManager.clearPreviewCanvas('#16213e');
-		const ctx = this.canvasManager.getPreviewContext();
-		const previewCanvas = this.canvasManager.getPreviewCanvas();
+	private createPieceSVG(piece: Piece, isPlaced: boolean): SVGElement {
+		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+		svg.setAttribute('viewBox', '-50 -50 100 100');
+		svg.style.width = '100%';
+		svg.style.height = '100%';
+		svg.style.display = 'block';
 
-		const piece = this.gameState.getCurrentPiece();
-		const currentIndex = this.gameState.getCurrentPieceIndex();
-		const previewHexSize = 20;
+		if (!isPlaced) {
+			// Calculate the relative positions of tiles
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = tile.q - piece.center.q;
+				const adjustedR = tile.r - piece.center.r;
+				const x = 15 * ((3 / 2) * adjustedQ);
+				const y = 15 * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
+
+				// Create hexagon path
+				const hex = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+				const points = [];
+				for (let i = 0; i < 6; i++) {
+					const angle = (Math.PI / 3) * i;
+					const hx = x + 15 * Math.cos(angle);
+					const hy = y + 15 * Math.sin(angle);
+					points.push(`${hx},${hy}`);
+				}
+				hex.setAttribute('points', points.join(' '));
+				hex.setAttribute('fill', 'rgba(233, 69, 96, 0.1)');
+				hex.setAttribute('stroke', '#e94560');
+				hex.setAttribute('stroke-width', '2');
+
+				svg.appendChild(hex);
+			});
+		}
+
+		return svg;
+	}
+
+	private renderFullSizePieceOnCanvas(canvas: HTMLCanvasElement, piece: Piece): void {
+		const ctx = canvas.getContext('2d');
+		if (!ctx) return;
+
+		// Clear canvas
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+		// Use the same hex size as the board
+		const hexSize = this.renderer.hexSize;
 
 		ctx.save();
-		ctx.translate(previewCanvas.width / 2, previewCanvas.height / 2);
-
-		const color = this.gameState.isPiecePlaced(currentIndex) ? '#666' : '#e94560';
+		ctx.translate(canvas.width / 2, canvas.height / 2);
 
 		piece.tiles.forEach((tile) => {
 			// Adjust for piece center
 			const adjustedQ = tile.q - piece.center.q;
 			const adjustedR = tile.r - piece.center.r;
-			const x = previewHexSize * ((3 / 2) * adjustedQ);
-			const y = previewHexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
-			this.canvasManager.drawHexOnCanvas(ctx, x, y, previewHexSize, color, '#0f3460', 2);
+			const x = hexSize * ((3 / 2) * adjustedQ);
+			const y = hexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
+
+			// Draw transparent hex with board-size hexes
+			this.drawTransparentPieceHex(ctx, x, y, hexSize);
 		});
 
 		ctx.restore();
+	}
+
+	private drawTransparentPieceHex(ctx: CanvasRenderingContext2D, x: number, y: number, size: number): void {
+		ctx.beginPath();
+		for (let i = 0; i < 6; i++) {
+			const angle = (Math.PI / 3) * i;
+			const hx = x + size * Math.cos(angle);
+			const hy = y + size * Math.sin(angle);
+			if (i === 0) {
+				ctx.moveTo(hx, hy);
+			} else {
+				ctx.lineTo(hx, hy);
+			}
+		}
+		ctx.closePath();
+
+		// Transparent with border only - use a color different from board border (#0f3460)
+		// Very light fill
+		ctx.fillStyle = 'rgba(233, 69, 96, 0.1)';
+		ctx.fill();
+		// Different from board border color
+		ctx.strokeStyle = '#e94560';
+		ctx.lineWidth = 2;
+		ctx.stroke();
+	}
+
+	private createDragPreview(pieceIndex: number, clientX: number, clientY: number): void {
+		const piece = this.gameState.getPieceByIndex(pieceIndex);
+		if (!piece) return;
+
+		// Calculate actual bounds of the piece
+		const hexSize = this.renderer.hexSize;
+		const minQ = Math.min(...piece.tiles.map((tile) => tile.q - piece.center.q));
+		const maxQ = Math.max(...piece.tiles.map((tile) => tile.q - piece.center.q));
+		const minR = Math.min(...piece.tiles.map((tile) => tile.r - piece.center.r));
+		const maxR = Math.max(...piece.tiles.map((tile) => tile.r - piece.center.r));
+
+		// Calculate canvas dimensions based on actual piece bounds
+		const hexWidth = hexSize * (3 / 2);
+		const hexHeight = hexSize * Math.sqrt(3);
+
+		const canvasWidth = (maxQ - minQ + 1) * hexWidth + hexSize;
+		const canvasHeight = (maxR - minR + 1) * hexHeight + hexSize;
+
+		// Create preview container
+		const preview = document.createElement('div');
+		preview.className = 'drag-preview';
+		preview.style.position = 'fixed';
+		preview.style.pointerEvents = 'none';
+		preview.style.zIndex = '10000';
+		preview.style.left = `${clientX - canvasWidth / 2}px`;
+		preview.style.top = `${clientY - canvasHeight / 2}px`;
+
+		// Create canvas for the piece
+		const canvas = document.createElement('canvas');
+		canvas.width = canvasWidth;
+		canvas.height = canvasHeight;
+		preview.appendChild(canvas);
+
+		// Render the piece at full board size
+		this.renderFullSizePieceOnCanvas(canvas, piece);
+
+		// Add to document
+		document.body.appendChild(preview);
+		this.dragPreviewElement = preview;
+	}
+
+	private setupPieceDragHandlers(element: HTMLElement, pieceIndex: number): void {
+		// Mouse events
+		element.addEventListener('mousedown', (e) => this.handlePieceDragStart(e, pieceIndex));
+
+		// Touch events
+		element.addEventListener('touchstart', (e) => this.handlePieceTouchStart(e, pieceIndex), {passive: false});
+	}
+
+	private handlePieceDragStart(event: MouseEvent, pieceIndex: number): void {
+		event.preventDefault();
+		this.startDrag(pieceIndex, event.clientX, event.clientY, event.target as HTMLElement);
+	}
+
+	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number): void {
+		event.preventDefault();
+		if (event.touches.length === 1) {
+			const touch = event.touches[0];
+			this.startDrag(pieceIndex, touch.clientX, touch.clientY, event.target as HTMLElement);
+		}
+	}
+
+	private startDrag(pieceIndex: number, clientX: number, clientY: number, element: HTMLElement): void {
+		if (this.gameState.isPiecePlaced(pieceIndex)) return;
+
+		this.isDragging = true;
+		this.draggedPieceIndex = pieceIndex;
+		this.draggedPieceElement = element.closest('.draggable-piece') as HTMLElement;
+
+		// Add dragging class to original element
+		if (this.draggedPieceElement) {
+			this.draggedPieceElement.classList.add('dragging');
+		}
+
+		// Create floating drag preview
+		this.createDragPreview(pieceIndex, clientX, clientY);
+
+		// Set up global drag listeners
+		document.addEventListener('mousemove', this.handleGlobalDragMove);
+		document.addEventListener('mouseup', this.handleGlobalDragEnd);
+		document.addEventListener('touchmove', this.handleGlobalTouchMove, {passive: false});
+		document.addEventListener('touchend', this.handleGlobalTouchEnd);
+	}
+
+	private handleGlobalDragMove = (event: MouseEvent): void => {
+		if (!this.isDragging) return;
+		event.preventDefault();
+		this.updateDragPosition(event.clientX, event.clientY);
+	};
+
+	private handleGlobalTouchMove = (event: TouchEvent): void => {
+		if (!this.isDragging) return;
+		event.preventDefault();
+		if (event.touches.length === 1) {
+			const touch = event.touches[0];
+			this.updateDragPosition(touch.clientX, touch.clientY);
+		}
+	};
+
+	private updateDragPosition(clientX: number, clientY: number): void {
+		// Update floating drag preview position (center it on cursor)
+		if (this.dragPreviewElement) {
+			const canvas = this.dragPreviewElement.querySelector('canvas');
+			if (canvas) {
+				const halfWidth = canvas.width / 2;
+				const halfHeight = canvas.height / 2;
+				this.dragPreviewElement.style.left = `${clientX - halfWidth}px`;
+				this.dragPreviewElement.style.top = `${clientY - halfHeight}px`;
+			}
+		}
+
+		// Check if hovering over game canvas
+		const canvas = this.canvasManager.getCanvas();
+		const rect = canvas.getBoundingClientRect();
+
+		if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+			const x = clientX - rect.left - canvas.width / 2 - this.panOffsetX;
+			const y = clientY - rect.top - canvas.height / 2 - this.panOffsetY;
+
+			const hex = this.renderer.pixelToHex(x, y);
+			const grid = this.gameState.getGrid();
+			if (grid.getHex(hex.q, hex.r)) {
+				this.dragHoverHex = hex;
+			} else {
+				this.dragHoverHex = null;
+			}
+		} else {
+			this.dragHoverHex = null;
+		}
+
+		// Re-render to show hover effects
+		this.render();
+	}
+
+	private handleGlobalDragEnd = (_event: MouseEvent): void => {
+		if (!this.isDragging) return;
+		this.finishDrag();
+	};
+
+	private handleGlobalTouchEnd = (_event: TouchEvent): void => {
+		if (!this.isDragging) return;
+		this.finishDrag();
+	};
+
+	private finishDrag(): void {
+		if (!this.isDragging || this.draggedPieceIndex === null) return;
+
+		// Try to place piece if hovering over valid location
+		if (this.dragHoverHex) {
+			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
+			if (piece && this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r)) {
+				// Set the current piece to the dragged piece for placement
+				this.gameState.setCurrentPieceIndex(this.draggedPieceIndex);
+				this.placePiece(this.dragHoverHex.q, this.dragHoverHex.r);
+			} else if (piece) {
+				this.showInvalidPlacementFeedback(this.dragHoverHex);
+			}
+		}
+
+		// Clean up drag state
+		if (this.draggedPieceElement) {
+			this.draggedPieceElement.classList.remove('dragging');
+		}
+
+		// Remove drag preview
+		if (this.dragPreviewElement) {
+			document.body.removeChild(this.dragPreviewElement);
+			this.dragPreviewElement = null;
+		}
+
+		this.isDragging = false;
+		this.draggedPieceIndex = null;
+		this.draggedPieceElement = null;
+		this.dragHoverHex = null;
+
+		// Remove global listeners
+		document.removeEventListener('mousemove', this.handleGlobalDragMove);
+		document.removeEventListener('mouseup', this.handleGlobalDragEnd);
+		document.removeEventListener('touchmove', this.handleGlobalTouchMove);
+		document.removeEventListener('touchend', this.handleGlobalTouchEnd);
+
+		// Clear any hover effects
+		this.render();
 	}
 
 	private renderPieceNavigation(): void {
@@ -1215,6 +1454,52 @@ class HexSeptominoGame {
 		}
 		ctx.closePath();
 		ctx.stroke();
+	}
+
+	private drawHaloEffect(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+		ctx.save();
+
+		// Inner light yellow fill
+		ctx.beginPath();
+		for (let i = 0; i < 6; i++) {
+			const angle = (Math.PI / 3) * i;
+			const hx = x + this.renderer.hexSize * Math.cos(angle);
+			const hy = y + this.renderer.hexSize * Math.sin(angle);
+			if (i === 0) {
+				ctx.moveTo(hx, hy);
+			} else {
+				ctx.lineTo(hx, hy);
+			}
+		}
+		ctx.closePath();
+		// Light yellow inside
+		ctx.fillStyle = 'rgba(255, 235, 59, 0.2)';
+		ctx.fill();
+
+		// Outer glow effect
+		const glowSize = this.renderer.hexSize * 1.3;
+		ctx.beginPath();
+		for (let i = 0; i < 6; i++) {
+			const angle = (Math.PI / 3) * i;
+			const hx = x + glowSize * Math.cos(angle);
+			const hy = y + glowSize * Math.sin(angle);
+			if (i === 0) {
+				ctx.moveTo(hx, hy);
+			} else {
+				ctx.lineTo(hx, hy);
+			}
+		}
+		ctx.closePath();
+
+		// Create gradient for glow effect
+		const gradient = ctx.createRadialGradient(x, y, this.renderer.hexSize, x, y, glowSize);
+		gradient.addColorStop(0, 'rgba(255, 235, 59, 0.3)');
+		gradient.addColorStop(1, 'rgba(255, 235, 59, 0.0)');
+
+		ctx.fillStyle = gradient;
+		ctx.fill();
+
+		ctx.restore();
 	}
 
 	private requestAnimationFrame(): void {

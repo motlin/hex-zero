@@ -283,6 +283,12 @@ export class GameState {
 		return this.currentPieceIndex;
 	}
 
+	setCurrentPieceIndex(index: number): void {
+		if (index >= 0 && index < this.pieces.length) {
+			this.currentPieceIndex = index;
+		}
+	}
+
 	getCurrentPiece(): Piece {
 		const piece = this.pieces[this.currentPieceIndex];
 		return {

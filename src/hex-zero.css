@@ -18,10 +18,20 @@ h1 {
 	font-size: 24px;
 }
 
+.game-title {
+	position: absolute;
+	top: 20px;
+	left: 20px;
+	margin: 0;
+	text-align: left;
+	font-size: 20px;
+	z-index: 100;
+}
+
 .game-container {
 	display: flex;
-	gap: 20px;
-	align-items: stretch;
+	flex-direction: column;
+	gap: 0;
 	padding: 10px;
 	width: 100%;
 	height: calc(100vh - 60px); /* Account for header */
@@ -44,6 +54,182 @@ h1 {
 	display: block;
 	width: 100%;
 	height: 100%;
+}
+
+/* Bottom Panel Styles */
+.control-panel {
+	background-color: #16213e;
+	border-top: 2px solid #0f3460;
+	border-radius: 8px 8px 0 0;
+	padding: 10px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 180px; /* Fixed height on desktop */
+	min-height: 120px;
+	max-height: 200px;
+	flex-shrink: 0;
+}
+
+.more-pieces-button {
+	background-color: #e94560;
+	color: #eee;
+	border: none;
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+	transition: opacity 0.2s;
+	flex-shrink: 0;
+	margin-left: 10px;
+}
+
+.more-pieces-button:hover {
+	opacity: 0.8;
+}
+
+.more-pieces-button:active {
+	opacity: 0.6;
+	transform: scale(0.98);
+}
+
+.more-pieces-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.piece-panel {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 0;
+	height: 100%;
+}
+
+.pieces-container {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 100%;
+	padding: 5px;
+	overflow: hidden;
+}
+
+.draggable-piece {
+	position: relative;
+	cursor: grab;
+	transition: transform 0.2s;
+	flex: 1;
+	min-width: 0;
+	height: 60px;
+	max-width: 80px;
+}
+
+.draggable-piece:hover {
+	transform: scale(1.05);
+}
+
+.draggable-piece.dragging {
+	opacity: 0.5;
+	cursor: grabbing;
+}
+
+.draggable-piece.empty-slot {
+	opacity: 0.3;
+	cursor: default;
+	pointer-events: none;
+}
+
+.draggable-piece canvas,
+.draggable-piece svg {
+	display: block;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+	width: 100%;
+	height: 100%;
+}
+
+.drag-preview {
+	opacity: 0.9;
+	transition: none;
+}
+
+.drag-preview canvas {
+	display: block;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+}
+
+.bottom-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	align-items: center;
+	flex-shrink: 0;
+	min-width: 120px;
+}
+
+.bottom-controls button {
+	padding: 8px 16px;
+	font-size: 14px;
+	width: 100px;
+}
+
+.bottom-controls .solution-status {
+	font-size: 12px;
+	text-align: center;
+	margin: 0;
+}
+
+/* Hamburger menu styles */
+.canvas-container .hamburger-menu-container {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 100;
+}
+
+.hamburger-button {
+	padding: 8px 12px;
+	font-size: 20px;
+	line-height: 1;
+	min-width: auto;
+	width: auto;
+	background-color: #16213e;
+	border: 2px solid #0f3460;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.hamburger-button:hover {
+	background-color: #1a4a7a;
+	border-color: #e94560;
+}
+
+.hamburger-dropdown {
+	position: absolute;
+	top: 100%;
+	right: 0;
+	margin-top: 5px;
+	background-color: #16213e;
+	border: 2px solid #0f3460;
+	border-radius: 8px;
+	padding: 8px;
+	min-width: 150px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	z-index: 100;
+}
+
+.hamburger-dropdown button {
+	width: 100%;
+	margin-bottom: 5px;
+}
+
+.hamburger-dropdown button:last-child {
+	margin-bottom: 0;
 }
 
 #piecePreview {
@@ -324,22 +510,99 @@ button:disabled {
 	font-size: 14px;
 }
 
-@media (max-width: 768px) {
-	body {
-		min-height: 100vh;
-		min-height: 100dvh; /* Use dynamic viewport height for mobile */
+/* Landscape/wide screens - side panel layout */
+@media (min-aspect-ratio: 1/1) {
+	.game-container {
+		flex-direction: row;
+		height: 100vh;
+		height: 100dvh;
+		padding: 0;
 	}
 
-	h1 {
-		font-size: 20px;
-		margin: 5px 0;
+	.canvas-container {
+		flex: 1;
+		height: 100%;
+	}
+
+	.control-panel {
+		width: 200px;
+		height: 100vh;
+		height: 100dvh;
+		min-height: auto;
+		max-height: 100vh;
+		max-height: 100dvh;
+		flex-direction: column;
+		padding: 15px;
+		gap: 15px;
+		overflow-y: auto;
+		box-sizing: border-box;
+	}
+
+	.piece-panel {
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		gap: 15px;
+		min-height: 0;
+		overflow-y: auto;
+	}
+
+	.pieces-container {
+		flex-direction: column;
+		gap: 15px;
+		padding: 10px;
+		align-items: center;
+	}
+
+	.draggable-piece {
+		height: 80px;
+		width: 80px;
+		max-width: 80px;
+	}
+
+	.bottom-controls {
+		flex: 0 0 auto;
+		flex-direction: column;
+		gap: 10px;
+		padding: 0;
+		width: 100%;
+		margin-top: auto;
+	}
+
+	.bottom-controls button {
+		width: 100%;
+		padding: 12px;
+		font-size: 14px;
+		height: 45px;
+	}
+
+	/* More pieces button styling in wide mode */
+	.more-pieces-button {
+		padding: 8px 16px;
+		font-size: 14px;
+		height: 40px;
+	}
+}
+
+/* Portrait/tall screens - bottom panel layout */
+@media (max-aspect-ratio: 1/1) {
+	body {
+		min-height: 100vh;
+		min-height: 100dvh;
+	}
+
+	/* More pieces button styling in tall mode */
+	.more-pieces-button {
+		padding: 6px 12px;
+		font-size: 12px;
+		margin-left: 6px;
 	}
 
 	.game-container {
 		flex-direction: column;
-		padding: 5px;
-		height: calc(100vh - 60px); /* Adjust for mobile header */
-		height: calc(100dvh - 60px); /* Use dynamic viewport height */
+		padding: 0;
+		height: 100vh;
+		height: 100dvh; /* Use full dynamic viewport height */
 	}
 
 	.controls {
@@ -347,8 +610,62 @@ button:disabled {
 	}
 
 	.mobile-controls {
-		display: block;
-		padding-bottom: env(safe-area-inset-bottom); /* Account for home indicator */
+		display: none; /* Replaced by bottom panel */
+	}
+
+	/* Mobile control panel adjustments */
+	.control-panel {
+		height: 20vh; /* Back to original */
+		min-height: 120px;
+		max-height: 160px;
+		padding: 8px 8px 0 8px; /* Remove bottom padding */
+		gap: 8px;
+		flex-direction: column; /* Stack the two rows vertically */
+	}
+
+	/* Top row: just the pieces */
+	.piece-panel {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 0;
+	}
+
+	.pieces-container {
+		gap: 8px;
+		padding: 5px;
+		flex: 1;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 0;
+	}
+
+	.draggable-piece {
+		height: 80px;
+		max-width: none;
+	}
+
+	/* Bottom row: 3 buttons */
+	.bottom-controls {
+		flex: 1;
+		flex-direction: row;
+		justify-content: center;
+		align-items: center;
+		gap: 6px;
+		width: 100%;
+		padding: 0 8px 8px 8px; /* Add bottom padding here instead */
+		padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* Include safe area */
+	}
+
+	/* Text buttons in bottom controls */
+	.bottom-controls button {
+		padding: 8px 12px;
+		font-size: 12px;
+		min-width: 60px;
+		flex: 1;
+		height: 40px;
 	}
 
 	.difficulty-screen {
@@ -405,8 +722,8 @@ button:disabled {
 
 	.canvas-container {
 		width: 100%;
-		height: calc(100dvh - 80px);
-		min-height: 300px;
+		height: calc(80vh - 40px); /* Back to original */
+		min-height: 250px;
 	}
 }
 
@@ -814,30 +1131,5 @@ button:disabled {
 	.victory-button {
 		padding: 8px 12px;
 		font-size: 14px;
-	}
-}
-
-/* Mobile Preview Touch Indicator */
-.mobile-preview-indicator {
-	position: absolute;
-	width: 8px;
-	height: 8px;
-	background: rgba(255, 255, 255, 0.9);
-	border-radius: 50%;
-	pointer-events: none;
-	z-index: 1001;
-	animation: pulse 1s ease-in-out 2;
-	animation-fill-mode: forwards;
-}
-
-@keyframes pulse {
-	0%,
-	100% {
-		transform: scale(1);
-		opacity: 0.6;
-	}
-	50% {
-		transform: scale(1.5);
-		opacity: 0.9;
 	}
 }
