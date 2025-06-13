@@ -305,6 +305,9 @@ class HexSeptominoGame {
 					this.swipeStartX = e.touches[0].clientX;
 					this.swipeStartY = e.touches[0].clientY;
 					this.isSwipingPanel = true;
+					// Clear any existing touch hex to prevent preview interference
+					this.touchHex = null;
+					this.isTouching = false;
 				}
 			},
 			{passive: true},
@@ -1356,6 +1359,11 @@ class HexSeptominoGame {
 	}
 
 	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number): void {
+		// Don't start drag if we're in the middle of a panel swipe
+		if (this.isSwipingPanel) {
+			return;
+		}
+
 		event.preventDefault();
 		if (event.touches.length === 1) {
 			const touch = event.touches[0];
