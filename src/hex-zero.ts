@@ -127,6 +127,11 @@ class HexSeptominoGame {
 	private dragPreviewElement: HTMLElement | null;
 	private dragHoverHex: HexCoordinate | null;
 
+	// Swipe state for pieces panel
+	private swipeStartX: number | null;
+	private swipeStartY: number | null;
+	private isSwipingPanel: boolean;
+
 	constructor(radius: number, numPieces: number) {
 		this.canvasManager = new CanvasManager('gameCanvas', 'piecePreview');
 		this.gameState = new GameState(radius, numPieces);
@@ -161,6 +166,12 @@ class HexSeptominoGame {
 		this.draggedPieceElement = null;
 		this.dragPreviewElement = null;
 		this.dragHoverHex = null;
+
+		// Initialize swipe state
+		this.swipeStartX = null;
+		this.swipeStartY = null;
+		this.isSwipingPanel = false;
+
 		this.setupEventListeners();
 		this.updateUI();
 		this.render();
@@ -276,6 +287,83 @@ class HexSeptominoGame {
 				}
 			}
 		});
+
+		// Setup swipe handlers for pieces panel
+		this.setupPanelSwipeHandlers();
+	}
+
+	private setupPanelSwipeHandlers(): void {
+		const piecesContainer = document.getElementById('piecesContainer');
+		if (!piecesContainer) return;
+
+		// Track multi-touch swipe gestures
+		piecesContainer.addEventListener(
+			'touchstart',
+			(e) => {
+				// Only track if multiple fingers are touching
+				if (e.touches.length >= 2) {
+					this.swipeStartX = e.touches[0].clientX;
+					this.swipeStartY = e.touches[0].clientY;
+					this.isSwipingPanel = true;
+				}
+			},
+			{passive: true},
+		);
+
+		piecesContainer.addEventListener(
+			'touchmove',
+			(e) => {
+				// Only process swipe if we started with 2+ fingers
+				if (this.isSwipingPanel && e.touches.length >= 2 && this.swipeStartX !== null) {
+					// Prevent any default behavior during multi-touch swipe
+					e.preventDefault();
+				}
+			},
+			{passive: false},
+		);
+
+		piecesContainer.addEventListener(
+			'touchend',
+			(e) => {
+				// Complete the swipe if we were tracking one
+				if (this.isSwipingPanel && this.swipeStartX !== null && this.swipeStartY !== null) {
+					// Get the last touch position before release
+					const touch = e.changedTouches[0];
+					const deltaX = touch.clientX - this.swipeStartX;
+					const deltaY = touch.clientY - this.swipeStartY;
+
+					// Check if horizontal swipe is dominant and exceeds threshold
+					// Threshold in pixels
+					const swipeThreshold = 50;
+					if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+						if (deltaX > 0) {
+							// Swipe right - go to previous page
+							this.previousPage();
+						} else {
+							// Swipe left - go to next page
+							this.nextPage();
+						}
+					}
+
+					// Reset swipe state
+					this.swipeStartX = null;
+					this.swipeStartY = null;
+					this.isSwipingPanel = false;
+				}
+			},
+			{passive: true},
+		);
+
+		// Cancel swipe on touch cancel
+		piecesContainer.addEventListener(
+			'touchcancel',
+			() => {
+				this.swipeStartX = null;
+				this.swipeStartY = null;
+				this.isSwipingPanel = false;
+			},
+			{passive: true},
+		);
 	}
 
 	private canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
@@ -390,6 +478,30 @@ class HexSeptominoGame {
 			}
 		} while (attempts < maxPages);
 
+		this.renderBottomPanel();
+	}
+
+	previousPage(): void {
+		const pieces = this.gameState.getPieces();
+		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
+
+		// If only one page total, nothing to change
+		if (maxPages <= 1) return;
+
+		// Calculate the previous page (with wraparound)
+		this.currentPage = (this.currentPage - 1 + maxPages) % maxPages;
+		this.renderBottomPanel();
+	}
+
+	nextPage(): void {
+		const pieces = this.gameState.getPieces();
+		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
+
+		// If only one page total, nothing to change
+		if (maxPages <= 1) return;
+
+		// Calculate the next page (with wraparound)
+		this.currentPage = (this.currentPage + 1) % maxPages;
 		this.renderBottomPanel();
 	}
 
