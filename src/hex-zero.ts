@@ -433,6 +433,9 @@ class HexSeptominoGame {
 			this.checkWinCondition();
 			this.render();
 			this.renderPieceNavigation();
+
+			// Check if all pieces on current page are placed
+			this.checkAndAdvancePage();
 		}, this.animationDuration);
 	}
 
@@ -503,6 +506,27 @@ class HexSeptominoGame {
 		// Calculate the next page (with wraparound)
 		this.currentPage = (this.currentPage + 1) % maxPages;
 		this.renderBottomPanel();
+	}
+
+	private checkAndAdvancePage(): void {
+		const pieces = this.gameState.getPieces();
+		const startIndex = this.currentPage * this.piecesPerPage;
+		const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
+
+		// Check if all pieces on current page are placed
+		let allPlacedOnCurrentPage = true;
+		for (let i = startIndex; i < endIndex; i++) {
+			if (!this.gameState.isPiecePlaced(i)) {
+				allPlacedOnCurrentPage = false;
+				break;
+			}
+		}
+
+		// If all pieces on current page are placed, automatically advance to next page with unplaced pieces
+		if (allPlacedOnCurrentPage) {
+			// Use morePieces() which already has the logic to find the next page with unplaced pieces
+			this.morePieces();
+		}
 	}
 
 	undo(): void {
