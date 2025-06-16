@@ -36,6 +36,12 @@
 
     <!-- Difficulty Selection Screen -->
     <div id="difficultyScreen" class="difficulty-screen">
+        <div class="hamburger-menu-container">
+            <button id="menuHamburgerBtn" class="hamburger-button">☰</button>
+            <div id="menuHamburgerMenu" class="hamburger-dropdown hidden">
+                <button id="howToPlayMenuBtn">How to Play</button>
+            </div>
+        </div>
         <h2>Select Difficulty</h2>
         <div class="difficulty-options">
             <div class="difficulty-card" onclick="startGame(3, 4)">
@@ -73,10 +79,6 @@
                 <span class="error-message" data-for="customPieces">Pieces must be between 3 and 15</span>
             </form>
         </div>
-
-        <div style="border-top: 1px solid #2a5080; padding-top: 20px; margin-top: 20px; text-align: center;">
-            <button id="showInstructionsFromMenu">How to Play</button>
-        </div>
     </div>
 
     <!-- Game Screen -->
@@ -89,6 +91,7 @@
                 <div id="hamburgerMenu" class="hamburger-dropdown hidden">
                     <button id="newGameBtn">New Game</button>
                     <button id="restartBtn">Restart</button>
+                    <button id="howToPlayBtn" onclick="showInstructions()">How to Play</button>
                 </div>
             </div>
         </div>
@@ -165,6 +168,15 @@
                 </section>
 
                 <section class="instruction-section">
+                    <h3>💡 Tips</h3>
+                    <ul>
+                        <li>Start with pieces that can only fit in specific locations</li>
+                        <li>Use a hint if you are *really* stuck</li>
+                        <li>Use undo if you get stuck</li>
+                    </ul>
+                </section>
+
+                <section class="instruction-section">
                     <h3>🎮 Controls</h3>
                     <ul>
                         <li><strong>Mouse:</strong> Click to place the current piece</li>
@@ -175,18 +187,12 @@
                         <li><strong>Hint:</strong> H key or Hint button for placement suggestions</li>
                     </ul>
                 </section>
-
-                <section class="instruction-section">
-                    <h3>💡 Tips</h3>
-                    <ul>
-                        <li>Start with pieces that can only fit in specific locations</li>
-                        <li>Use hints sparingly to maintain the challenge</li>
-                        <li>Plan ahead - some placements make others impossible</li>
-                        <li>The undo feature lets you experiment freely</li>
-                    </ul>
-                </section>
             </div>
             <div class="modal-footer">
+                <label class="dont-show-again">
+                    <input type="checkbox" id="dontShowAgain">
+                    Don't show this automatically again
+                </label>
                 <button id="closeInstructionsBtn">Close</button>
             </div>
         </div>

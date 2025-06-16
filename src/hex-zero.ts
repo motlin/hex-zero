@@ -59,8 +59,15 @@ function showInstructions(): void {
 
 function hideInstructions(): void {
 	const modal = document.getElementById('instructionsModal');
+	const dontShowAgain = document.getElementById('dontShowAgain') as HTMLInputElement;
+
 	if (modal) {
 		modal.classList.add('hidden');
+	}
+
+	// Update the preference if checkbox is checked
+	if (dontShowAgain?.checked) {
+		localStorage.setItem('hexZeroDontShowInstructions', 'true');
 	}
 }
 
@@ -69,7 +76,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	const instructionsModal = document.getElementById('instructionsModal');
 	const instructionsOverlay = instructionsModal?.querySelector('.modal-overlay');
 	const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
-	const showInstructionsFromMenu = document.getElementById('showInstructionsFromMenu');
 
 	if (closeInstructionsBtn) {
 		closeInstructionsBtn.addEventListener('click', hideInstructions);
@@ -79,8 +85,40 @@ window.addEventListener('DOMContentLoaded', () => {
 		instructionsOverlay.addEventListener('click', hideInstructions);
 	}
 
-	if (showInstructionsFromMenu) {
-		showInstructionsFromMenu.addEventListener('click', showInstructions);
+	// Menu hamburger button on difficulty screen
+	const menuHamburgerBtn = document.getElementById('menuHamburgerBtn');
+	const menuHamburgerMenu = document.getElementById('menuHamburgerMenu');
+	const howToPlayMenuBtn = document.getElementById('howToPlayMenuBtn');
+
+	if (menuHamburgerBtn && menuHamburgerMenu) {
+		menuHamburgerBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			menuHamburgerMenu.classList.toggle('hidden');
+		});
+
+		// Close menu when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!menuHamburgerBtn.contains(e.target as Node) && !menuHamburgerMenu.contains(e.target as Node)) {
+				menuHamburgerMenu.classList.add('hidden');
+			}
+		});
+	}
+
+	if (howToPlayMenuBtn) {
+		howToPlayMenuBtn.addEventListener('click', () => {
+			menuHamburgerMenu?.classList.add('hidden');
+			showInstructions();
+		});
+	}
+
+	// Check if first-time player and if they want to see instructions
+	const isFirstTime = localStorage.getItem('hexZeroFirstTime') === null;
+	const dontShowInstructions = localStorage.getItem('hexZeroDontShowInstructions') === 'true';
+
+	if (isFirstTime && !dontShowInstructions) {
+		// Show instructions automatically for first-time players
+		showInstructions();
+		localStorage.setItem('hexZeroFirstTime', 'false');
 	}
 
 	// Handle ESC key for instructions modal
