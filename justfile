@@ -54,6 +54,11 @@ typecheck-ci: install-ci
 build: install
     npm run build
 
+# `npm run build && npx cap sync`
+build-mobile: install
+    npm run build
+    npx cap sync
+
 # `npm run build`
 build-ci: install-ci
     npm run build

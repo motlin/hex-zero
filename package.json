@@ -15,7 +15,14 @@
 		"ci:typecheck": "tsc --noEmit",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
-		"test:run": "vitest run"
+		"test:run": "vitest run",
+		"cap:sync": "npm run build && npx cap sync",
+		"cap:copy": "npm run build && npx cap copy",
+		"cap:update": "npx cap update",
+		"ios:build": "npm run cap:sync && npx cap open ios",
+		"ios:run": "npm run cap:sync && npx cap run ios",
+		"android:build": "npm run cap:sync && npx cap open android",
+		"android:run": "npm run cap:sync && npx cap run android"
 	},
 	"repository": {
 		"type": "git",
@@ -46,6 +53,10 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
+		"@capacitor/android": "^7.3.0",
+		"@capacitor/cli": "^7.3.0",
+		"@capacitor/core": "^7.3.0",
+		"@capacitor/ios": "^7.3.0",
 		"canvas-confetti": "^1.9.4"
 	}
 }
