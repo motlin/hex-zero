@@ -3,6 +3,8 @@ import {GameState, type HexCoordinate, type Piece} from './game-state';
 import {HexRenderer} from './renderer/HexRenderer';
 import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
 import {CanvasManager} from './canvas/CanvasManager';
+import {AchievementManager} from './achievements/AchievementManager';
+import {DifficultyLevel} from './achievements/AchievementDefinitions';
 
 declare global {
 	interface Window {
@@ -26,6 +28,7 @@ interface AnimatingHex {
 }
 
 let game: HexSeptominoGame | null = null;
+let globalAchievementManager: AchievementManager | null = null;
 
 function startGame(radius: number, numPieces: number): void {
 	document.getElementById('difficultyScreen')!.classList.add('hidden');
@@ -73,6 +76,10 @@ function hideInstructions(): void {
 
 // Set up global instructions modal event listeners
 window.addEventListener('DOMContentLoaded', () => {
+	// Initialize global achievement manager
+	globalAchievementManager = new AchievementManager();
+	globalAchievementManager.initialize();
+
 	const instructionsModal = document.getElementById('instructionsModal');
 	const instructionsOverlay = instructionsModal?.querySelector('.modal-overlay');
 	const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
@@ -83,6 +90,56 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	if (instructionsOverlay) {
 		instructionsOverlay.addEventListener('click', hideInstructions);
+	}
+
+	// Set up in-game hamburger menu (global, not per-game)
+	const hamburgerBtn = document.getElementById('hamburgerBtn') as HTMLElement;
+	const hamburgerMenu = document.getElementById('hamburgerMenu') as HTMLElement;
+
+	if (hamburgerBtn && hamburgerMenu) {
+		hamburgerBtn.addEventListener('click', (e) => {
+			e.stopPropagation();
+			hamburgerMenu.classList.toggle('hidden');
+		});
+
+		// Close hamburger menu when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!hamburgerBtn.contains(e.target as Node) && !hamburgerMenu.contains(e.target as Node)) {
+				hamburgerMenu.classList.add('hidden');
+			}
+		});
+
+		// Close hamburger menu after clicking a menu item
+		hamburgerMenu.addEventListener('click', () => {
+			setTimeout(() => hamburgerMenu.classList.add('hidden'), 100);
+		});
+	}
+
+	// Set up in-game menu buttons (global handlers)
+	const newGameBtn = document.getElementById('newGameBtn');
+	if (newGameBtn) {
+		newGameBtn.addEventListener('click', () => showDifficultyScreen());
+	}
+
+	const restartBtn = document.getElementById('restartBtn');
+	if (restartBtn) {
+		restartBtn.addEventListener('click', () => {
+			if (window.game) {
+				window.game.restart();
+			}
+		});
+	}
+
+	const howToPlayBtn = document.getElementById('howToPlayBtn');
+	if (howToPlayBtn) {
+		howToPlayBtn.addEventListener('click', () => showInstructions());
+	}
+
+	const achievementsButton = document.getElementById('achievementsButton');
+	if (achievementsButton) {
+		achievementsButton.addEventListener('click', () => {
+			globalAchievementManager?.showAchievements();
+		});
 	}
 
 	// Menu hamburger button on difficulty screen
@@ -109,6 +166,19 @@ window.addEventListener('DOMContentLoaded', () => {
 			menuHamburgerMenu?.classList.add('hidden');
 			showInstructions();
 		});
+	}
+
+	// Menu achievements button
+	const menuAchievementsButton = document.getElementById('menuAchievementsButton');
+	if (menuAchievementsButton && globalAchievementManager) {
+		menuAchievementsButton.addEventListener('click', () => {
+			menuHamburgerMenu?.classList.add('hidden');
+			globalAchievementManager?.showAchievements();
+		});
+		// Update the button text with achievement count
+		const count = globalAchievementManager.getUnlockedCount();
+		const total = globalAchievementManager.getTotalCount();
+		menuAchievementsButton.textContent = `🏆 Achievements (${count}/${total})`;
 	}
 
 	// Check if first-time player and if they want to see instructions
@@ -155,6 +225,7 @@ class HexSeptominoGame {
 		position: HexCoordinate;
 		duration: number;
 	} | null;
+	private achievementManager: AchievementManager;
 
 	// Bottom panel drag and drop state
 	private currentPage: number;
@@ -210,6 +281,10 @@ class HexSeptominoGame {
 		this.swipeStartY = null;
 		this.isSwipingPanel = false;
 
+		// Use global achievement manager
+		this.achievementManager = globalAchievementManager!;
+		this.achievementManager.trackGameStart();
+
 		this.setupEventListeners();
 		this.updateUI();
 		this.render();
@@ -264,8 +339,6 @@ class HexSeptominoGame {
 
 		document.addEventListener('keydown', (e) => this.handleKeyPress(e));
 		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.toggleHint());
-		(document.getElementById('restartBtn') as HTMLElement).addEventListener('click', () => this.restart());
-		(document.getElementById('newGameBtn') as HTMLElement).addEventListener('click', () => showDifficultyScreen());
 
 		// Undo/Redo buttons
 		(document.getElementById('undoBtn') as HTMLElement).addEventListener('click', () => this.undo());
@@ -273,27 +346,6 @@ class HexSeptominoGame {
 
 		// More pieces button
 		(document.getElementById('morePiecesBtn') as HTMLElement).addEventListener('click', () => this.morePieces());
-
-		// Hamburger menu
-		const hamburgerBtn = document.getElementById('hamburgerBtn') as HTMLElement;
-		const hamburgerMenu = document.getElementById('hamburgerMenu') as HTMLElement;
-
-		hamburgerBtn.addEventListener('click', (e) => {
-			e.stopPropagation();
-			hamburgerMenu.classList.toggle('hidden');
-		});
-
-		// Close hamburger menu when clicking outside
-		document.addEventListener('click', (e) => {
-			if (!hamburgerBtn.contains(e.target as Node) && !hamburgerMenu.contains(e.target as Node)) {
-				hamburgerMenu.classList.add('hidden');
-			}
-		});
-
-		// Close hamburger menu after clicking a menu item
-		hamburgerMenu.addEventListener('click', () => {
-			setTimeout(() => hamburgerMenu.classList.add('hidden'), 100);
-		});
 
 		// Keyboard shortcuts modal event listeners
 		const closeBtn = document.getElementById('closeShortcutsBtn');
@@ -462,8 +514,14 @@ class HexSeptominoGame {
 			}
 		});
 
+		// Track piece placement for achievements BEFORE placing (since index will change)
+		const currentPieceIndex = this.gameState.getCurrentPieceIndex();
+
 		const placed = this.gameState.placePiece(centerQ, centerR);
 		if (!placed) return;
+
+		this.achievementManager.trackPiecePlaced(currentPieceIndex);
+		this.achievementManager.trackMove();
 
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
@@ -573,6 +631,7 @@ class HexSeptominoGame {
 	undo(): void {
 		const undone = this.gameState.undo();
 		if (undone) {
+			this.achievementManager.trackUndo();
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
@@ -609,6 +668,7 @@ class HexSeptominoGame {
 		if (hint) {
 			this.hintPos = hint;
 			this.gameState.incrementHintCount();
+			this.achievementManager.trackHint();
 			this.render();
 
 			this.hintTimeout = window.setTimeout(() => {
@@ -619,9 +679,10 @@ class HexSeptominoGame {
 		}
 	}
 
-	private restart(): void {
+	restart(): void {
 		this.gameState.restart();
 		this.clearHint();
+		this.achievementManager.resetInOrderTracking();
 
 		(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 		this.updateUI();
@@ -645,13 +706,23 @@ class HexSeptominoGame {
 			victoryScreen.classList.remove('hidden');
 
 			// Update stats
-			(document.getElementById('victoryDifficulty') as HTMLElement).textContent = this.gameState.getDifficulty();
+			const difficulty = this.gameState.getDifficulty();
+			(document.getElementById('victoryDifficulty') as HTMLElement).textContent = difficulty;
 			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.gameState
 				.getUndoCount()
 				.toString();
 			(document.getElementById('victoryHints') as HTMLElement).textContent = this.gameState
 				.getHintCount()
 				.toString();
+
+			// Trigger achievements
+			this.achievementManager.onGameComplete({
+				difficulty: difficulty as DifficultyLevel,
+				undoCount: this.gameState.getUndoCount(),
+				hintCount: this.gameState.getHintCount(),
+				moveCount: this.gameState.getMoveCount(),
+				placedInOrder: this.achievementManager.isPlacedInOrder(),
+			});
 			const duration = 3000;
 			const animationEnd = Date.now() + duration;
 			const defaults = {startVelocity: 30, spread: 360, ticks: 60, zIndex: 2100};
