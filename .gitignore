@@ -27,6 +27,21 @@ yarn-error.log*
 eslint_report.json
 /.vite/
 
-# Capacitor native platforms
-/android/
-/ios/
+# iOS
+ios/App/build
+ios/App/Pods
+ios/App/public
+ios/App/Podfile.lock
+ios/App/App.xcworkspace
+DerivedData
+xcuserdata
+
+# Android
+android/app/build
+android/build
+android/app/src/main/assets/public
+android/.gradle
+local.properties
+
+# Capacitor
+.sourcemaps

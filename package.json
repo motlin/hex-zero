@@ -28,9 +28,18 @@
 		"test": "node node_modules/vitest/dist/cli.js",
 		"test:ui": "node node_modules/vitest/dist/cli.js --ui",
 		"test:run": "node node_modules/vitest/dist/cli.js run",
+		"cap:sync": "pnpm run build && pnpm exec cap sync",
+		"cap:copy": "pnpm run build && pnpm exec cap copy",
+		"cap:update": "pnpm exec cap update",
+		"ios:build": "pnpm run cap:sync && pnpm exec cap open ios",
+		"ios:run": "pnpm run cap:sync && pnpm exec cap run ios",
+		"android:build": "pnpm run cap:sync && pnpm exec cap open android",
+		"android:run": "pnpm run cap:sync && pnpm exec cap run android",
 		"prepare": "vp config"
 	},
 	"dependencies": {
+		"@capacitor/cli": "^7.3.0",
+		"@capacitor/core": "^7.3.0",
 		"canvas-confetti": "^1.9.4"
 	},
 	"devDependencies": {

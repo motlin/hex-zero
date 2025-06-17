@@ -40,6 +40,11 @@ typecheck: install
 build: install
     vp run build
 
+# Build the project and sync native mobile platforms
+build-mobile: install
+    vp run build
+    vp exec cap sync
+
 # Run fallow codebase intelligence (dead code, duplication, drift)
 fallow: install
     vp run {{ if ci != "" { "fallow:ci" } else { "fallow" } }}
