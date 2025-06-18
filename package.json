@@ -13,6 +13,7 @@
 		"ci:prettier": "prettier --check \"src/**/*.{js,ts,css,md,json}\"",
 		"ci:biome": "biome format .",
 		"ci:typecheck": "tsc --noEmit",
+		"ci:typecheck:rn": "tsc --project tsconfig.rn.json --noEmit",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run",
@@ -51,6 +52,7 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
+		"@shopify/react-native-skia": "^2.0.5",
 		"@types/react": "^19.1.8",
 		"@types/react-native": "^0.72.8",
 		"canvas-confetti": "^1.9.4",
