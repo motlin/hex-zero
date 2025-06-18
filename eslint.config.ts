@@ -17,6 +17,9 @@ const config: Linter.Config[] = [
 			sourceType: 'module',
 			globals: {
 				...globals.browser,
+				module: 'readonly',
+				require: 'readonly',
+				__dirname: 'readonly',
 			},
 		},
 		rules: {
@@ -38,6 +41,7 @@ const config: Linter.Config[] = [
 			'no-trailing-spaces': 'off',
 			'comma-dangle': 'off',
 			'line-comment-position': ['error', {position: 'above'}],
+			'@typescript-eslint/no-require-imports': 'off',
 		},
 	},
 ];
