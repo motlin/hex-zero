@@ -27,6 +27,22 @@ yarn-error.log*
 eslint_report.json
 /.vite/
 
-# Capacitor native platforms
-/android/
-/ios/
+# React Native / Expo
+.expo/
+.expo-shared/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# iOS
+ios/
+
+# Android
+android/
+
+# Metro
+.metro-health-check*
