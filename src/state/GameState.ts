@@ -70,9 +70,7 @@ export class GameState {
 			const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
 
 			if (validPositions.length === 0) {
-				// Skip pieces that can't be placed during initial generation
-				// They remain in the pieces array for the player to place
-				return;
+				throw new Error(`Cannot place piece ${index} during level generation - no valid positions available`);
 			}
 
 			const pos = validPositions[Math.floor(Math.random() * validPositions.length)];

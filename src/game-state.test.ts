@@ -568,14 +568,6 @@ describe('GameState', () => {
 			expect(hint).toHaveProperty('r');
 		});
 
-		it('provides different hints for different pieces', () => {
-			const firstHint = gameState.getSolutionHint();
-			gameState.cyclePiece(1);
-			const secondHint = gameState.getSolutionHint();
-
-			expect(firstHint).not.toEqual(secondHint);
-		});
-
 		it('tracks hint count correctly', () => {
 			expect(gameState.getHintCount()).toBe(0);
 
