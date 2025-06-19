@@ -13,13 +13,14 @@
 		},
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.hexzero.app"
+			"bundleIdentifier": "io.github.motlin.hexzero"
 		},
 		"android": {
 			"adaptiveIcon": {
 				"foregroundImage": "./assets/adaptive-icon.png",
 				"backgroundColor": "#ffffff"
-			}
+			},
+			"package": "io.github.motlin.hexzero"
 		},
 		"web": {
 			"favicon": "./assets/favicon.png"
