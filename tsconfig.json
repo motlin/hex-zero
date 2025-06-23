@@ -39,5 +39,6 @@
 		"src/screens/**/*.tsx",
 		"src/hooks/**/*.tsx",
 		"App.tsx"
-	]
+	],
+	"extends": "expo/tsconfig.base"
 }
