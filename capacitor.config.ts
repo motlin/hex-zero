@@ -12,9 +12,23 @@ const config: CapacitorConfig = {
 	backgroundColor: '#1a1a1a',
 	ios: {
 		contentInset: 'automatic',
+		// Properly handle safe areas on iOS
+		scrollEnabled: false,
 	},
 	android: {
 		allowMixedContent: false,
+		// Handle Android system UI
+		backgroundColor: '#1a1a1a',
+	},
+	plugins: {
+		StatusBar: {
+			style: 'DARK',
+			backgroundColor: '#1a1a1a',
+		},
+		Keyboard: {
+			resize: 'none',
+			resizeOnFullScreen: true,
+		},
 	},
 };
 

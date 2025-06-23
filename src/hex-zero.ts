@@ -6,6 +6,7 @@ import {CanvasManager} from './canvas/CanvasManager';
 import {AchievementManager} from './achievements/AchievementManager';
 import type {DifficultyLevel} from './achievements/AchievementDefinitions';
 import {setupMobileCompatibility} from './mobile-utils';
+import {setupStatusBar} from './status-bar-handler';
 
 declare global {
 	interface Window {
@@ -104,9 +105,12 @@ function updateFullscreenButtonText(): void {
 	}
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
 	// Set up mobile compatibility fixes
 	setupMobileCompatibility();
+
+	// Set up status bar for native platforms
+	await setupStatusBar();
 
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
