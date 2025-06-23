@@ -79,4 +79,39 @@ export function setupMobileCompatibility(): void {
 	setupMobileViewport();
 	preventDefaultTouchBehavior();
 	addIOSWebAppMeta();
+	optimizeTouchEvents();
+}
+
+// Optimize touch event performance
+function optimizeTouchEvents(): void {
+	// Add touch-action CSS to prevent delays
+	const style = document.createElement('style');
+	style.textContent = `
+        /* Optimize touch responsiveness */
+        * {
+            touch-action: manipulation;
+        }
+
+        /* Allow pan on specific elements */
+        .scrollable-container {
+            touch-action: pan-y;
+        }
+
+        /* Disable all touch actions on canvas */
+        #gameCanvas {
+            touch-action: none;
+        }
+    `;
+	document.head.appendChild(style);
+
+	// Add fast-click behavior for iOS Safari
+	if ('ontouchstart' in window) {
+		document.addEventListener(
+			'click',
+			(_e) => {
+				// This helps remove the 300ms delay on older iOS versions
+			},
+			true,
+		);
+	}
 }

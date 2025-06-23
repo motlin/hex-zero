@@ -151,6 +151,61 @@ button,
 .draggable-piece {
 	min-height: 44px;
 	min-width: 44px;
+	position: relative;
+}
+
+/* Enhanced touch feedback */
+.touch-active {
+	opacity: 0.8;
+}
+
+/* Larger touch targets for small buttons */
+.piece-nav-button,
+.hamburger-button,
+.bottom-controls button {
+	position: relative;
+	min-height: 48px;
+	min-width: 48px;
+}
+
+/* Invisible touch target extension for small elements */
+.touch-target-overlay {
+	pointer-events: auto;
+}
+
+/* Visual feedback for draggable pieces */
+.draggable-piece {
+	transition:
+		transform 0.1s ease-out,
+		box-shadow 0.1s ease-out;
+	cursor: grab;
+}
+
+.draggable-piece:active,
+.draggable-piece.dragging {
+	cursor: grabbing;
+	transform: scale(1.05);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	z-index: 1000;
+}
+
+/* Touch feedback for buttons */
+button:active,
+.difficulty-card:active {
+	transform: scale(0.95);
+	transition: transform 0.1s ease-out;
+}
+
+/* Improve contrast for touch feedback */
+@media (hover: none) and (pointer: coarse) {
+	button:active {
+		background-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.draggable-piece:active {
+		border-color: #4caf50;
+		border-width: 2px;
+	}
 }
 
 /* Fix for Android Chrome address bar */
@@ -218,5 +273,54 @@ button {
 			width: calc(220px + var(--safe-area-inset-right));
 			padding-right: calc(10px + var(--safe-area-inset-right));
 		}
+	}
+}
+
+/* Optimize scrolling performance */
+.scrollable-container {
+	-webkit-overflow-scrolling: touch;
+	overflow-scrolling: touch;
+}
+
+/* Prevent momentum scrolling on game elements */
+.game-container,
+#gameCanvas,
+.control-panel {
+	overscroll-behavior: contain;
+}
+
+/* Improve piece visibility on touch */
+@media (hover: none) and (pointer: coarse) {
+	.draggable-piece {
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.draggable-piece:hover,
+	.draggable-piece:focus {
+		border-color: rgba(255, 255, 255, 0.4);
+		outline: none;
+	}
+}
+
+/* Optimize animations for mobile performance */
+@media (hover: none) and (pointer: coarse) {
+	* {
+		animation-duration: 0.2s !important;
+	}
+
+	.draggable-piece,
+	button {
+		will-change: transform;
+	}
+}
+
+/* Better spacing for mobile piece navigation */
+@media (max-width: 768px) {
+	.piece-navigation {
+		gap: 16px;
+	}
+
+	.piece-nav-button {
+		padding: 12px;
 	}
 }
