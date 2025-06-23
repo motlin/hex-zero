@@ -1,0 +1,326 @@
+/* Mobile compatibility fixes for Hex Zero */
+
+/* Prevent tap highlighting on iOS */
+* {
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection on mobile */
+body {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+/* Allow text selection in modals */
+.modal-content {
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
+}
+
+/* Prevent pinch zooming on the canvas */
+#gameCanvas {
+	touch-action: none;
+}
+
+/* Allow standard touch actions on UI elements */
+.control-panel,
+.bottom-controls,
+.hamburger-menu-container,
+.difficulty-screen {
+	touch-action: auto;
+}
+
+/* Prevent bouncing/elastic scrolling on iOS */
+html,
+body {
+	position: fixed;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+}
+
+.game-container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* Comprehensive safe area handling for iOS and Android */
+:root {
+	--safe-area-inset-top: env(safe-area-inset-top, 0px);
+	--safe-area-inset-right: env(safe-area-inset-right, 0px);
+	--safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+	--safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Main game container safe area adjustments */
+.game-container {
+	padding-top: var(--safe-area-inset-top);
+	padding-left: var(--safe-area-inset-left);
+	padding-right: var(--safe-area-inset-right);
+	padding-bottom: var(--safe-area-inset-bottom);
+	box-sizing: border-box;
+}
+
+/* Adjust game screen to account for safe areas */
+#gameScreen {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+/* Canvas should fill available space within safe areas */
+#gameCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* Control panel positioning with safe areas */
+.control-panel {
+	position: relative;
+	z-index: 10;
+}
+
+/* Bottom controls need extra bottom padding for home indicator */
+.bottom-controls {
+	padding-bottom: calc(8px + var(--safe-area-inset-bottom));
+}
+
+/* Hamburger menu positioning */
+.hamburger-menu-container {
+	top: calc(10px + var(--safe-area-inset-top));
+	right: calc(10px + var(--safe-area-inset-right));
+}
+
+/* Ensure modals work with safe areas */
+.modal-content {
+	max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 40px);
+	margin-top: calc(20px + var(--safe-area-inset-top));
+	margin-left: var(--safe-area-inset-left);
+	margin-right: var(--safe-area-inset-right);
+}
+
+/* Landscape adjustments for safe areas */
+@media (orientation: landscape) {
+	.game-container {
+		padding-top: var(--safe-area-inset-top);
+		padding-bottom: 0; /* Bottom is often not needed in landscape */
+	}
+
+	.control-panel {
+		padding-right: var(--safe-area-inset-right);
+	}
+}
+
+/* iOS-specific adjustments */
+@supports (-webkit-touch-callout: none) {
+	/* Add extra padding for iOS status bar if not hidden */
+	.game-container {
+		padding-top: max(20px, var(--safe-area-inset-top));
+	}
+}
+
+/* Android-specific adjustments */
+@media screen and (-webkit-device-pixel-ratio: 2) and (orientation: portrait),
+	screen and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) {
+	/* Android devices often need extra top padding for status bar */
+	.game-container:not(.fullscreen) {
+		padding-top: max(24px, var(--safe-area-inset-top));
+	}
+}
+
+/* Fix viewport on mobile browsers */
+@supports (-webkit-touch-callout: none) {
+	/* iOS only */
+	.game-container {
+		height: -webkit-fill-available;
+	}
+}
+
+/* Improve touch targets for mobile */
+button,
+.difficulty-card,
+.draggable-piece {
+	min-height: 44px;
+	min-width: 44px;
+	position: relative;
+}
+
+/* Enhanced touch feedback */
+.touch-active {
+	opacity: 0.8;
+}
+
+/* Larger touch targets for small buttons */
+.piece-nav-button,
+.hamburger-button,
+.bottom-controls button {
+	position: relative;
+	min-height: 48px;
+	min-width: 48px;
+}
+
+/* Invisible touch target extension for small elements */
+.touch-target-overlay {
+	pointer-events: auto;
+}
+
+/* Visual feedback for draggable pieces */
+.draggable-piece {
+	transition:
+		transform 0.1s ease-out,
+		box-shadow 0.1s ease-out;
+	cursor: grab;
+}
+
+.draggable-piece:active,
+.draggable-piece.dragging {
+	cursor: grabbing;
+	transform: scale(1.05);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	z-index: 1000;
+}
+
+/* Touch feedback for buttons */
+button:active,
+.difficulty-card:active {
+	transform: scale(0.95);
+	transition: transform 0.1s ease-out;
+}
+
+/* Improve contrast for touch feedback */
+@media (hover: none) and (pointer: coarse) {
+	button:active {
+		background-color: rgba(255, 255, 255, 0.2);
+	}
+
+	.draggable-piece:active {
+		border-color: #4caf50;
+		border-width: 2px;
+	}
+}
+
+/* Fix for Android Chrome address bar */
+@media screen and (max-width: 768px) {
+	.game-container {
+		height: 100vh;
+		height: calc(var(--vh, 1vh) * 100);
+	}
+}
+
+/* Prevent accidental zooming on form inputs */
+input[type="number"],
+input[type="text"],
+button {
+	font-size: 16px; /* Prevents zoom on iOS when focusing inputs */
+}
+
+/* Ensure proper rendering on high DPI screens */
+#gameCanvas {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}
+
+/* Draggable pieces container positioning with safe areas */
+#draggablePiecesContainer {
+	padding-left: var(--safe-area-inset-left);
+	padding-right: var(--safe-area-inset-right);
+}
+
+/* Achievement popup positioning */
+.achievement-popup {
+	bottom: calc(20px + var(--safe-area-inset-bottom));
+	right: calc(20px + var(--safe-area-inset-right));
+}
+
+/* Ensure touch targets are properly sized in safe areas */
+@media (max-width: 768px) {
+	.difficulty-card {
+		margin-left: var(--safe-area-inset-left);
+		margin-right: var(--safe-area-inset-right);
+	}
+
+	.modal-content {
+		width: calc(100% - var(--safe-area-inset-left) - var(--safe-area-inset-right) - 40px);
+	}
+}
+
+/* Handle orientation changes with safe areas */
+@media (orientation: portrait) {
+	#gameCanvas {
+		max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+	}
+}
+
+@media (orientation: landscape) {
+	#gameCanvas {
+		max-width: calc(100vw - var(--safe-area-inset-left) - var(--safe-area-inset-right));
+	}
+
+	/* In landscape, the control panel should respect safe areas */
+	@media (min-aspect-ratio: 1 / 1) {
+		.control-panel {
+			width: calc(220px + var(--safe-area-inset-right));
+			padding-right: calc(10px + var(--safe-area-inset-right));
+		}
+	}
+}
+
+/* Optimize scrolling performance */
+.scrollable-container {
+	-webkit-overflow-scrolling: touch;
+	overflow-scrolling: touch;
+}
+
+/* Prevent momentum scrolling on game elements */
+.game-container,
+#gameCanvas,
+.control-panel {
+	overscroll-behavior: contain;
+}
+
+/* Improve piece visibility on touch */
+@media (hover: none) and (pointer: coarse) {
+	.draggable-piece {
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
+	.draggable-piece:hover,
+	.draggable-piece:focus {
+		border-color: rgba(255, 255, 255, 0.4);
+		outline: none;
+	}
+}
+
+/* Optimize animations for mobile performance */
+@media (hover: none) and (pointer: coarse) {
+	* {
+		animation-duration: 0.2s !important;
+	}
+
+	.draggable-piece,
+	button {
+		will-change: transform;
+	}
+}
+
+/* Better spacing for mobile piece navigation */
+@media (max-width: 768px) {
+	.piece-navigation {
+		gap: 16px;
+	}
+
+	.piece-nav-button {
+		padding: 12px;
+	}
+}

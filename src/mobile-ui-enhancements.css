@@ -1,0 +1,490 @@
+/* Mobile UI Enhancements for Hex Zero */
+
+/* ============================================
+   Hamburger Menu Mobile Optimizations
+   ============================================ */
+
+/* Larger touch target for hamburger button */
+.hamburger-button {
+	min-width: 48px;
+	min-height: 48px;
+	font-size: 24px;
+	padding: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	/* Visual feedback on touch */
+	transition: all 0.2s ease-out;
+	position: relative;
+}
+
+/* Touch feedback ripple effect */
+.hamburger-button::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 0;
+	height: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.3);
+	transform: translate(-50%, -50%);
+	transition:
+		width 0.3s,
+		height 0.3s;
+}
+
+.hamburger-button:active::after {
+	width: 100%;
+	height: 100%;
+}
+
+/* Improved dropdown for mobile */
+.hamburger-dropdown {
+	min-width: 200px;
+	padding: 12px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+	backdrop-filter: blur(10px);
+	background-color: rgba(22, 33, 62, 0.95);
+}
+
+.hamburger-dropdown button {
+	min-height: 48px;
+	font-size: 16px;
+	margin-bottom: 8px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+
+	/* Add icons for better recognition */
+	position: relative;
+	padding-left: 40px;
+}
+
+/* Icon placeholders for menu items */
+.hamburger-dropdown button::before {
+	content: "";
+	position: absolute;
+	left: 12px;
+	width: 20px;
+	height: 20px;
+	background-size: contain;
+}
+
+/* Specific icons for each menu item */
+.hamburger-dropdown button:nth-child(1)::before {
+	content: "🎮";
+	font-size: 18px;
+}
+
+.hamburger-dropdown button:nth-child(2)::before {
+	content: "🔄";
+	font-size: 18px;
+}
+
+.hamburger-dropdown button:nth-child(3)::before {
+	content: "❓";
+	font-size: 18px;
+}
+
+.hamburger-dropdown button:nth-child(4)::before {
+	content: "🏆";
+	font-size: 18px;
+}
+
+/* ============================================
+   Bottom Control Panel Enhancements
+   ============================================ */
+
+/* Enhanced bottom control panel for thumb accessibility */
+@media (max-aspect-ratio: 1 / 1) {
+	.control-panel {
+		/* Rounded corners for modern look */
+		border-radius: 16px 16px 0 0;
+		box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+		background: linear-gradient(to bottom, #1a2547, #16213e);
+
+		/* Better spacing for mobile */
+		padding: 12px;
+		gap: 12px;
+	}
+
+	/* Piece panel with better touch targets */
+	.piece-panel {
+		position: relative;
+		padding: 0 40px; /* Space for nav buttons */
+	}
+
+	/* Navigation buttons positioned absolutely */
+	.piece-nav-button {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background-color: rgba(233, 69, 96, 0.8);
+		border: 2px solid rgba(255, 255, 255, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 18px;
+		padding: 0;
+		z-index: 10;
+
+		/* Visual feedback */
+		transition: all 0.2s ease-out;
+	}
+
+	.piece-nav-button:active {
+		transform: translateY(-50%) scale(0.9);
+		background-color: rgba(233, 69, 96, 1);
+	}
+
+	.piece-nav-button.prev {
+		left: 4px;
+	}
+
+	.piece-nav-button.next {
+		right: 4px;
+	}
+
+	/* Draggable pieces with better visual feedback */
+	.draggable-piece {
+		border-radius: 8px;
+		background-color: rgba(15, 52, 96, 0.3);
+		border: 2px solid transparent;
+		transition: all 0.2s ease-out;
+		position: relative;
+		overflow: visible;
+	}
+
+	.draggable-piece::before {
+		content: "";
+		position: absolute;
+		top: -4px;
+		left: -4px;
+		right: -4px;
+		bottom: -4px;
+		border-radius: 10px;
+		background: linear-gradient(45deg, #e94560, #0f3460);
+		opacity: 0;
+		transition: opacity 0.2s ease-out;
+		z-index: -1;
+	}
+
+	.draggable-piece:active::before {
+		opacity: 1;
+	}
+
+	.draggable-piece.dragging {
+		transform: scale(1.1) translateY(-10px);
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+		z-index: 100;
+	}
+
+	/* Enhanced bottom controls with better spacing */
+	.bottom-controls {
+		background-color: rgba(15, 52, 96, 0.2);
+		border-radius: 12px;
+		padding: 8px;
+
+		/* Ensure proper safe area padding */
+		padding-bottom: max(8px, env(safe-area-inset-bottom));
+	}
+
+	.bottom-controls button {
+		border-radius: 8px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+		/* Visual states */
+		position: relative;
+		overflow: hidden;
+	}
+
+	/* Ripple effect for bottom control buttons */
+	.bottom-controls button::before {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 0;
+		height: 0;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.4);
+		transform: translate(-50%, -50%);
+		transition:
+			width 0.4s,
+			height 0.4s;
+	}
+
+	.bottom-controls button:active::before {
+		width: 200%;
+		height: 200%;
+	}
+}
+
+/* ============================================
+   Visual Feedback Enhancements
+   ============================================ */
+
+/* Improved touch states for all interactive elements */
+@media (hover: none) and (pointer: coarse) {
+	/* Remove hover states on touch devices */
+	button:hover,
+	.draggable-piece:hover,
+	.difficulty-card:hover {
+		transform: none;
+		opacity: 1;
+	}
+
+	/* Enhanced active states */
+	button:active {
+		transform: scale(0.95);
+		box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+	}
+
+	.difficulty-card:active {
+		transform: scale(0.98);
+		border-color: #e94560;
+		box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.3);
+	}
+}
+
+/* Loading states for async operations */
+.loading {
+	position: relative;
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+.loading::after {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	margin: -10px 0 0 -10px;
+	border: 2px solid transparent;
+	border-top-color: #e94560;
+	border-radius: 50%;
+	animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* ============================================
+   Screen Density Scaling
+   ============================================ */
+
+/* High DPI screens (2x and above) */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+	/* Sharper borders and shadows */
+	.hamburger-button,
+	.hamburger-dropdown,
+	.control-panel,
+	.draggable-piece,
+	button {
+		border-width: 1.5px;
+	}
+
+	/* Crisper text rendering */
+	body {
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+}
+
+/* Extra large screens (tablets in portrait) */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+	.control-panel {
+		height: 25vh;
+		max-height: 200px;
+	}
+
+	.draggable-piece {
+		height: 100px;
+		max-width: 120px;
+	}
+
+	.bottom-controls button {
+		font-size: 14px;
+		padding: 10px 16px;
+		min-width: 80px;
+	}
+}
+
+/* ============================================
+   Landscape Mode Enhancements
+   ============================================ */
+
+@media (min-aspect-ratio: 1 / 1) {
+	/* Side panel improvements for landscape */
+	.control-panel {
+		border-radius: 0 16px 16px 0;
+		box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+		background: linear-gradient(to right, #16213e, #1a2547);
+		max-width: 280px;
+	}
+
+	/* Vertical piece layout */
+	.pieces-container {
+		flex-direction: column;
+		gap: 12px;
+		padding: 12px;
+	}
+
+	.draggable-piece {
+		width: 100%;
+		max-width: none;
+		height: auto;
+		aspect-ratio: 4 / 3;
+	}
+
+	/* Bottom controls stay horizontal in landscape */
+	.bottom-controls {
+		flex-direction: row;
+		gap: 8px;
+	}
+
+	.bottom-controls button {
+		flex: 1;
+	}
+}
+
+/* ============================================
+   Accessibility Improvements
+   ============================================ */
+
+/* Focus states for keyboard navigation */
+button:focus-visible,
+.draggable-piece:focus-visible,
+.difficulty-card:focus-visible {
+	outline: 3px solid #e94560;
+	outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+	.hamburger-button,
+	.hamburger-dropdown,
+	.control-panel,
+	button {
+		border-width: 2px;
+		border-color: white;
+	}
+
+	.draggable-piece {
+		border: 2px solid white;
+	}
+}
+
+/* ============================================
+   Additional Mobile States
+   ============================================ */
+
+/* Ready to drag state */
+.draggable-piece.ready-to-drag {
+	animation: pulse 0.5s ease-in-out infinite;
+	border-color: #e94560;
+}
+
+@keyframes pulse {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+/* Piece container scrolling */
+@media (max-aspect-ratio: 1 / 1) {
+	.pieces-container {
+		overflow-x: auto;
+		overflow-y: hidden;
+		scroll-snap-type: x mandatory;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
+
+	.pieces-container::-webkit-scrollbar {
+		display: none;
+	}
+
+	.draggable-piece {
+		scroll-snap-align: center;
+		flex-shrink: 0;
+	}
+}
+
+/* Dynamic class additions from JavaScript */
+.high-dpi-2x .hamburger-button,
+.high-dpi-2x button {
+	font-weight: 500;
+}
+
+.high-dpi-3x .hamburger-button,
+.high-dpi-3x button {
+	font-weight: 400;
+}
+
+.tablet-size .control-panel {
+	height: 30vh;
+	max-height: 250px;
+}
+
+.tablet-size .draggable-piece {
+	height: 120px;
+	max-width: 150px;
+}
+
+.phablet-size .control-panel {
+	height: 22vh;
+}
+
+/* Portrait/Landscape specific classes */
+.portrait-mode .control-panel {
+	flex-direction: column;
+}
+
+.landscape-mode .control-panel {
+	flex-direction: row;
+}
+
+/* Active states for enhanced feedback */
+.hamburger-active {
+	background-color: #1a4a7a !important;
+}
+
+.control-active {
+	background-color: #c23850 !important;
+}
+
+.piece-active {
+	border-color: #e94560 !important;
+	background-color: rgba(233, 69, 96, 0.1) !important;
+}

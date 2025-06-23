@@ -6,6 +6,10 @@ import {CanvasManager} from './canvas/CanvasManager';
 import {AchievementManager} from './achievements/AchievementManager';
 import {isDifficultyLevel} from './achievements/AchievementDefinitions';
 import {getElementByIdOrNull, getRequiredElementById} from './dom-utils';
+import {setupMobileCompatibility} from './mobile-utils';
+import {setupStatusBar} from './status-bar-handler';
+import {TouchOptimizer, addTouchFeedback, ensureTouchTarget} from './touch-optimizer';
+import {initializeMobileUIEnhancements} from './mobile-ui-enhancements';
 
 declare global {
 	interface Window {
@@ -100,7 +104,16 @@ function updateFullscreenButtonText(): void {
 	}
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', async () => {
+	// Set up mobile compatibility fixes
+	setupMobileCompatibility();
+
+	// Set up status bar for native platforms
+	await setupStatusBar();
+
+	// Initialize mobile UI enhancements
+	initializeMobileUIEnhancements();
+
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 
@@ -245,7 +258,6 @@ class HexSeptominoGame {
 	private readonly colors: ColorMap;
 	private mouseHex: HexCoordinate | null;
 	private touchHex: HexCoordinate | null;
-	private isTouching: boolean;
 	private zoomFactor: number;
 	private hintPos: HexCoordinate | null;
 	private hintTimeout: number | null;
@@ -257,7 +269,6 @@ class HexSeptominoGame {
 	private panStartY: number;
 	private panOffsetX: number;
 	private panOffsetY: number;
-	private lastPinchDistance: number | null;
 	private invalidPlacementAnimation: {
 		isActive: boolean;
 		startTime: number;
@@ -278,6 +289,8 @@ class HexSeptominoGame {
 	private swipeStartY: number | null;
 	private isSwipingPanel: boolean;
 
+	private touchOptimizer: TouchOptimizer | null;
+
 	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty) {
 		this.canvasManager = new CanvasManager('gameCanvas');
 		this.gameState = new GameState(radius, numPieces, difficulty);
@@ -288,7 +301,6 @@ class HexSeptominoGame {
 
 		this.mouseHex = null;
 		this.touchHex = null;
-		this.isTouching = false;
 		this.zoomFactor = 1.0;
 		this.hintPos = null;
 		this.hintTimeout = null;
@@ -300,7 +312,6 @@ class HexSeptominoGame {
 		this.panStartY = 0;
 		this.panOffsetX = 0;
 		this.panOffsetY = 0;
-		this.lastPinchDistance = null;
 		this.invalidPlacementAnimation = null;
 
 		this.currentPage = 0;
@@ -314,6 +325,8 @@ class HexSeptominoGame {
 		this.swipeStartX = null;
 		this.swipeStartY = null;
 		this.isSwipingPanel = false;
+
+		this.touchOptimizer = null;
 
 		if (globalAchievementManager === null) {
 			throw new Error('AchievementManager is not initialized');
@@ -370,29 +383,116 @@ class HexSeptominoGame {
 			},
 			{passive: false},
 		);
+		const touchOptimizer = new TouchOptimizer(
+			// onTap
+			(x, y) => {
+				const rect = canvas.getBoundingClientRect();
+				const canvasX = x - rect.left - canvas.width / 2 - this.panOffsetX;
+				const canvasY = y - rect.top - canvas.height / 2 - this.panOffsetY;
+				const hex = this.renderer.pixelToHex(canvasX, canvasY);
+
+				if (
+					this.gameState.getGrid().getHex(hex.q, hex.r) &&
+					!this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())
+				) {
+					const piece = this.gameState.getCurrentPiece();
+					if (this.canPlacePiece(piece, hex.q, hex.r)) {
+						this.placePiece(hex.q, hex.r);
+					} else {
+						this.showInvalidPlacementFeedback(hex);
+					}
+				}
+			},
+			// onDoubleTap
+			(_x, _y) => {
+				// Double tap to zoom
+				const scale = this.zoomFactor < 1.5 ? 2 : 0.5;
+				this.zoom(scale);
+			},
+			// onDragStart
+			(x, y) => {
+				const rect = canvas.getBoundingClientRect();
+				const canvasX = x - rect.left - canvas.width / 2 - this.panOffsetX;
+				const canvasY = y - rect.top - canvas.height / 2 - this.panOffsetY;
+				const hex = this.renderer.pixelToHex(canvasX, canvasY);
+
+				if (this.gameState.getGrid().getHex(hex.q, hex.r)) {
+					this.touchHex = hex;
+					this.render();
+				}
+			},
+			// onDragMove
+			(x, y) => {
+				const rect = canvas.getBoundingClientRect();
+				const canvasX = x - rect.left - canvas.width / 2 - this.panOffsetX;
+				const canvasY = y - rect.top - canvas.height / 2 - this.panOffsetY;
+				const hex = this.renderer.pixelToHex(canvasX, canvasY);
+
+				if (this.gameState.getGrid().getHex(hex.q, hex.r)) {
+					this.touchHex = hex;
+				} else {
+					this.touchHex = null;
+				}
+				this.render();
+			},
+			// onDragEnd
+			(_x, _y) => {
+				if (this.touchHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+					const piece = this.gameState.getCurrentPiece();
+					if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
+						this.placePiece(this.touchHex.q, this.touchHex.r);
+					}
+				}
+				this.touchHex = null;
+				this.render();
+			},
+			// onPinchStart
+			(_distance, centerX, centerY) => {
+				const rect = canvas.getBoundingClientRect();
+				this.panStartX = centerX - rect.left - this.panOffsetX;
+				this.panStartY = centerY - rect.top - this.panOffsetY;
+			},
+			// onPinchMove
+			(scale, centerX, centerY) => {
+				this.zoom(scale);
+				const rect = canvas.getBoundingClientRect();
+				this.panOffsetX = centerX - rect.left - this.panStartX;
+				this.panOffsetY = centerY - rect.top - this.panStartY;
+				this.render();
+			},
+			// onPinchEnd
+			() => {
+				// No-op
+			},
+		);
+		this.touchOptimizer = touchOptimizer;
+
 		canvas.addEventListener(
 			'touchstart',
 			(e) => {
-				this.handleTouchStart(e);
+				e.preventDefault();
+				touchOptimizer.handleTouchStart(e);
 			},
 			{passive: false},
 		);
 		canvas.addEventListener(
 			'touchmove',
 			(e) => {
-				this.handleTouchMove(e);
+				e.preventDefault();
+				touchOptimizer.handleTouchMove(e);
 			},
 			{passive: false},
 		);
 		canvas.addEventListener(
 			'touchend',
 			(e) => {
-				this.handleTouchEnd(e);
+				e.preventDefault();
+				touchOptimizer.handleTouchEnd(e);
 			},
 			{passive: false},
 		);
 		canvas.addEventListener('touchcancel', (e) => {
-			this.handleTouchCancel(e);
+			touchOptimizer.handleTouchCancel(e);
 		});
 		canvas.addEventListener('mouseleave', () => {
 			this.mouseHex = null;
@@ -451,6 +551,9 @@ class HexSeptominoGame {
 		});
 
 		this.setupPanelSwipeHandlers();
+
+		// Add touch feedback to all interactive elements
+		this.setupTouchFeedback();
 	}
 
 	private setupPanelSwipeHandlers(): void {
@@ -467,7 +570,6 @@ class HexSeptominoGame {
 					this.swipeStartY = firstTouch.clientY;
 					this.isSwipingPanel = true;
 					this.touchHex = null;
-					this.isTouching = false;
 				}
 			},
 			{passive: true},
@@ -518,6 +620,30 @@ class HexSeptominoGame {
 			},
 			{passive: true},
 		);
+	}
+
+	private setupTouchFeedback(): void {
+		// Add touch feedback to all buttons
+		const buttons = document.querySelectorAll('button');
+		buttons.forEach((button) => {
+			addTouchFeedback(button as HTMLElement);
+			ensureTouchTarget(button as HTMLElement);
+		});
+
+		// Add touch feedback to difficulty cards
+		const difficultyCards = document.querySelectorAll('.difficulty-card');
+		difficultyCards.forEach((card) => {
+			addTouchFeedback(card as HTMLElement, {scale: 0.98});
+		});
+
+		// Add touch feedback to draggable pieces (will be handled dynamically)
+		// This is done in renderBottomPanel method
+
+		// Ensure minimum touch targets for navigation buttons
+		const navButtons = document.querySelectorAll('.piece-nav-button');
+		navButtons.forEach((button) => {
+			ensureTouchTarget(button as HTMLElement, 48);
+		});
 	}
 
 	private canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
@@ -575,6 +701,12 @@ class HexSeptominoGame {
 
 		this.achievementManager.trackPiecePlaced(currentPieceIndex);
 		this.achievementManager.trackMove();
+
+		// Add haptic feedback for successful placement
+		if ('vibrate' in navigator) {
+			// Single short vibration for success
+			navigator.vibrate(20);
+		}
 
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
@@ -867,116 +999,6 @@ class HexSeptominoGame {
 		}
 	}
 
-	private handleTouchStart(event: TouchEvent): void {
-		event.preventDefault();
-
-		if (event.touches.length === 1) {
-			const touch = event.touches[0];
-			if (!touch) return;
-			const canvas = this.canvasManager.getCanvas();
-			const rect = canvas.getBoundingClientRect();
-			const x = touch.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
-			const y = touch.clientY - rect.top - canvas.height / 2 - this.panOffsetY;
-
-			const hex = this.renderer.pixelToHex(x, y);
-			const grid = this.gameState.getGrid();
-			if (grid.getHex(hex.q, hex.r)) {
-				this.touchHex = hex;
-				this.isTouching = true;
-				this.render();
-			}
-		} else if (event.touches.length === 2) {
-			this.touchHex = null;
-			this.isTouching = false;
-
-			const touch1 = event.touches[0];
-			const touch2 = event.touches[1];
-			if (!touch1 || !touch2) return;
-			const dx = touch2.clientX - touch1.clientX;
-			const dy = touch2.clientY - touch1.clientY;
-			this.lastPinchDistance = Math.sqrt(dx * dx + dy * dy);
-			const centerX = (touch1.clientX + touch2.clientX) / 2;
-			const centerY = (touch1.clientY + touch2.clientY) / 2;
-			this.panStartX = centerX - this.panOffsetX;
-			this.panStartY = centerY - this.panOffsetY;
-		}
-	}
-
-	private handleTouchMove(event: TouchEvent): void {
-		event.preventDefault();
-
-		if (event.touches.length === 1 && this.isTouching) {
-			const touch = event.touches[0];
-			if (!touch) return;
-			const canvas = this.canvasManager.getCanvas();
-			const rect = canvas.getBoundingClientRect();
-			const x = touch.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
-			const y = touch.clientY - rect.top - canvas.height / 2 - this.panOffsetY;
-
-			const hex = this.renderer.pixelToHex(x, y);
-			const grid = this.gameState.getGrid();
-			if (grid.getHex(hex.q, hex.r)) {
-				this.touchHex = hex;
-			} else {
-				this.touchHex = null;
-			}
-			this.render();
-		} else if (event.touches.length === 2) {
-			const touch1 = event.touches[0];
-			const touch2 = event.touches[1];
-			if (!touch1 || !touch2) return;
-
-			const dx = touch2.clientX - touch1.clientX;
-			const dy = touch2.clientY - touch1.clientY;
-			const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
-			if (this.lastPinchDistance !== null) {
-				const scale = newPinchDistance / this.lastPinchDistance;
-				this.zoom(scale);
-			}
-			this.lastPinchDistance = newPinchDistance;
-
-			const centerX = (touch1.clientX + touch2.clientX) / 2;
-			const centerY = (touch1.clientY + touch2.clientY) / 2;
-			this.panOffsetX = centerX - this.panStartX;
-			this.panOffsetY = centerY - this.panStartY;
-
-			this.render();
-		}
-	}
-
-	private handleTouchEnd(event: TouchEvent): void {
-		event.preventDefault();
-
-		if (event.touches.length === 0) {
-			if (
-				this.isTouching &&
-				this.touchHex &&
-				!this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())
-			) {
-				const piece = this.gameState.getCurrentPiece();
-				if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
-					this.placePiece(this.touchHex.q, this.touchHex.r);
-				} else {
-					this.showInvalidPlacementFeedback(this.touchHex);
-				}
-			}
-
-			this.touchHex = null;
-			this.isTouching = false;
-			this.lastPinchDistance = null;
-			this.render();
-		} else if (event.touches.length === 1) {
-			this.lastPinchDistance = null;
-		}
-	}
-
-	private handleTouchCancel(_event: TouchEvent): void {
-		this.touchHex = null;
-		this.isTouching = false;
-		this.lastPinchDistance = null;
-		this.render();
-	}
-
 	private handleClick(event: MouseEvent): void {
 		if (this.isPanning) return;
 
@@ -1077,6 +1099,12 @@ class HexSeptominoGame {
 			duration: 333,
 		};
 		this.requestAnimationFrame();
+
+		// Add haptic feedback for invalid placement
+		if ('vibrate' in navigator) {
+			// Two short vibrations to indicate error
+			navigator.vibrate([30, 50, 30]);
+		}
 	}
 
 	private toggleKeyboardShortcuts(): void {
@@ -1288,6 +1316,8 @@ class HexSeptominoGame {
 
 			if (!isPlaced) {
 				this.setupPieceDragHandlers(pieceContainer, i);
+				// Add touch feedback for better mobile UX
+				addTouchFeedback(pieceContainer, {scale: 1.05, duration: 100});
 			}
 
 			piecesContainer.appendChild(pieceContainer);
@@ -1464,6 +1494,11 @@ class HexSeptominoGame {
 			const touch = event.touches[0];
 			if (!touch) return;
 			this.startDrag(pieceIndex, touch.clientX, touch.clientY, element);
+
+			// Add haptic feedback if available (will be implemented with haptics plugin)
+			if ('vibrate' in navigator) {
+				navigator.vibrate(10);
+			}
 		}
 	}
 
