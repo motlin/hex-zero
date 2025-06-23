@@ -1,0 +1,103 @@
+/* Mobile compatibility fixes for Hex Zero */
+
+/* Prevent tap highlighting on iOS */
+* {
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent text selection on mobile */
+body {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+/* Allow text selection in modals */
+.modal-content {
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	-ms-user-select: text;
+	user-select: text;
+}
+
+/* Prevent pinch zooming on the canvas */
+#gameCanvas {
+	touch-action: none;
+}
+
+/* Allow standard touch actions on UI elements */
+.control-panel,
+.bottom-controls,
+.hamburger-menu-container,
+.difficulty-screen {
+	touch-action: auto;
+}
+
+/* Prevent bouncing/elastic scrolling on iOS */
+html,
+body {
+	position: fixed;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+}
+
+.game-container {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* Fix for iOS safe areas */
+.game-container {
+	padding-left: env(safe-area-inset-left);
+	padding-right: env(safe-area-inset-right);
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure modals work with safe areas */
+.modal-content {
+	max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 40px);
+	margin-top: calc(20px + env(safe-area-inset-top));
+}
+
+/* Fix viewport on mobile browsers */
+@supports (-webkit-touch-callout: none) {
+	/* iOS only */
+	.game-container {
+		height: -webkit-fill-available;
+	}
+}
+
+/* Improve touch targets for mobile */
+button,
+.difficulty-card,
+.draggable-piece {
+	min-height: 44px;
+	min-width: 44px;
+}
+
+/* Fix for Android Chrome address bar */
+@media screen and (max-width: 768px) {
+	.game-container {
+		height: 100vh;
+		height: calc(var(--vh, 1vh) * 100);
+	}
+}
+
+/* Prevent accidental zooming on form inputs */
+input[type="number"],
+input[type="text"],
+button {
+	font-size: 16px; /* Prevents zoom on iOS when focusing inputs */
+}
+
+/* Ensure proper rendering on high DPI screens */
+#gameCanvas {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: -webkit-crisp-edges;
+	image-rendering: pixelated;
+	image-rendering: crisp-edges;
+}

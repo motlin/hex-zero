@@ -5,6 +5,7 @@ import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
 import {CanvasManager} from './canvas/CanvasManager';
 import {AchievementManager} from './achievements/AchievementManager';
 import type {DifficultyLevel} from './achievements/AchievementDefinitions';
+import {setupMobileCompatibility} from './mobile-utils';
 
 declare global {
 	interface Window {
@@ -104,6 +105,9 @@ function updateFullscreenButtonText(): void {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+	// Set up mobile compatibility fixes
+	setupMobileCompatibility();
+
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 

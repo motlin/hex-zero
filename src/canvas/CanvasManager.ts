@@ -31,16 +31,24 @@ export class CanvasManager {
 
 	updateCanvasSize(radius: number, zoomFactor: number): number {
 		const rect = this.canvas.getBoundingClientRect();
+		const dpr = window.devicePixelRatio || 1;
 
-		this.canvas.width = rect.width;
-		this.canvas.height = rect.height;
+		// Set canvas size accounting for device pixel ratio
+		this.canvas.width = rect.width * dpr;
+		this.canvas.height = rect.height * dpr;
+
+		// Scale the context to ensure correct drawing dimensions
+		this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
 		return calculateHexSize(rect.width, rect.height, radius, zoomFactor);
 	}
 
 	clearCanvas(backgroundColor: string): void {
+		this.ctx.save();
+		this.ctx.setTransform(1, 0, 0, 1, 0, 0);
 		this.ctx.fillStyle = backgroundColor;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+		this.ctx.restore();
 	}
 
 	clearPreviewCanvas(backgroundColor: string): void {
