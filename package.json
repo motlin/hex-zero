@@ -57,6 +57,7 @@
 		"@capacitor/cli": "^7.3.0",
 		"@capacitor/core": "^7.3.0",
 		"@capacitor/ios": "^7.3.0",
+		"@capacitor/status-bar": "^7.0.1",
 		"canvas-confetti": "^1.9.4"
 	}
 }

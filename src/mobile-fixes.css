@@ -56,6 +56,7 @@ body {
 	--safe-area-inset-right: env(safe-area-inset-right, 0px);
 	--safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 	--safe-area-inset-left: env(safe-area-inset-left, 0px);
+	--status-bar-height: 24px; /* Default Android status bar height */
 }
 
 /* Main game container safe area adjustments */
@@ -122,19 +123,33 @@ body {
 
 /* iOS-specific adjustments */
 @supports (-webkit-touch-callout: none) {
-	/* Add extra padding for iOS status bar if not hidden */
+	/* iOS doesn't overlay status bar, so no extra padding needed */
 	.game-container {
-		padding-top: max(20px, var(--safe-area-inset-top));
+		padding-top: var(--safe-area-inset-top);
 	}
 }
 
 /* Android-specific adjustments */
-@media screen and (-webkit-device-pixel-ratio: 2) and (orientation: portrait),
-	screen and (-webkit-device-pixel-ratio: 3) and (orientation: portrait) {
-	/* Android devices often need extra top padding for status bar */
-	.game-container:not(.fullscreen) {
-		padding-top: max(24px, var(--safe-area-inset-top));
-	}
+
+/* Android uses overlay mode, so we need extra  padding for status bar */
+.android .game-container {
+	padding-top: calc(var(--status-bar-height) + var(--safe-area-inset-top));
+} /* Game title positioning adjustment for status bar */
+.game-title {
+	padding-top: calc(10px + var(--safe-area-inset-top));
+}
+
+.android .game-title {
+	padding-top: calc(var(--status-bar-height) + 10px + var(--safe-area-inset-top));
+}
+
+/* Difficulty screen adjustments */
+.difficulty-screen {
+	padding-top: calc(20px + var(--safe-area-inset-top));
+}
+
+.android .difficulty-screen {
+	padding-top: calc(var(--status-bar-height) + 20px + var(--safe-area-inset-top));
 }
 
 /* Fix viewport on mobile browsers */
@@ -323,4 +338,21 @@ button {
 	.piece-nav-button {
 		padding: 12px;
 	}
+}
+
+/* Immersive mode adjustments (status bar hidden) */
+body.immersive-mode .game-container {
+	padding-top: 0;
+}
+
+body.immersive-mode .game-title {
+	padding-top: 10px;
+}
+
+body.immersive-mode .difficulty-screen {
+	padding-top: 20px;
+}
+
+body.immersive-mode .hamburger-menu-container {
+	top: 10px;
 }
