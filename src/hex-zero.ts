@@ -8,6 +8,7 @@ import type {DifficultyLevel} from './achievements/AchievementDefinitions';
 import {setupMobileCompatibility} from './mobile-utils';
 import {setupStatusBar} from './status-bar-handler';
 import {TouchOptimizer, addTouchFeedback, ensureTouchTarget} from './touch-optimizer';
+import {initializeMobileUIEnhancements} from './mobile-ui-enhancements';
 
 declare global {
 	interface Window {
@@ -112,6 +113,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// Set up status bar for native platforms
 	await setupStatusBar();
+
+	// Initialize mobile UI enhancements
+	initializeMobileUIEnhancements();
 
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
