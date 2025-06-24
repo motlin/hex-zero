@@ -10,6 +10,12 @@ import {setupMobileCompatibility} from './mobile-utils';
 import {setupStatusBar} from './status-bar-handler';
 import {TouchOptimizer, addTouchFeedback, ensureTouchTarget} from './touch-optimizer';
 import {initializeMobileUIEnhancements} from './mobile-ui-enhancements';
+import {HapticFeedback} from './haptic-feedback';
+import {OptimizedHexRenderer} from './performance/OptimizedHexRenderer';
+import {MobilePerformanceOptimizer} from './performance/MobilePerformanceOptimizer';
+import {PerformanceMonitor} from './performance/PerformanceMonitor';
+import {scheduleIdleWork} from './performance/idle-callback-polyfill';
+import {SharingService} from './services/sharing';
 
 declare global {
 	interface Window {
@@ -37,6 +43,7 @@ let game: HexSeptominoGame | null = null;
 let globalAchievementManager: AchievementManager | null = null;
 
 function startGame(radius: number, numPieces: number, difficulty?: GameDifficulty): void {
+	void HapticFeedback.lightTap();
 	getRequiredElementById('difficultyScreen', HTMLElement).classList.add('hidden');
 	getRequiredElementById('gameScreen', HTMLElement).classList.remove('hidden');
 
@@ -114,6 +121,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 	// Initialize mobile UI enhancements
 	initializeMobileUIEnhancements();
 
+	// Initialize haptic feedback system
+	await HapticFeedback.initialize();
+
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 
@@ -135,6 +145,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (hamburgerBtn && hamburgerMenu) {
 		hamburgerBtn.addEventListener('click', (e) => {
 			e.stopPropagation();
+			HapticFeedback.lightTap();
 			hamburgerMenu.classList.toggle('hidden');
 		});
 
@@ -155,6 +166,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const newGameBtn = document.getElementById('newGameBtn');
 	if (newGameBtn) {
 		newGameBtn.addEventListener('click', () => {
+			void HapticFeedback.lightTap();
 			showDifficultyScreen();
 		});
 	}
@@ -162,6 +174,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const restartBtn = document.getElementById('restartBtn');
 	if (restartBtn) {
 		restartBtn.addEventListener('click', () => {
+			HapticFeedback.lightTap();
 			if (window.game) {
 				window.game.restart();
 			}
@@ -171,6 +184,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const howToPlayBtn = document.getElementById('howToPlayBtn');
 	if (howToPlayBtn) {
 		howToPlayBtn.addEventListener('click', () => {
+			void HapticFeedback.lightTap();
 			showInstructions();
 		});
 	}
@@ -178,6 +192,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	const achievementsButton = document.getElementById('achievementsButton');
 	if (achievementsButton) {
 		achievementsButton.addEventListener('click', () => {
+			HapticFeedback.lightTap();
 			globalAchievementManager?.showAchievements();
 		});
 	}
@@ -189,6 +204,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (menuHamburgerBtn && menuHamburgerMenu) {
 		menuHamburgerBtn.addEventListener('click', (e) => {
 			e.stopPropagation();
+			HapticFeedback.lightTap();
 			menuHamburgerMenu.classList.toggle('hidden');
 		});
 
@@ -255,6 +271,9 @@ class HexSeptominoGame {
 	private readonly canvasManager: CanvasManager;
 	private readonly gameState: GameState;
 	private readonly renderer: HexRenderer;
+	private readonly optimizedRenderer: OptimizedHexRenderer;
+	private readonly performanceOptimizer: MobilePerformanceOptimizer;
+	private readonly performanceMonitor: PerformanceMonitor;
 	private readonly colors: ColorMap;
 	private mouseHex: HexCoordinate | null;
 	private touchHex: HexCoordinate | null;
@@ -276,6 +295,8 @@ class HexSeptominoGame {
 		duration: number;
 	} | null;
 	private readonly achievementManager: AchievementManager;
+	private readonly sharingService: SharingService;
+	private gameStartTime: number;
 
 	private currentPage: number;
 	private readonly piecesPerPage: number;
@@ -295,6 +316,10 @@ class HexSeptominoGame {
 		this.canvasManager = new CanvasManager('gameCanvas');
 		this.gameState = new GameState(radius, numPieces, difficulty);
 		this.renderer = new HexRenderer(30);
+		this.optimizedRenderer = new OptimizedHexRenderer();
+		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
+		this.performanceMonitor = new PerformanceMonitor();
+		this.performanceMonitor.setRenderer(this.optimizedRenderer);
 		this.updateCanvasSize();
 
 		this.colors = DEFAULT_COLORS;
@@ -333,6 +358,13 @@ class HexSeptominoGame {
 		}
 		this.achievementManager = globalAchievementManager;
 		this.achievementManager.trackGameStart();
+
+		// Initialize sharing service
+		this.sharingService = SharingService.getInstance();
+		this.gameStartTime = Date.now();
+
+		// Initialize haptic feedback
+		HapticFeedback.initialize();
 
 		this.setupEventListeners();
 		this.updateUI();
@@ -504,17 +536,21 @@ class HexSeptominoGame {
 			this.handleKeyPress(e);
 		});
 		getRequiredElementById('hintBtn', HTMLElement).addEventListener('click', () => {
+			void HapticFeedback.lightTap();
 			this.toggleHint();
 		});
 
 		getRequiredElementById('undoBtn', HTMLElement).addEventListener('click', () => {
+			void HapticFeedback.lightTap();
 			this.undo();
 		});
 		getRequiredElementById('redoBtn', HTMLElement).addEventListener('click', () => {
+			void HapticFeedback.lightTap();
 			this.redo();
 		});
 
 		getRequiredElementById('morePiecesBtn', HTMLElement).addEventListener('click', () => {
+			void HapticFeedback.lightTap();
 			this.morePieces();
 		});
 
@@ -699,19 +735,30 @@ class HexSeptominoGame {
 		const placed = this.gameState.placePiece(centerQ, centerR);
 		if (!placed) return;
 
+		// Mark affected hexes as dirty for optimized renderer
+		if (this.performanceOptimizer.getPlatform() !== 'web') {
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = centerQ + tile.q - piece.center.q;
+				const adjustedR = centerR + tile.r - piece.center.r;
+				this.optimizedRenderer.markDirty(adjustedQ, adjustedR);
+			});
+		}
+
 		this.achievementManager.trackPiecePlaced(currentPieceIndex);
 		this.achievementManager.trackMove();
 
 		// Add haptic feedback for successful placement
-		if ('vibrate' in navigator) {
-			// Single short vibration for success
-			navigator.vibrate(20);
-		}
+		HapticFeedback.heavyTap();
 
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
 
-		this.updateUI();
+		// Schedule UI updates during idle time on mobile
+		if (this.performanceOptimizer.getPlatform() !== 'web') {
+			scheduleIdleWork(() => this.updateUI(), {priority: 'normal'});
+		} else {
+			this.updateUI();
+		}
 
 		setTimeout(() => {
 			this.checkWinCondition();
@@ -725,6 +772,7 @@ class HexSeptominoGame {
 	cyclePiece(direction: number): void {
 		const cycled = this.gameState.cyclePiece(direction);
 		if (cycled) {
+			HapticFeedback.mediumTap();
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
@@ -757,6 +805,7 @@ class HexSeptominoGame {
 
 			if (hasUnplaced) {
 				this.currentPage = nextPage;
+				HapticFeedback.lightTap();
 				break;
 			}
 		} while (attempts < maxPages);
@@ -771,6 +820,7 @@ class HexSeptominoGame {
 		if (maxPages <= 1) return;
 
 		this.currentPage = (this.currentPage - 1 + maxPages) % maxPages;
+		HapticFeedback.lightTap();
 		this.renderBottomPanel();
 	}
 
@@ -781,6 +831,7 @@ class HexSeptominoGame {
 		if (maxPages <= 1) return;
 
 		this.currentPage = (this.currentPage + 1) % maxPages;
+		HapticFeedback.lightTap();
 		this.renderBottomPanel();
 	}
 
@@ -853,6 +904,7 @@ class HexSeptominoGame {
 
 	restart(): void {
 		this.gameState.restart();
+		this.gameStartTime = Date.now();
 		this.clearHint();
 		this.achievementManager.resetInOrderTracking();
 
@@ -872,10 +924,25 @@ class HexSeptominoGame {
 		this.restart();
 	}
 
+	async shareVictory(): Promise<void> {
+		const difficulty = this.gameState.getDifficulty();
+		const moveCount = this.gameState.getMoveCount();
+		const timeInSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+
+		await this.sharingService.shareVictory(
+			difficulty as 'easy' | 'medium' | 'hard' | 'expert',
+			moveCount,
+			timeInSeconds,
+		);
+	}
+
 	private checkWinCondition(): void {
 		if (this.gameState.isGameWon()) {
 			const victoryScreen = getRequiredElementById('victoryScreen', HTMLElement);
 			victoryScreen.classList.remove('hidden');
+
+			// Trigger victory haptic feedback
+			HapticFeedback.victoryPattern();
 
 			const difficulty = this.gameState.getDifficulty();
 			getRequiredElementById('victoryDifficulty', HTMLElement).textContent = difficulty;
@@ -1019,6 +1086,48 @@ class HexSeptominoGame {
 		}
 	}
 
+	private getVisibleHexes(): HexCoordinate[] {
+		const canvas = this.canvasManager.getCanvas();
+		const grid = this.gameState.getGrid();
+
+		// Calculate viewport bounds in hex coordinates
+		const viewportWidth = canvas.width / this.zoomFactor;
+		const viewportHeight = canvas.height / this.zoomFactor;
+
+		// Add some padding to ensure smooth scrolling
+		const padding = this.renderer.hexSize * 2;
+
+		// Convert viewport corners to hex coordinates
+		this.renderer.pixelToHex(
+			-viewportWidth / 2 - this.panOffsetX - padding,
+			-viewportHeight / 2 - this.panOffsetY - padding,
+		);
+		this.renderer.pixelToHex(
+			viewportWidth / 2 - this.panOffsetX + padding,
+			viewportHeight / 2 - this.panOffsetY + padding,
+		);
+
+		// Filter hexes within viewport bounds
+		const visibleHexes: HexCoordinate[] = [];
+		grid.hexes.forEach((hex) => {
+			const pos = this.renderer.hexToPixel(hex.q, hex.r);
+			const screenX = pos.x + this.panOffsetX;
+			const screenY = pos.y + this.panOffsetY;
+
+			// Check if hex is within viewport
+			if (
+				screenX >= -viewportWidth / 2 - padding &&
+				screenX <= viewportWidth / 2 + padding &&
+				screenY >= -viewportHeight / 2 - padding &&
+				screenY <= viewportHeight / 2 + padding
+			) {
+				visibleHexes.push({q: hex.q, r: hex.r});
+			}
+		});
+
+		return visibleHexes;
+	}
+
 	private handleKeyPress(event: KeyboardEvent): void {
 		switch (event.key) {
 			case 'ArrowUp':
@@ -1101,10 +1210,7 @@ class HexSeptominoGame {
 		this.requestAnimationFrame();
 
 		// Add haptic feedback for invalid placement
-		if ('vibrate' in navigator) {
-			// Two short vibrations to indicate error
-			navigator.vibrate([30, 50, 30]);
-		}
+		HapticFeedback.warningNotification();
 	}
 
 	private toggleKeyboardShortcuts(): void {
@@ -1136,6 +1242,13 @@ class HexSeptominoGame {
 	private render(): void {
 		const canvas = this.canvasManager.getCanvas();
 		const ctx = this.canvasManager.getContext();
+		const currentTime = performance.now();
+
+		// Use optimized renderer for mobile platforms
+		if (this.performanceOptimizer.getPlatform() !== 'web') {
+			this.renderOptimized(currentTime);
+			return;
+		}
 
 		this.canvasManager.clearCanvas('#0f3460');
 
@@ -1290,6 +1403,185 @@ class HexSeptominoGame {
 		}
 
 		ctx.restore();
+	}
+
+	private renderOptimized(currentTime: number): void {
+		const canvas = this.canvasManager.getCanvas();
+		const ctx = this.canvasManager.getContext();
+		const grid = this.gameState.getGrid();
+
+		this.canvasManager.clearCanvas('#0f3460');
+
+		ctx.save();
+		ctx.translate(canvas.width / 2 + this.panOffsetX, canvas.height / 2 + this.panOffsetY);
+
+		// Update hex cache with current state
+		grid.hexes.forEach((hex) => {
+			let displayHeight = hex.height;
+			const animatingHex = this.animatingHexes.find((h) => h.q === hex.q && h.r === hex.r);
+			if (animatingHex) {
+				displayHeight = animatingHex.targetHeight;
+			}
+			const color = this.colors[displayHeight] || (displayHeight > 10 ? '#1a1a1a' : '#000');
+			this.optimizedRenderer.updateHexCache(hex.q, hex.r, color, displayHeight);
+		});
+
+		// Mark animating hexes as dirty
+		this.animatingHexes.forEach((animatingHex) => {
+			this.optimizedRenderer.markDirty(animatingHex.q, animatingHex.r);
+		});
+
+		// Get visible hexes with viewport culling
+		const visibleHexes = this.getVisibleHexes();
+
+		// Use optimized batch rendering
+		this.optimizedRenderer.renderOptimized(
+			ctx,
+			visibleHexes,
+			(q, r) => this.renderer.hexToPixel(q, r),
+			this.renderer.hexSize,
+			currentTime,
+		);
+
+		// Render animations and overlays separately
+		this.renderAnimations(ctx);
+		this.renderOverlays(ctx);
+
+		ctx.restore();
+
+		// Periodic memory optimization
+		// 1% chance per frame
+		if (Math.random() < 0.01) {
+			this.optimizedRenderer.trimCache();
+		}
+	}
+
+	private renderAnimations(ctx: CanvasRenderingContext2D): void {
+		const fontSize = Math.max(12, Math.floor(this.renderer.hexSize * 0.5));
+
+		// Render animating hexes
+		this.animatingHexes.forEach((animatingHex) => {
+			const hex = this.gameState.getGrid().getHex(animatingHex.q, animatingHex.r);
+			if (!hex) return;
+
+			const pos = this.renderer.hexToPixel(hex.q, hex.r);
+			ctx.save();
+			ctx.translate(pos.x, pos.y);
+
+			const burstScale = 1 + animatingHex.progress * 0.5;
+			const opacity = 1 - animatingHex.progress;
+
+			ctx.globalAlpha = opacity;
+			ctx.scale(burstScale, burstScale);
+
+			this.canvasManager.drawHexOnCanvas(
+				ctx,
+				0,
+				0,
+				this.renderer.hexSize,
+				this.colors[animatingHex.startHeight] || (animatingHex.startHeight > 10 ? '#1a1a1a' : '#000'),
+				'#0f3460',
+				2,
+			);
+
+			if (animatingHex.startHeight > 0 && opacity > 0.1) {
+				ctx.fillStyle = '#fff';
+				ctx.font = `bold ${fontSize}px Arial`;
+				ctx.textAlign = 'center';
+				ctx.textBaseline = 'middle';
+				ctx.fillText(animatingHex.startHeight.toString(), 0, 0);
+			}
+
+			ctx.restore();
+		});
+
+		// Render invalid placement animation
+		if (this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) {
+			const elapsed = performance.now() - this.invalidPlacementAnimation.startTime;
+			const progress = elapsed / this.invalidPlacementAnimation.duration;
+			const pulseProgress = Math.sin(progress * Math.PI * 2);
+			const scale = 1.0 + pulseProgress * 0.3;
+			const opacity = Math.max(0, 1 - progress);
+
+			const piece = this.gameState.getCurrentPiece();
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = this.invalidPlacementAnimation!.position.q + tile.q - piece.center.q;
+				const adjustedR = this.invalidPlacementAnimation!.position.r + tile.r - piece.center.r;
+				const hex = this.gameState.getGrid().getHex(adjustedQ, adjustedR);
+				if (hex) {
+					const pos = this.renderer.hexToPixel(hex.q, hex.r);
+					ctx.save();
+					ctx.translate(pos.x, pos.y);
+					ctx.scale(scale, scale);
+					ctx.globalAlpha = opacity;
+					ctx.strokeStyle = '#f44336';
+					ctx.lineWidth = 5;
+					this.drawHexOutline(ctx, 0, 0);
+					ctx.restore();
+				}
+			});
+		}
+	}
+
+	private renderOverlays(ctx: CanvasRenderingContext2D): void {
+		const grid = this.gameState.getGrid();
+
+		// Handle drag hover effects
+		if (this.isDragging && this.draggedPieceIndex !== null && this.dragHoverHex) {
+			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
+			if (piece) {
+				const canPlace = this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r);
+				piece.tiles.forEach((tile) => {
+					const adjustedQ = this.dragHoverHex!.q + tile.q - piece.center.q;
+					const adjustedR = this.dragHoverHex!.r + tile.r - piece.center.r;
+					const hex = grid.getHex(adjustedQ, adjustedR);
+					if (hex) {
+						const pos = this.renderer.hexToPixel(hex.q, hex.r);
+						if (canPlace) {
+							this.drawHaloEffect(ctx, pos.x, pos.y);
+						}
+					}
+				});
+			}
+		}
+
+		// Preview hex for click-to-place
+		const previewHex = this.mouseHex || this.touchHex;
+		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) && !this.isDragging) {
+			const piece = this.gameState.getCurrentPiece();
+			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = previewHex.q + tile.q - piece.center.q;
+				const adjustedR = previewHex.r + tile.r - piece.center.r;
+				const hex = grid.getHex(adjustedQ, adjustedR);
+				if (hex) {
+					const pos = this.renderer.hexToPixel(hex.q, hex.r);
+					if (canPlace) {
+						this.drawHex(ctx, pos.x, pos.y, 'rgba(255, 235, 59, 0.3)', '#ffeb3b', 3);
+					} else {
+						this.drawHex(ctx, pos.x, pos.y, 'rgba(244, 67, 54, 0.3)', '#f44336', 3);
+					}
+				}
+			});
+		}
+
+		// Hint overlay
+		if (this.hintPos) {
+			const piece = this.gameState.getCurrentPiece();
+			piece.tiles.forEach((tile) => {
+				const adjustedQ = this.hintPos!.q + tile.q - piece.center.q;
+				const adjustedR = this.hintPos!.r + tile.r - piece.center.r;
+				const hex = grid.getHex(adjustedQ, adjustedR);
+				if (hex) {
+					const pos = this.renderer.hexToPixel(hex.q, hex.r);
+					ctx.strokeStyle = '#e94560';
+					ctx.lineWidth = 4;
+					ctx.setLineDash([5, 5]);
+					this.drawHexOutline(ctx, pos.x, pos.y);
+					ctx.setLineDash([]);
+				}
+			});
+		}
 	}
 
 	private renderBottomPanel(): void {
@@ -1495,10 +1787,8 @@ class HexSeptominoGame {
 			if (!touch) return;
 			this.startDrag(pieceIndex, touch.clientX, touch.clientY, element);
 
-			// Add haptic feedback if available (will be implemented with haptics plugin)
-			if ('vibrate' in navigator) {
-				navigator.vibrate(10);
-			}
+			// Add haptic feedback for drag start
+			HapticFeedback.mediumTap();
 		}
 	}
 

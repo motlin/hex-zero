@@ -1,8 +1,13 @@
 import {calculateHexSize} from '../canvas-utils';
 import {getRequiredElementById} from '../dom-utils';
+import {MobilePerformanceOptimizer} from '../performance/MobilePerformanceOptimizer';
 
 function getRequiredContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-	const ctx = canvas.getContext('2d');
+	const ctx = canvas.getContext('2d', {
+		alpha: false,
+		desynchronized: true,
+		willReadFrequently: false,
+	});
 	if (ctx === null) {
 		throw new Error('Failed to get 2d rendering context');
 	}
@@ -12,10 +17,13 @@ function getRequiredContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D
 export class CanvasManager {
 	private readonly canvas: HTMLCanvasElement;
 	private readonly ctx: CanvasRenderingContext2D;
+	private readonly performanceOptimizer: MobilePerformanceOptimizer;
 
 	constructor(canvasId: string) {
 		this.canvas = getRequiredElementById(canvasId, HTMLCanvasElement);
 		this.ctx = getRequiredContext(this.canvas);
+		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
+		this.performanceOptimizer.optimizeCanvasContext(this.ctx);
 	}
 
 	getCanvas(): HTMLCanvasElement {
@@ -28,14 +36,16 @@ export class CanvasManager {
 
 	updateCanvasSize(radius: number, zoomFactor: number): number {
 		const rect = this.canvas.getBoundingClientRect();
-		const dpr = window.devicePixelRatio || 1;
 
-		// Set canvas size accounting for device pixel ratio
-		this.canvas.width = rect.width * dpr;
-		this.canvas.height = rect.height * dpr;
+		// Get optimal canvas size from performance optimizer
+		const optimalSize = this.performanceOptimizer.getOptimalCanvasSize(rect.width, rect.height);
+
+		// Set canvas size with optimized dimensions
+		this.canvas.width = optimalSize.width;
+		this.canvas.height = optimalSize.height;
 
 		// Scale the context to ensure correct drawing dimensions
-		this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		this.ctx.setTransform(optimalSize.scale, 0, 0, optimalSize.scale, 0, 0);
 
 		return calculateHexSize(rect.width, rect.height, radius, zoomFactor);
 	}
