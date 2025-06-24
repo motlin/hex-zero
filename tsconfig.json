@@ -1,44 +1,36 @@
 {
+	"extends": "expo/tsconfig.base",
 	"compilerOptions": {
-		"target": "ES2022",
-		"module": "ESNext",
-		"lib": ["ES2022", "DOM", "DOM.Iterable"],
-		"jsx": "react-jsx",
 		"strict": true,
-		"esModuleInterop": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"noEmit": true,
 		"strictNullChecks": true,
 		"noImplicitAny": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
 		"noImplicitReturns": true,
-		"noFallthroughCasesInSwitch": true,
-		"noUncheckedIndexedAccess": true,
-		"exactOptionalPropertyTypes": true,
-		"noImplicitOverride": true,
-		"noPropertyAccessFromIndexSignature": true,
-		"verbatimModuleSyntax": true,
-		"allowSyntheticDefaultImports": true
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+		"types": ["react", "react-native"]
 	},
-	"include": ["src/**/*", "tests/**/*", "vite.config.ts", "vitest.config.ts", "eslint.config.ts"],
+	"include": [
+		"src/**/*",
+		"tests/**/*",
+		"vite.config.ts",
+		"vitest.config.ts",
+		"eslint.config.ts",
+		"App.tsx",
+		"app.json"
+	],
 	"exclude": [
 		"node_modules",
-		"dist",
-		"build",
-		"coverage",
-		"babel.config.js",
-		"metro.config.js",
+		"babel.config.cjs",
+		"metro.config.cjs",
 		"jest.config.js",
-		"src/components/**/*.tsx",
-		"src/screens/**/*.tsx",
-		"src/hooks/**/*.tsx",
-		"App.tsx"
-	],
-	"extends": "expo/tsconfig.base"
+		"src/hex-zero.ts",
+		"src/canvas/**/*",
+		"src/renderer/**/*",
+		"src/canvas-utils.ts",
+		"src/canvas-utils.test.ts",
+		"**/*.test.ts",
+		"**/*.test.tsx"
+	]
 }

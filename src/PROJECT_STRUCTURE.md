@@ -41,22 +41,16 @@ This document explains the adapted project structure for the React Native port o
 
 ## TypeScript Configuration
 
-The project uses two TypeScript configurations:
+The project uses a unified TypeScript configuration:
 
-1. `tsconfig.json` - Base configuration for web development
-    - Excludes React Native files (\*.tsx in components/screens/hooks)
-    - Uses ES2020 target with DOM libraries
-
-2. `tsconfig.rn.json` - React Native specific configuration
-    - Extends base config
-    - Adds JSX support for React Native
-    - Includes only React Native relevant files
-    - Excludes web-specific files and test files
+- `tsconfig.json` - Unified configuration for React Native development
+    - Extends expo/tsconfig.base for React Native compatibility
+    - Includes all React Native source files
+    - Excludes web-specific files (canvas/, renderer/, hex-zero.ts)
+    - Excludes test files to keep the build focused
 
 ## Development Workflow
 
-- Web development: Uses Vite and the base tsconfig.json
-- React Native development: Uses Expo and tsconfig.rn.json
-- Both configurations can coexist without conflicts
-- Run `npm run ci:typecheck` for web type checking
-- Run `npm run ci:typecheck:rn` for React Native type checking
+- React Native development: Uses Expo and the unified tsconfig.json
+- Run `npm run ci:typecheck` for type checking
+- Web-specific files are excluded from the React Native build

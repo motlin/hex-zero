@@ -42,13 +42,13 @@ test: install
 test-ci: install-ci
     npm run test:run
 
-# `npm run ci:typecheck`
+# `npm run typecheck`
 typecheck: install
-    npm run ci:typecheck
+    npm run typecheck
 
-# `npm run ci:typecheck`
+# `npm run typecheck`
 typecheck-ci: install-ci
-    npm run ci:typecheck
+    npm run typecheck
 
 # `npm run build`
 build: install
