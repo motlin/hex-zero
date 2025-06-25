@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import { SkiaTest } from './src/components/SkiaTest';
 import { DependencyTest } from './src/components/DependencyTest';
+import { GameLogicTest } from './src/components/GameLogicTest';
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
         <Text style={styles.header}>Hex Zero</Text>
         <SkiaTest />
         <DependencyTest />
+        <GameLogicTest />
         <StatusBar style="auto" />
       </View>
     </ScrollView>
