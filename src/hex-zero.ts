@@ -9,6 +9,7 @@ import {setupMobileCompatibility} from './mobile-utils';
 import {setupStatusBar} from './status-bar-handler';
 import {TouchOptimizer, addTouchFeedback, ensureTouchTarget} from './touch-optimizer';
 import {initializeMobileUIEnhancements} from './mobile-ui-enhancements';
+import {HapticFeedback} from './haptic-feedback';
 
 declare global {
 	interface Window {
@@ -36,6 +37,7 @@ let game: HexSeptominoGame | null = null;
 let globalAchievementManager: AchievementManager | null = null;
 
 function startGame(radius: number, numPieces: number): void {
+	HapticFeedback.lightTap();
 	document.getElementById('difficultyScreen')!.classList.add('hidden');
 	document.getElementById('gameScreen')!.classList.remove('hidden');
 
@@ -117,6 +119,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 	// Initialize mobile UI enhancements
 	initializeMobileUIEnhancements();
 
+	// Initialize haptic feedback system
+	await HapticFeedback.initialize();
+
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 
@@ -138,6 +143,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (hamburgerBtn && hamburgerMenu) {
 		hamburgerBtn.addEventListener('click', (e) => {
 			e.stopPropagation();
+			HapticFeedback.lightTap();
 			hamburgerMenu.classList.toggle('hidden');
 		});
 
@@ -154,12 +160,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	const newGameBtn = document.getElementById('newGameBtn');
 	if (newGameBtn) {
-		newGameBtn.addEventListener('click', () => showDifficultyScreen());
+		newGameBtn.addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			showDifficultyScreen();
+		});
 	}
 
 	const restartBtn = document.getElementById('restartBtn');
 	if (restartBtn) {
 		restartBtn.addEventListener('click', () => {
+			HapticFeedback.lightTap();
 			if (window.game) {
 				window.game.restart();
 			}
@@ -168,12 +178,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	const howToPlayBtn = document.getElementById('howToPlayBtn');
 	if (howToPlayBtn) {
-		howToPlayBtn.addEventListener('click', () => showInstructions());
+		howToPlayBtn.addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			showInstructions();
+		});
 	}
 
 	const achievementsButton = document.getElementById('achievementsButton');
 	if (achievementsButton) {
 		achievementsButton.addEventListener('click', () => {
+			HapticFeedback.lightTap();
 			globalAchievementManager?.showAchievements();
 		});
 	}
@@ -185,6 +199,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (menuHamburgerBtn && menuHamburgerMenu) {
 		menuHamburgerBtn.addEventListener('click', (e) => {
 			e.stopPropagation();
+			HapticFeedback.lightTap();
 			menuHamburgerMenu.classList.toggle('hidden');
 		});
 
@@ -323,6 +338,9 @@ class HexSeptominoGame {
 
 		this.achievementManager = globalAchievementManager!;
 		this.achievementManager.trackGameStart();
+
+		// Initialize haptic feedback
+		HapticFeedback.initialize();
 
 		this.setupEventListeners();
 		this.updateUI();
@@ -483,12 +501,24 @@ class HexSeptominoGame {
 		});
 
 		document.addEventListener('keydown', (e) => this.handleKeyPress(e));
-		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.toggleHint());
+		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			this.toggleHint();
+		});
 
-		(document.getElementById('undoBtn') as HTMLElement).addEventListener('click', () => this.undo());
-		(document.getElementById('redoBtn') as HTMLElement).addEventListener('click', () => this.redo());
+		(document.getElementById('undoBtn') as HTMLElement).addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			this.undo();
+		});
+		(document.getElementById('redoBtn') as HTMLElement).addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			this.redo();
+		});
 
-		(document.getElementById('morePiecesBtn') as HTMLElement).addEventListener('click', () => this.morePieces());
+		(document.getElementById('morePiecesBtn') as HTMLElement).addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			this.morePieces();
+		});
 
 		const closeBtn = document.getElementById('closeShortcutsBtn');
 		const modal = document.getElementById('keyboardShortcutsModal');
@@ -671,10 +701,7 @@ class HexSeptominoGame {
 		this.achievementManager.trackMove();
 
 		// Add haptic feedback for successful placement
-		if ('vibrate' in navigator) {
-			// Single short vibration for success
-			navigator.vibrate(20);
-		}
+		HapticFeedback.heavyTap();
 
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
@@ -693,6 +720,7 @@ class HexSeptominoGame {
 	cyclePiece(direction: number): void {
 		const cycled = this.gameState.cyclePiece(direction);
 		if (cycled) {
+			HapticFeedback.mediumTap();
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
@@ -725,6 +753,7 @@ class HexSeptominoGame {
 
 			if (hasUnplaced) {
 				this.currentPage = nextPage;
+				HapticFeedback.lightTap();
 				break;
 			}
 		} while (attempts < maxPages);
@@ -739,6 +768,7 @@ class HexSeptominoGame {
 		if (maxPages <= 1) return;
 
 		this.currentPage = (this.currentPage - 1 + maxPages) % maxPages;
+		HapticFeedback.lightTap();
 		this.renderBottomPanel();
 	}
 
@@ -749,6 +779,7 @@ class HexSeptominoGame {
 		if (maxPages <= 1) return;
 
 		this.currentPage = (this.currentPage + 1) % maxPages;
+		HapticFeedback.lightTap();
 		this.renderBottomPanel();
 	}
 
@@ -844,6 +875,9 @@ class HexSeptominoGame {
 		if (this.gameState.isGameWon()) {
 			const victoryScreen = document.getElementById('victoryScreen')!;
 			victoryScreen.classList.remove('hidden');
+
+			// Trigger victory haptic feedback
+			HapticFeedback.victoryPattern();
 
 			const difficulty = this.gameState.getDifficulty();
 			(document.getElementById('victoryDifficulty') as HTMLElement).textContent = difficulty;
@@ -1070,10 +1104,7 @@ class HexSeptominoGame {
 		this.requestAnimationFrame();
 
 		// Add haptic feedback for invalid placement
-		if ('vibrate' in navigator) {
-			// Two short vibrations to indicate error
-			navigator.vibrate([30, 50, 30]);
-		}
+		HapticFeedback.warningNotification();
 	}
 
 	private toggleKeyboardShortcuts(): void {
@@ -1453,10 +1484,8 @@ class HexSeptominoGame {
 			if (!touch) return;
 			this.startDrag(pieceIndex, touch.clientX, touch.clientY, event.target as HTMLElement);
 
-			// Add haptic feedback if available (will be implemented with haptics plugin)
-			if ('vibrate' in navigator) {
-				navigator.vibrate(10);
-			}
+			// Add haptic feedback for drag start
+			HapticFeedback.mediumTap();
 		}
 	}
 
