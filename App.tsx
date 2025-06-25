@@ -2,17 +2,24 @@ import {StatusBar} from 'expo-status-bar';
 import {StyleSheet, Text, View, ScrollView} from 'react-native';
 import {SkiaTest} from './src/components/SkiaTest';
 import {DependencyTest} from './src/components/DependencyTest';
+import {GameLogicTest} from './src/components/GameLogicTest';
+import {GameStateTest} from './src/components/GameStateTest';
+import {GameStateProvider} from './src/contexts/GameStateContext';
 
 export default function App() {
 	return (
-		<ScrollView contentContainerStyle={styles.scrollContainer}>
-			<View style={styles.container}>
-				<Text style={styles.header}>Hex Zero</Text>
-				<SkiaTest />
-				<DependencyTest />
-				<StatusBar style="auto" />
-			</View>
-		</ScrollView>
+		<GameStateProvider>
+			<ScrollView contentContainerStyle={styles.scrollContainer}>
+				<View style={styles.container}>
+					<Text style={styles.header}>Hex Zero</Text>
+					<SkiaTest />
+					<DependencyTest />
+					<GameLogicTest />
+					<GameStateTest />
+					<StatusBar style="auto" />
+				</View>
+			</ScrollView>
+		</GameStateProvider>
 	);
 }
 
