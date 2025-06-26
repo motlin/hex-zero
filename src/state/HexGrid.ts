@@ -42,6 +42,21 @@ export class HexGrid {
 		];
 		return dirs.map(([dq, dr]) => ({q: q + dq, r: r + dr})).filter((pos) => this.getHex(pos.q, pos.r));
 	}
+
+	isValidCoordinate(q: number, r: number): boolean {
+		return this.hexes.has(`${q},${r}`);
+	}
+
+	getHeight(q: number, r: number): number {
+		const hex = this.getHex(q, r);
+		return hex ? hex.height : 0;
+	}
+
+	forEachHex(callback: (q: number, r: number, height: number) => void): void {
+		this.hexes.forEach((hex) => {
+			callback(hex.q, hex.r, hex.height);
+		});
+	}
 }
 
 export type {HexCoordinate, Hex};
