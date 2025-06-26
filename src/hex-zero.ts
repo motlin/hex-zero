@@ -14,6 +14,7 @@ import {OptimizedHexRenderer} from './performance/OptimizedHexRenderer';
 import {MobilePerformanceOptimizer} from './performance/MobilePerformanceOptimizer';
 import {PerformanceMonitor} from './performance/PerformanceMonitor';
 import {scheduleIdleWork} from './performance/idle-callback-polyfill';
+import {SharingService} from './services/sharing';
 
 declare global {
 	interface Window {
@@ -289,6 +290,8 @@ class HexSeptominoGame {
 		duration: number;
 	} | null;
 	private achievementManager: AchievementManager;
+	private sharingService: SharingService;
+	private gameStartTime: number;
 
 	private currentPage: number;
 	private piecesPerPage: number;
@@ -349,6 +352,10 @@ class HexSeptominoGame {
 
 		this.achievementManager = globalAchievementManager!;
 		this.achievementManager.trackGameStart();
+
+		// Initialize sharing service
+		this.sharingService = SharingService.getInstance();
+		this.gameStartTime = Date.now();
 
 		// Initialize haptic feedback
 		HapticFeedback.initialize();
@@ -877,6 +884,7 @@ class HexSeptominoGame {
 
 	restart(): void {
 		this.gameState.restart();
+		this.gameStartTime = Date.now();
 		this.clearHint();
 		this.achievementManager.resetInOrderTracking();
 
@@ -894,6 +902,18 @@ class HexSeptominoGame {
 	restartAndHideVictory(): void {
 		document.getElementById('victoryScreen')!.classList.add('hidden');
 		this.restart();
+	}
+
+	async shareVictory(): Promise<void> {
+		const difficulty = this.gameState.getDifficulty();
+		const moveCount = this.gameState.getMoveCount();
+		const timeInSeconds = Math.floor((Date.now() - this.gameStartTime) / 1000);
+
+		await this.sharingService.shareVictory(
+			difficulty as 'easy' | 'medium' | 'hard' | 'expert',
+			moveCount,
+			timeInSeconds,
+		);
 	}
 
 	private checkWinCondition(): void {
