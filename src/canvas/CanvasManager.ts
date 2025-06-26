@@ -1,16 +1,31 @@
 import {calculateHexSize} from '../canvas-utils';
+import {MobilePerformanceOptimizer} from '../performance/MobilePerformanceOptimizer';
 
 export class CanvasManager {
 	private canvas: HTMLCanvasElement;
 	private ctx: CanvasRenderingContext2D;
 	private previewCanvas: HTMLCanvasElement;
 	private previewCtx: CanvasRenderingContext2D;
+	private performanceOptimizer: MobilePerformanceOptimizer;
 
 	constructor(canvasId: string, previewCanvasId: string) {
 		this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-		this.ctx = this.canvas.getContext('2d')!;
+		this.ctx = this.canvas.getContext('2d', {
+			alpha: false,
+			desynchronized: true,
+			willReadFrequently: false,
+		})!;
 		this.previewCanvas = document.getElementById(previewCanvasId) as HTMLCanvasElement;
-		this.previewCtx = this.previewCanvas.getContext('2d')!;
+		this.previewCtx = this.previewCanvas.getContext('2d', {
+			alpha: false,
+			desynchronized: true,
+			willReadFrequently: false,
+		})!;
+
+		// Initialize performance optimizer
+		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
+		this.performanceOptimizer.optimizeCanvasContext(this.ctx);
+		this.performanceOptimizer.optimizeCanvasContext(this.previewCtx);
 	}
 
 	getCanvas(): HTMLCanvasElement {
@@ -31,14 +46,16 @@ export class CanvasManager {
 
 	updateCanvasSize(radius: number, zoomFactor: number): number {
 		const rect = this.canvas.getBoundingClientRect();
-		const dpr = window.devicePixelRatio || 1;
 
-		// Set canvas size accounting for device pixel ratio
-		this.canvas.width = rect.width * dpr;
-		this.canvas.height = rect.height * dpr;
+		// Get optimal canvas size from performance optimizer
+		const optimalSize = this.performanceOptimizer.getOptimalCanvasSize(rect.width, rect.height);
+
+		// Set canvas size with optimized dimensions
+		this.canvas.width = optimalSize.width;
+		this.canvas.height = optimalSize.height;
 
 		// Scale the context to ensure correct drawing dimensions
-		this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+		this.ctx.setTransform(optimalSize.scale, 0, 0, optimalSize.scale, 0, 0);
 
 		return calculateHexSize(rect.width, rect.height, radius, zoomFactor);
 	}

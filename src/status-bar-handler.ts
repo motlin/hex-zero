@@ -31,8 +31,6 @@ export async function setupStatusBar(): Promise<void> {
 			await StatusBar.setBackgroundColor({color: '#0a0e27ee'});
 			document.body.classList.add('android');
 		}
-
-		console.log(`Status bar configured for ${platform} platform`);
 	} catch (error) {
 		console.error('Failed to configure status bar:', error);
 	}
@@ -45,7 +43,6 @@ export async function hideStatusBar(): Promise<void> {
 
 	try {
 		await StatusBar.hide();
-		console.log('Status bar hidden');
 	} catch (error) {
 		console.error('Could not hide status bar:', error);
 	}
@@ -58,7 +55,6 @@ export async function showStatusBar(): Promise<void> {
 
 	try {
 		await StatusBar.show();
-		console.log('Status bar shown');
 	} catch (error) {
 		console.error('Could not show status bar:', error);
 	}

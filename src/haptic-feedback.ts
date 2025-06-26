@@ -18,7 +18,6 @@ export class HapticFeedback {
 			try {
 				// Test haptics availability with a simple impact
 				await Haptics.impact({style: ImpactStyle.Light});
-				console.log('Haptic feedback initialized and available');
 			} catch (error) {
 				console.warn('Haptic feedback not available on this device:', error);
 				this.isAvailable = false;
