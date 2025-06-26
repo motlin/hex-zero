@@ -22,7 +22,10 @@
 		"ios:build": "npm run cap:sync && npx cap open ios",
 		"ios:run": "npm run cap:sync && npx cap run ios",
 		"android:build": "npm run cap:sync && npx cap open android",
-		"android:run": "npm run cap:sync && npx cap run android"
+		"android:run": "npm run cap:sync && npx cap run android",
+		"generate:icons": "node scripts/generate-app-icons.js",
+		"generate:launch": "node scripts/generate-launch-screens.js",
+		"generate:assets": "npm run generate:icons && npm run generate:launch"
 	},
 	"repository": {
 		"type": "git",
