@@ -53,5 +53,28 @@
 	<false/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>
+	<key>NSCameraUsageDescription</key>
+	<string>This app does not use the camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app does not use the microphone.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app does not use location services.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app does not access the photo library.</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+	</array>
+	<key>CFBundleGetInfoString</key>
+	<string>Hex Zero - A challenging puzzle game where you place hexagonal pieces to clear the board. Test your spatial reasoning and strategic thinking in this addictive hex-based puzzle.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2024 Hex Zero. All rights reserved.</string>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 </dict>
 </plist>
