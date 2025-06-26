@@ -30,6 +30,33 @@ export class HexGrid {
 	getHex(q: number, r: number): Hex | undefined {
 		return this.hexes.get(`${q},${r}`);
 	}
+
+	getNeighbors(q: number, r: number): HexCoordinate[] {
+		const dirs: [number, number][] = [
+			[1, 0],
+			[1, -1],
+			[0, -1],
+			[-1, 0],
+			[-1, 1],
+			[0, 1],
+		];
+		return dirs.map(([dq, dr]) => ({q: q + dq, r: r + dr})).filter((pos) => this.getHex(pos.q, pos.r));
+	}
+
+	forEachHex(callback: (q: number, r: number, height: number) => void): void {
+		this.hexes.forEach((hex) => {
+			callback(hex.q, hex.r, hex.height);
+		});
+	}
+
+	isValidCoordinate(q: number, r: number): boolean {
+		return this.hexes.has(`${q},${r}`);
+	}
+
+	getHeight(q: number, r: number): number {
+		const hex = this.getHex(q, r);
+		return hex ? hex.height : 0;
+	}
 }
 
-export type {HexCoordinate};
+export type {HexCoordinate, Hex};

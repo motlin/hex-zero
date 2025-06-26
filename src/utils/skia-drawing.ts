@@ -46,21 +46,21 @@ export function createPiecePath(tilePositions: Point[], hexSize: number): SkPath
 }
 
 /**
- * 🎨 Convert color with alpha
+ * 🎨 Convert color with alpha (deprecated - use withAlpha from SkiaColorTheme)
  */
 export function colorWithAlpha(color: string, alpha: number): string {
 	if (color.startsWith('#')) {
 		const hex = color.slice(1);
-		const alphaHex = Math.round(alpha * 255)
+		const alphaHex = Math.round(Math.max(0, Math.min(1, alpha)) * 255)
 			.toString(16)
 			.padStart(2, '0');
-		return `#${hex}${alphaHex}`;
+		return hex.length === 6 ? `#${hex}${alphaHex}` : color;
 	}
 	return color;
 }
 
 /**
- * 🎨 Get color for hex height
+ * 🎨 Get color for hex height (deprecated - use getHeightColorFromTheme)
  */
 export function getHeightColor(height: number, colorMap: Record<number, string>): string {
 	if (height === 0) return '#000000';
