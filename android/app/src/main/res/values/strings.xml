@@ -4,4 +4,7 @@
     <string name="title_activity_main">Hex Zero</string>
     <string name="package_name">com.hexzero.game</string>
     <string name="custom_url_scheme">com.hexzero.game</string>
+    <string name="app_description">A challenging puzzle game where you place hexagonal pieces to clear the board. Test your spatial reasoning and strategic thinking in this addictive hex-based puzzle.</string>
+    <string name="app_category">Game</string>
+    <string name="app_copyright">Copyright © 2024 Hex Zero. All rights reserved.</string>
 </resources>
