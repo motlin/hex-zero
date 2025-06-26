@@ -11,7 +11,12 @@ export function useGameActions() {
 		redo,
 		canUndo,
 		canRedo,
-		getSolutionHint,
-		incrementHintCount,
+		getHint: () => {
+			const hint = getSolutionHint();
+			if (hint) {
+				incrementHintCount();
+			}
+			return hint;
+		},
 	};
 }

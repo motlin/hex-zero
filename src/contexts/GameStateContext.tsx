@@ -175,9 +175,14 @@ export function GameStateProvider({children}: {children: React.ReactNode}) {
 
 	const restart = useCallback(() => {
 		if (!gameState) return;
-		gameState.restart();
-		setCurrentPieceIndexState(gameState.getCurrentPieceIndex());
-	}, [gameState]);
+
+		// Get current game settings
+		const radius = gameState.getGrid().radius;
+		const numPieces = gameState.getPieces().length;
+
+		// Create a new game with same settings
+		initializeGame(radius, numPieces);
+	}, [gameState, initializeGame]);
 
 	const getSolutionHint = useCallback((): HexCoordinate | null => {
 		if (!gameState) return null;

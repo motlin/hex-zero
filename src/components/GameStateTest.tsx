@@ -4,9 +4,9 @@ import {useGame, usePieces, useGameActions, useGameStats} from '../hooks';
 
 export function GameStateTest() {
 	const {gameState, isLoading, initializeGame, restart, isGameWon, getDifficulty} = useGame();
-	const {currentPieceIndex, cyclePiece, getCurrentPiece, getAllPiecesPlaced} = usePieces();
+	const {selectedPieceIndex, selectedPiece, cycleSelectedPiece, getAllPiecesPlaced} = usePieces();
 	const {undo, redo, canUndo, canRedo} = useGameActions();
-	const {getMoveCount, getUndoCount, getHintCount} = useGameStats();
+	const {moveCount, hintsUsed} = useGameStats();
 
 	useEffect(() => {
 		if (!gameState) {
@@ -14,8 +14,6 @@ export function GameStateTest() {
 			initializeGame(3, 4);
 		}
 	}, [gameState, initializeGame]);
-
-	const currentPiece = getCurrentPiece();
 
 	return (
 		<View style={styles.container}>
@@ -27,28 +25,27 @@ export function GameStateTest() {
 				<>
 					<View style={styles.infoSection}>
 						<Text style={styles.label}>Difficulty: {getDifficulty()}</Text>
-						<Text style={styles.label}>Current Piece: {currentPieceIndex}</Text>
-						<Text style={styles.label}>Piece Tiles: {currentPiece?.tiles.length || 0}</Text>
+						<Text style={styles.label}>Current Piece: {selectedPieceIndex}</Text>
+						<Text style={styles.label}>Piece Tiles: {selectedPiece?.tiles.length || 0}</Text>
 						<Text style={styles.label}>All Placed: {getAllPiecesPlaced() ? 'Yes' : 'No'}</Text>
 						<Text style={styles.label}>Game Won: {isGameWon() ? 'Yes' : 'No'}</Text>
 					</View>
 
 					<View style={styles.statsSection}>
 						<Text style={styles.sectionTitle}>Statistics</Text>
-						<Text style={styles.label}>Moves: {getMoveCount()}</Text>
-						<Text style={styles.label}>Undos: {getUndoCount()}</Text>
-						<Text style={styles.label}>Hints: {getHintCount()}</Text>
+						<Text style={styles.label}>Moves: {moveCount}</Text>
+						<Text style={styles.label}>Hints: {hintsUsed}</Text>
 					</View>
 
 					<View style={styles.buttonRow}>
 						<Button
 							title="Prev Piece"
-							onPress={() => cyclePiece(-1)}
+							onPress={() => cycleSelectedPiece(-1)}
 							disabled={getAllPiecesPlaced()}
 						/>
 						<Button
 							title="Next Piece"
-							onPress={() => cyclePiece(1)}
+							onPress={() => cycleSelectedPiece(1)}
 							disabled={getAllPiecesPlaced()}
 						/>
 					</View>

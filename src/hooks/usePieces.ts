@@ -18,12 +18,16 @@ export function usePieces() {
 	} = useGameState();
 
 	return {
-		currentPieceIndex,
-		setCurrentPieceIndex,
-		cyclePiece,
-		getNextPieceIndex,
-		getPreviousPieceIndex,
-		getCurrentPiece,
+		selectedPieceIndex: currentPieceIndex,
+		selectedPiece: getCurrentPiece(),
+		selectPiece: setCurrentPieceIndex,
+		cycleSelectedPiece: cyclePiece,
+		navigatePiece: (direction: 'next' | 'previous') => {
+			const nextIndex = direction === 'next' ? getNextPieceIndex() : getPreviousPieceIndex();
+			if (nextIndex !== null) {
+				setCurrentPieceIndex(nextIndex);
+			}
+		},
 		getPieceByIndex,
 		isPiecePlaced,
 		getAllPiecesPlaced,
