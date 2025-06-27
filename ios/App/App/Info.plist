@@ -53,14 +53,6 @@
 	<false/>
 	<key>UIStatusBarStyle</key>
 	<string>UIStatusBarStyleLightContent</string>
-	<key>NSCameraUsageDescription</key>
-	<string>This app does not use the camera.</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app does not use the microphone.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app does not use location services.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app does not access the photo library.</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
@@ -76,5 +68,14 @@
 	<string>Copyright © 2024 Hex Zero. All rights reserved.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<false/>
+		<key>NSAllowsArbitraryLoadsInWebContent</key>
+		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<false/>
+	</dict>
 </dict>
 </plist>
