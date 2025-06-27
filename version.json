@@ -1,0 +1,16 @@
+{
+	"version": "1.0.0",
+	"versionCode": 10000,
+	"buildNumber": 10000,
+	"lastUpdated": "2025-06-27T00:48:51.406Z",
+	"platform": {
+		"ios": {
+			"CFBundleShortVersionString": "1.0.0",
+			"CFBundleVersion": "10000"
+		},
+		"android": {
+			"versionName": "1.0.0",
+			"versionCode": 10000
+		}
+	}
+}

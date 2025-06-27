@@ -25,7 +25,11 @@
 		"android:run": "npm run cap:sync && npx cap run android",
 		"generate:icons": "node scripts/generate-app-icons.js",
 		"generate:launch": "node scripts/generate-launch-screens.js",
-		"generate:assets": "npm run generate:icons && npm run generate:launch"
+		"generate:assets": "npm run generate:icons && npm run generate:launch",
+		"version:update": "node scripts/update-version.js",
+		"version:patch": "node scripts/update-version.js patch",
+		"version:minor": "node scripts/update-version.js minor",
+		"version:major": "node scripts/update-version.js major"
 	},
 	"repository": {
 		"type": "git",
