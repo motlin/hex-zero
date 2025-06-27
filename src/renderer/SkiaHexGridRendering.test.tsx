@@ -1,6 +1,7 @@
 import {describe, it, expect, vi} from 'vitest';
 import {HexGrid} from '../state/HexGrid';
 import {createHexPath, getHeightColor, calculateTextSize} from '../utils/skia-drawing';
+import {getHeightColorFromTheme, DARK_THEME} from '../ui/SkiaColorTheme';
 import {hexToPixel} from '../utils/hex-calculations';
 
 // Mock React Native
@@ -91,7 +92,7 @@ describe('Skia Hex Grid Rendering', () => {
 			expect(calculateTextSize(50)).toBe(25);
 		});
 
-		it('maps heights to correct colors', () => {
+		it('maps heights to correct colors with legacy function', () => {
 			const colorMap = {
 				1: '#e94560',
 				2: '#ee6c4d',
@@ -110,6 +111,16 @@ describe('Skia Hex Grid Rendering', () => {
 			expect(getHeightColor(5, colorMap)).toBe('#f8dc81');
 			expect(getHeightColor(10, colorMap)).toBe('#277da1');
 			expect(getHeightColor(11, colorMap)).toBe('#1a1a1a');
+		});
+
+		it('maps heights to correct colors with theme system', () => {
+			const theme = DARK_THEME;
+
+			expect(getHeightColorFromTheme(0, theme)).toBe('#000000');
+			expect(getHeightColorFromTheme(1, theme)).toBe('#e94560');
+			expect(getHeightColorFromTheme(5, theme)).toBe('#f8dc81');
+			expect(getHeightColorFromTheme(10, theme)).toBe('#277da1');
+			expect(getHeightColorFromTheme(11, theme)).toBe(theme.colors.surface);
 		});
 	});
 

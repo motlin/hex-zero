@@ -7,8 +7,11 @@ import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native
 import {Canvas} from '@shopify/react-native-skia';
 import {SkiaHexRenderer} from '../renderer/SkiaHexRenderer';
 import {HexGrid} from '../state/HexGrid';
+import {useThemeContext} from '../context/ThemeContext';
 
 export const HexGridDemo: React.FC = () => {
+	const {theme: currentTheme, themeType, setTheme} = useThemeContext();
+
 	const [grid] = useState(() => {
 		const newGrid = new HexGrid(5);
 		// Initialize with some test data
@@ -24,16 +27,15 @@ export const HexGridDemo: React.FC = () => {
 	});
 
 	const [hexSize, setHexSize] = useState(30);
-	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 	const [scale, setScale] = useState(1);
 
 	return (
-		<View style={[styles.container, theme === 'dark' && styles.darkContainer]}>
+		<View style={[styles.container, {backgroundColor: currentTheme.colors.background}]}>
 			<View style={styles.header}>
-				<Text style={[styles.title, theme === 'dark' && styles.darkText]}>Hex Grid Rendering Test</Text>
+				<Text style={[styles.title, {color: currentTheme.colors.text}]}>Hex Grid Rendering Test</Text>
 			</View>
 
-			<View style={styles.canvasContainer}>
+			<View style={[styles.canvasContainer, {backgroundColor: currentTheme.colors.surface}]}>
 				<Canvas style={styles.canvas}>
 					<SkiaHexRenderer
 						grid={grid}
@@ -41,14 +43,14 @@ export const HexGridDemo: React.FC = () => {
 						offsetX={200}
 						offsetY={200}
 						scale={scale}
-						theme={theme}
+						theme={themeType}
 					/>
 				</Canvas>
 			</View>
 
-			<ScrollView style={styles.controls}>
+			<ScrollView style={[styles.controls, {backgroundColor: currentTheme.colors.surface}]}>
 				<View style={styles.controlSection}>
-					<Text style={[styles.sectionTitle, theme === 'dark' && styles.darkText]}>Hex Size: {hexSize}</Text>
+					<Text style={[styles.sectionTitle, {color: currentTheme.colors.text}]}>Hex Size: {hexSize}</Text>
 					<View style={styles.buttonRow}>
 						<TouchableOpacity
 							style={styles.button}
@@ -66,7 +68,7 @@ export const HexGridDemo: React.FC = () => {
 				</View>
 
 				<View style={styles.controlSection}>
-					<Text style={[styles.sectionTitle, theme === 'dark' && styles.darkText]}>
+					<Text style={[styles.sectionTitle, {color: currentTheme.colors.text}]}>
 						Scale: {scale.toFixed(1)}
 					</Text>
 					<View style={styles.buttonRow}>
@@ -86,16 +88,16 @@ export const HexGridDemo: React.FC = () => {
 				</View>
 
 				<View style={styles.controlSection}>
-					<Text style={[styles.sectionTitle, theme === 'dark' && styles.darkText]}>Theme</Text>
+					<Text style={[styles.sectionTitle, {color: currentTheme.colors.text}]}>Theme</Text>
 					<View style={styles.buttonRow}>
 						<TouchableOpacity
-							style={[styles.button, theme === 'light' && styles.activeButton]}
+							style={[styles.button, themeType === 'light' && styles.activeButton]}
 							onPress={() => setTheme('light')}
 						>
 							<Text style={styles.buttonText}>Light</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
-							style={[styles.button, theme === 'dark' && styles.activeButton]}
+							style={[styles.button, themeType === 'dark' && styles.activeButton]}
 							onPress={() => setTheme('dark')}
 						>
 							<Text style={styles.buttonText}>Dark</Text>
@@ -103,14 +105,14 @@ export const HexGridDemo: React.FC = () => {
 					</View>
 				</View>
 
-				<View style={styles.info}>
-					<Text style={[styles.infoText, theme === 'dark' && styles.darkText]}>
+				<View style={[styles.info, {backgroundColor: currentTheme.colors.background}]}>
+					<Text style={[styles.infoText, {color: currentTheme.colors.textSecondary}]}>
 						• Grid shows hex heights as numbers
 					</Text>
-					<Text style={[styles.infoText, theme === 'dark' && styles.darkText]}>
+					<Text style={[styles.infoText, {color: currentTheme.colors.textSecondary}]}>
 						• Colors represent different heights
 					</Text>
-					<Text style={[styles.infoText, theme === 'dark' && styles.darkText]}>
+					<Text style={[styles.infoText, {color: currentTheme.colors.textSecondary}]}>
 						• Grid lines separate hexagons
 					</Text>
 				</View>
@@ -122,10 +124,6 @@ export const HexGridDemo: React.FC = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#f5f5f5',
-	},
-	darkContainer: {
-		backgroundColor: '#1a1a1a',
 	},
 	header: {
 		padding: 20,
@@ -134,17 +132,12 @@ const styles = StyleSheet.create({
 	title: {
 		fontSize: 24,
 		fontWeight: 'bold',
-		color: '#000',
-	},
-	darkText: {
-		color: '#fff',
 	},
 	canvasContainer: {
 		flex: 1,
 		margin: 10,
 		borderRadius: 10,
 		overflow: 'hidden',
-		backgroundColor: '#fff',
 		shadowColor: '#000',
 		shadowOffset: {width: 0, height: 2},
 		shadowOpacity: 0.1,
@@ -156,7 +149,6 @@ const styles = StyleSheet.create({
 	},
 	controls: {
 		maxHeight: 300,
-		backgroundColor: 'rgba(255, 255, 255, 0.9)',
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 		padding: 20,
@@ -168,7 +160,6 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 		fontWeight: '600',
 		marginBottom: 10,
-		color: '#000',
 	},
 	buttonRow: {
 		flexDirection: 'row',
@@ -193,12 +184,10 @@ const styles = StyleSheet.create({
 	info: {
 		marginTop: 20,
 		padding: 15,
-		backgroundColor: 'rgba(0, 0, 0, 0.05)',
 		borderRadius: 10,
 	},
 	infoText: {
 		fontSize: 14,
 		marginBottom: 5,
-		color: '#666',
 	},
 });

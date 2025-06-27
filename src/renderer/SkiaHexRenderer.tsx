@@ -9,7 +9,15 @@ import {PixelRatio, Platform} from 'react-native';
 import type {HexGrid} from '../state/HexGrid';
 import type {Piece} from '../state/SeptominoGenerator';
 import {hexToPixel, pixelToHex, type Point, type HexPoint} from '../utils/hex-calculations';
-import {createHexPath, colorWithAlpha, getHeightColor, calculateTextSize} from '../utils/skia-drawing';
+import {createHexPath, calculateTextSize} from '../utils/skia-drawing';
+import {
+	getTheme,
+	getHeightColorFromTheme,
+	withAlpha,
+	getAnimationColors,
+	getContrastColor,
+	type ThemeType,
+} from '../ui/SkiaColorTheme';
 import type {SkPath} from '@shopify/react-native-skia';
 
 interface SkiaHexRendererProps {
@@ -18,7 +26,7 @@ interface SkiaHexRendererProps {
 	offsetX?: number;
 	offsetY?: number;
 	scale?: number;
-	theme?: 'light' | 'dark';
+	theme?: ThemeType;
 	hoveredHex?: HexPoint | null;
 	selectedPiece?: Piece | null;
 	hintCells?: HexPoint[];
@@ -27,18 +35,7 @@ interface SkiaHexRendererProps {
 	onAnimationComplete?: () => void;
 }
 
-const colorMap: Record<number, string> = {
-	1: '#e94560',
-	2: '#ee6c4d',
-	3: '#f3a261',
-	4: '#f9c74f',
-	5: '#f8dc81',
-	6: '#e9d758',
-	7: '#c9e265',
-	8: '#90be6d',
-	9: '#43aa8b',
-	10: '#277da1',
-};
+// Deprecated: Use SkiaTheme instead
 
 export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	grid,
@@ -46,7 +43,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	offsetX = 0,
 	offsetY = 0,
 	scale = 1,
-	theme = 'light',
+	theme = 'dark',
 	hoveredHex,
 	selectedPiece,
 	hintCells = [],
@@ -54,6 +51,9 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	animatingCells = [],
 	onAnimationComplete,
 }) => {
+	// Get theme configuration
+	const skiaTheme = useMemo(() => getTheme(theme), [theme]);
+	const animationColors = useMemo(() => getAnimationColors(skiaTheme), [skiaTheme]);
 	// Load system font
 	const fontSize = useMemo(() => calculateTextSize(hexSize * scale), [hexSize, scale]);
 	const fontFamily = Platform.select({
@@ -150,8 +150,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	}, [hoveredHex, selectedPiece, actualHexSize]);
 
 	// Get theme colors
-	const textColor = theme === 'dark' ? '#ffffff' : '#000000';
-	const gridLineColor = theme === 'dark' ? '#333333' : '#cccccc';
+	const gridLineColor = skiaTheme.colors.gridLines;
 
 	return (
 		<Group transform={[{translateX: actualOffsetX}, {translateY: actualOffsetY}]}>
@@ -173,14 +172,14 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 							: actualHexSize * 1.5 + actualHexSize * 0.5 * (animationProgress - 0.5) * 2;
 					const burstOpacity =
 						animationProgress < 0.5
-							? 0.8 - 0.4 * (animationProgress * 2)
-							: 0.4 - 0.4 * ((animationProgress - 0.5) * 2);
+							? skiaTheme.opacity.strong - skiaTheme.opacity.medium * (animationProgress * 2)
+							: skiaTheme.opacity.medium - skiaTheme.opacity.medium * ((animationProgress - 0.5) * 2);
 
 					return (
 						<Group key={key}>
 							<Path
 								path={path}
-								color={getHeightColor(animatedHeight, colorMap)}
+								color={getHeightColorFromTheme(animatedHeight, skiaTheme)}
 								style="fill"
 							/>
 							<Path
@@ -195,7 +194,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 									y={center.y + fontSize / 3}
 									text={Math.round(animatedHeight).toString()}
 									font={font}
-									color={textColor}
+									color={getContrastColor(getHeightColorFromTheme(animatedHeight, skiaTheme))}
 									opacity={0.9}
 								/>
 							)}
@@ -204,7 +203,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 								cx={center.x}
 								cy={center.y}
 								r={burstRadius}
-								color={colorWithAlpha('#ffffff', burstOpacity)}
+								color={withAlpha(animationColors.burst, burstOpacity)}
 								style="stroke"
 								strokeWidth={3}
 							/>
@@ -216,7 +215,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 					<Group key={key}>
 						<Path
 							path={path}
-							color={getHeightColor(height, colorMap)}
+							color={getHeightColorFromTheme(height, skiaTheme)}
 							style="fill"
 						/>
 						<Path
@@ -231,7 +230,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 								y={center.y + fontSize / 3}
 								text={height.toString()}
 								font={font}
-								color={textColor}
+								color={getContrastColor(getHeightColorFromTheme(height, skiaTheme))}
 								opacity={0.9}
 							/>
 						)}
@@ -244,7 +243,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 				<Path
 					key={`hint-${index}`}
 					path={path}
-					color="#0066cc"
+					color={skiaTheme.colors.hintStroke}
 					style="stroke"
 					strokeWidth={3}
 				>
@@ -257,7 +256,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 				<Path
 					key={`invalid-${index}`}
 					path={path}
-					color={colorWithAlpha('#ff0000', 0.3)}
+					color={skiaTheme.colors.invalidFill}
 					style="fill"
 				/>
 			))}
@@ -267,7 +266,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 				<Path
 					key={`preview-${index}`}
 					path={path}
-					color={colorWithAlpha('#0066cc', 0.5)}
+					color={skiaTheme.colors.previewFill}
 					style="fill"
 				/>
 			))}
@@ -284,7 +283,7 @@ export class SkiaHexRendererCompat {
 	private offsetX: number = 0;
 	private offsetY: number = 0;
 	private scale: number = 1;
-	private theme: 'light' | 'dark' = 'light';
+	private theme: ThemeType = 'dark';
 	private hoveredHex: HexPoint | null = null;
 	private selectedPiece: Piece | null = null;
 	private hintCells: HexPoint[] = [];
@@ -312,7 +311,7 @@ export class SkiaHexRendererCompat {
 		this.triggerRender();
 	}
 
-	setTheme(theme: 'light' | 'dark') {
+	setTheme(theme: ThemeType) {
 		this.theme = theme;
 		this.triggerRender();
 	}

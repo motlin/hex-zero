@@ -7,14 +7,15 @@ import {View, StyleSheet, Dimensions} from 'react-native';
 import {Canvas} from '@shopify/react-native-skia';
 import {SkiaHexRenderer} from '../renderer/SkiaHexRenderer';
 import {HexGrid} from '../state/HexGrid';
+import type {ThemeType} from '../ui/SkiaColorTheme';
 
 interface BasicHexGridProps {
 	radius?: number;
 	hexSize?: number;
-	theme?: 'light' | 'dark';
+	theme?: ThemeType;
 }
 
-export const BasicHexGrid: React.FC<BasicHexGridProps> = ({radius = 4, hexSize = 30, theme = 'light'}) => {
+export const BasicHexGrid: React.FC<BasicHexGridProps> = ({radius = 4, hexSize = 30, theme = 'dark'}) => {
 	const grid = React.useMemo(() => {
 		const newGrid = new HexGrid(radius);
 		// Create a gradient pattern
