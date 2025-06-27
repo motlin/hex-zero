@@ -4,12 +4,12 @@
  */
 
 import React, {useMemo, useRef, useEffect, useState} from 'react';
-import {Path, Text, Group, Circle, DashPathEffect, interpolate, Extrapolate} from '@shopify/react-native-skia';
-import {PixelRatio} from 'react-native';
+import {Path, Text, Group, Circle, DashPathEffect, matchFont} from '@shopify/react-native-skia';
+import {PixelRatio, Platform} from 'react-native';
 import type {HexGrid} from '../state/HexGrid';
 import type {Piece} from '../state/SeptominoGenerator';
 import {hexToPixel, pixelToHex, type Point, type HexPoint} from '../utils/hex-calculations';
-import {createHexPath, colorWithAlpha, getHeightColor} from '../utils/skia-drawing';
+import {createHexPath, colorWithAlpha, getHeightColor, calculateTextSize} from '../utils/skia-drawing';
 import type {SkPath} from '@shopify/react-native-skia';
 
 interface SkiaHexRendererProps {
@@ -19,7 +19,6 @@ interface SkiaHexRendererProps {
 	offsetY?: number;
 	scale?: number;
 	theme?: 'light' | 'dark';
-	showCoordinates?: boolean;
 	hoveredHex?: HexPoint | null;
 	selectedPiece?: Piece | null;
 	hintCells?: HexPoint[];
@@ -48,7 +47,6 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	offsetY = 0,
 	scale = 1,
 	theme = 'light',
-	showCoordinates = false,
 	hoveredHex,
 	selectedPiece,
 	hintCells = [],
@@ -56,8 +54,20 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	animatingCells = [],
 	onAnimationComplete,
 }) => {
-	// Font is loaded externally or passed as prop
-	const font = null;
+	// Load system font
+	const fontSize = useMemo(() => calculateTextSize(hexSize * scale), [hexSize, scale]);
+	const fontFamily = Platform.select({
+		ios: 'Helvetica',
+		android: 'Roboto',
+		default: 'Arial',
+	});
+	const fontStyle = {
+		fontFamily,
+		fontSize,
+		fontWeight: 'bold' as const,
+	};
+	const font = useMemo(() => matchFont(fontStyle), [fontSize, fontFamily]);
+
 	const devicePixelRatio = PixelRatio.get();
 	const [animationProgress, setAnimationProgress] = useState(0);
 	const animationRef = useRef<number | null>(null);
@@ -152,19 +162,19 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 
 				if (isAnimating) {
 					const animatingCell = animatingCells.find((cell) => cell.q === q && cell.r === r)!;
-					const animatedHeight = interpolate(
-						animationProgress,
-						[0, 1],
-						[animatingCell.startHeight, animatingCell.endHeight],
-						Extrapolate.CLAMP,
-					);
-					const burstRadius = interpolate(
-						animationProgress,
-						[0, 0.5, 1],
-						[0, actualHexSize * 1.5, actualHexSize * 2],
-						Extrapolate.CLAMP,
-					);
-					const burstOpacity = interpolate(animationProgress, [0, 0.5, 1], [0.8, 0.4, 0], Extrapolate.CLAMP);
+					const animatedHeight =
+						animatingCell.startHeight +
+						(animatingCell.endHeight - animatingCell.startHeight) * animationProgress;
+
+					// Calculate burst animation values
+					const burstRadius =
+						animationProgress < 0.5
+							? actualHexSize * 3 * animationProgress
+							: actualHexSize * 1.5 + actualHexSize * 0.5 * (animationProgress - 0.5) * 2;
+					const burstOpacity =
+						animationProgress < 0.5
+							? 0.8 - 0.4 * (animationProgress * 2)
+							: 0.4 - 0.4 * ((animationProgress - 0.5) * 2);
 
 					return (
 						<Group key={key}>
@@ -177,16 +187,16 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 								path={path}
 								color={gridLineColor}
 								style="stroke"
-								strokeWidth={1}
+								strokeWidth={2}
 							/>
-							{showCoordinates && font && (
+							{font && animatedHeight > 0 && (
 								<Text
 									x={center.x}
-									y={center.y}
+									y={center.y + fontSize / 3}
 									text={Math.round(animatedHeight).toString()}
 									font={font}
 									color={textColor}
-									opacity={0.8}
+									opacity={0.9}
 								/>
 							)}
 							{/* Burst animation */}
@@ -213,16 +223,16 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 							path={path}
 							color={gridLineColor}
 							style="stroke"
-							strokeWidth={1}
+							strokeWidth={2}
 						/>
-						{showCoordinates && font && height > 0 && (
+						{font && height > 0 && (
 							<Text
 								x={center.x}
-								y={center.y}
+								y={center.y + fontSize / 3}
 								text={height.toString()}
 								font={font}
 								color={textColor}
-								opacity={0.8}
+								opacity={0.9}
 							/>
 						)}
 					</Group>

@@ -195,7 +195,6 @@ export const HexGameBoard: React.FC<HexGameBoardProps> = ({
 					offsetY={offset.y}
 					scale={scale}
 					theme={theme}
-					showCoordinates={true}
 					hoveredHex={hoveredHex}
 					selectedPiece={selectedPiece}
 					hintCells={showHints ? hintCells : []}

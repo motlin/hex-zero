@@ -118,7 +118,7 @@ export const HexRendererDemo: React.FC = () => {
 						<View style={styles.controlSection}>
 							<Text style={styles.sectionTitle}>Pieces</Text>
 							<View style={styles.pieceButtons}>
-								{pieces.map((_piece, index) => (
+								{pieces.map((_, index) => (
 									<TouchableOpacity
 										key={index}
 										style={[
