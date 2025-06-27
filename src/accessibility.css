@@ -1,0 +1,487 @@
+/* Accessibility Styles for Hex Zero */
+
+/* ============================================
+   Focus Management
+   ============================================ */
+
+/* High contrast focus indicators */
+*:focus {
+	outline: 3px solid #ffeb3b;
+	outline-offset: 2px;
+	border-radius: 4px;
+}
+
+/* Enhanced focus for interactive elements */
+button:focus,
+.difficulty-card:focus,
+.draggable-piece:focus {
+	outline: 3px solid #ffeb3b;
+	outline-offset: 3px;
+	box-shadow: 0 0 0 6px rgba(255, 235, 59, 0.3);
+}
+
+/* Canvas focus indicator */
+#gameCanvas:focus {
+	outline: 4px solid #ffeb3b;
+	outline-offset: 4px;
+	box-shadow: 0 0 0 8px rgba(255, 235, 59, 0.2);
+}
+
+/* Skip navigation focus */
+.skip-nav:focus {
+	position: fixed;
+	top: 10px;
+	left: 10px;
+	z-index: 10001;
+	background: #ffeb3b;
+	color: #000;
+	padding: 8px 16px;
+	text-decoration: none;
+	border-radius: 4px;
+	font-weight: bold;
+}
+
+/* ============================================
+   High Contrast Mode Support
+   ============================================ */
+
+@media (prefers-contrast: high) {
+	/* Increase contrast for all interactive elements */
+	button {
+		border: 2px solid currentColor;
+		background: #000;
+		color: #fff;
+	}
+
+	button:hover,
+	button:focus {
+		background: #fff;
+		color: #000;
+	}
+
+	.difficulty-card {
+		border: 3px solid #fff;
+		background: #000;
+		color: #fff;
+	}
+
+	.difficulty-card:hover,
+	.difficulty-card:focus {
+		background: #fff;
+		color: #000;
+	}
+
+	/* High contrast for game elements */
+	.draggable-piece {
+		border: 2px solid #fff;
+		background: #000;
+	}
+
+	.draggable-piece:not(.empty-slot):hover,
+	.draggable-piece:not(.empty-slot):focus {
+		background: #333;
+	}
+
+	/* Modal contrast */
+	.modal-content {
+		border: 3px solid #fff;
+		background: #000;
+		color: #fff;
+	}
+}
+
+/* ============================================
+   Reduced Motion Support
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+	/* Disable animations for users who prefer reduced motion */
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+
+	/* Remove hover animations */
+	.difficulty-card:hover,
+	button:hover,
+	.draggable-piece:hover {
+		transform: none !important;
+	}
+
+	/* Reduce touch feedback animations */
+	.touch-feedback {
+		transition: none !important;
+	}
+
+	/* Simplify confetti animation */
+	canvas {
+		animation: none !important;
+	}
+}
+
+/* ============================================
+   Screen Reader Only Content
+   ============================================ */
+
+.sr-only {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+.sr-only-focusable:focus {
+	position: static !important;
+	width: auto !important;
+	height: auto !important;
+	padding: inherit !important;
+	margin: inherit !important;
+	overflow: visible !important;
+	clip: auto !important;
+	white-space: normal !important;
+}
+
+/* ============================================
+   Touch Target Improvements
+   ============================================ */
+
+/* Ensure minimum touch target size for accessibility */
+button,
+.difficulty-card,
+.draggable-piece,
+.piece-nav-button {
+	min-height: 44px;
+	min-width: 44px;
+}
+
+/* Larger touch targets on mobile */
+@media (max-width: 768px) {
+	button,
+	.difficulty-card,
+	.draggable-piece {
+		min-height: 48px;
+		min-width: 48px;
+	}
+
+	/* Increase spacing between interactive elements */
+	.bottom-controls button {
+		margin: 8px;
+	}
+
+	.difficulty-options .difficulty-card {
+		margin: 12px 0;
+	}
+
+	.pieces-container .draggable-piece {
+		margin: 6px;
+	}
+}
+
+/* ============================================
+   Color and Contrast Improvements
+   ============================================ */
+
+/* Ensure sufficient color contrast */
+.solution-status {
+	color: #fff;
+	background: rgba(0, 0, 0, 0.7);
+	padding: 4px 8px;
+	border-radius: 4px;
+}
+
+/* Status indicators with sufficient contrast */
+.stat-value {
+	font-weight: bold;
+	color: #ffeb3b;
+}
+
+/* Error states with high contrast */
+.error-message {
+	color: #ff5722;
+	background: rgba(255, 87, 34, 0.1);
+	border: 1px solid #ff5722;
+	padding: 4px 8px;
+	border-radius: 4px;
+}
+
+/* ============================================
+   Keyboard Navigation Enhancements
+   ============================================ */
+
+/* Visual indication of keyboard navigation mode */
+body.keyboard-navigation {
+	--focus-ring-color: #ffeb3b;
+}
+
+body.keyboard-navigation *:focus {
+	outline: 3px solid var(--focus-ring-color);
+	outline-offset: 2px;
+}
+
+/* Navigation hints for keyboard users */
+.keyboard-hint {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	background: rgba(0, 0, 0, 0.8);
+	color: #fff;
+	padding: 8px 12px;
+	border-radius: 4px;
+	font-size: 12px;
+	z-index: 1000;
+	opacity: 0;
+	transition: opacity 0.3s;
+}
+
+.keyboard-hint.show {
+	opacity: 1;
+}
+
+/* ============================================
+   Loading and State Indicators
+   ============================================ */
+
+/* Loading state for screen readers */
+.loading {
+	position: relative;
+}
+
+.loading::before {
+	content: "Loading...";
+	position: absolute;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* Progress indicators */
+.progress-indicator {
+	position: relative;
+	background: #333;
+	height: 4px;
+	border-radius: 2px;
+	overflow: hidden;
+}
+
+.progress-indicator::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	background: #ffeb3b;
+	width: var(--progress, 0%);
+	transition: width 0.3s ease;
+}
+
+/* ============================================
+   Modal Accessibility Enhancements
+   ============================================ */
+
+/* Backdrop for modals */
+.modal-overlay {
+	background: rgba(0, 0, 0, 0.8);
+}
+
+/* Modal focus trap */
+.modal:not(.hidden) {
+	isolation: isolate;
+}
+
+.modal:not(.hidden) ~ * {
+	filter: blur(2px);
+	pointer-events: none;
+	user-select: none;
+}
+
+/* Modal close button accessibility */
+.modal-close {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	background: transparent;
+	border: 2px solid #fff;
+	color: #fff;
+	width: 32px;
+	height: 32px;
+	border-radius: 16px;
+	cursor: pointer;
+	font-size: 18px;
+	line-height: 1;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+	background: #fff;
+	color: #000;
+}
+
+/* ============================================
+   Game-Specific Accessibility
+   ============================================ */
+
+/* Piece placement indicators */
+.placement-indicator {
+	position: absolute;
+	background: rgba(255, 235, 59, 0.8);
+	border: 2px solid #ffeb3b;
+	border-radius: 4px;
+	padding: 4px 8px;
+	font-size: 12px;
+	font-weight: bold;
+	color: #000;
+	pointer-events: none;
+	z-index: 1000;
+}
+
+/* Victory celebration accessibility */
+.victory-screen[aria-hidden="false"] {
+	animation: victory-announce 0.5s ease-out;
+}
+
+@keyframes victory-announce {
+	0% {
+		transform: scale(0.8);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+/* Hint visualization for screen readers */
+.hint-description {
+	position: absolute;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* ============================================
+   Platform-Specific Accessibility
+   ============================================ */
+
+/* iOS VoiceOver enhancements */
+.ios-gestures .accessibility-label {
+	position: absolute;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* Android TalkBack enhancements */
+.android-gestures .accessibility-description {
+	position: absolute;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+/* ============================================
+   Print Accessibility
+   ============================================ */
+
+@media print {
+	/* Hide interactive elements in print */
+	button,
+	.hamburger-menu-container,
+	.control-panel,
+	.modal {
+		display: none !important;
+	}
+
+	/* Show game state in print */
+	.game-container::after {
+		content: "Hex Zero Puzzle Game - Visit the website for interactive version";
+		display: block;
+		text-align: center;
+		margin-top: 20px;
+		font-weight: bold;
+	}
+}
+
+/* ============================================
+   Responsive Accessibility
+   ============================================ */
+
+/* Small screen accessibility adjustments */
+@media (max-height: 600px) {
+	/* Reduce modal content height for small screens */
+	.modal-content {
+		max-height: 80vh;
+		overflow-y: auto;
+	}
+
+	/* Ensure focus indicators are visible */
+	*:focus {
+		outline-offset: 1px;
+	}
+}
+
+/* Large screen accessibility improvements */
+@media (min-width: 1200px) {
+	/* Larger focus indicators for large screens */
+	*:focus {
+		outline-width: 4px;
+		outline-offset: 3px;
+	}
+
+	/* Better spacing for mouse/keyboard users */
+	button {
+		margin: 4px;
+	}
+}
+
+/* ============================================
+   Animation Accessibility
+   ============================================ */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: no-preference) {
+	/* Smooth focus transitions */
+	*:focus {
+		transition:
+			outline 0.2s ease,
+			box-shadow 0.2s ease;
+	}
+
+	/* Smooth state changes */
+	button:disabled {
+		transition:
+			opacity 0.3s ease,
+			filter 0.3s ease;
+	}
+}
+
+/* Provide alternative feedback for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+	/* Use color/contrast changes instead of animations */
+	.success-feedback {
+		background-color: #4caf50 !important;
+		color: #fff !important;
+	}
+
+	.error-feedback {
+		background-color: #f44336 !important;
+		color: #fff !important;
+	}
+
+	.info-feedback {
+		background-color: #2196f3 !important;
+		color: #fff !important;
+	}
+}

@@ -1,0 +1,463 @@
+/* Device Variation Styles for Hex Zero */
+
+/* ============================================
+   CSS Custom Properties for Dynamic Sizing
+   ============================================ */
+:root {
+	--hex-size: 30px;
+	--ui-scale: 1;
+	--canvas-scale: 1;
+	--safe-area-top: env(safe-area-inset-top);
+	--safe-area-bottom: env(safe-area-inset-bottom);
+	--safe-area-left: env(safe-area-inset-left);
+	--safe-area-right: env(safe-area-inset-right);
+}
+
+/* ============================================
+   Small Phone Optimizations (< 360px width)
+   ============================================ */
+.device-phone.screen-small {
+	/* Compact header */
+	.game-title {
+		font-size: 16px;
+		top: 10px;
+		left: 10px;
+	}
+
+	/* Smaller control panel */
+	.control-panel {
+		height: 140px;
+		padding: 8px;
+	}
+
+	/* Compact pieces */
+	.draggable-piece {
+		height: 50px;
+		max-width: 60px;
+	}
+
+	/* Smaller buttons */
+	.bottom-controls button {
+		font-size: 12px;
+		padding: 6px 12px;
+		min-width: 70px;
+	}
+
+	/* Adjust difficulty cards */
+	.difficulty-card {
+		padding: 12px;
+		margin: 6px;
+	}
+
+	.difficulty-card h3 {
+		font-size: 16px;
+	}
+
+	.difficulty-card p {
+		font-size: 12px;
+	}
+}
+
+/* ============================================
+   Medium Phone Optimizations (360-414px)
+   ============================================ */
+.device-phone.screen-medium {
+	/* Standard phone layout - base styles apply */
+}
+
+/* ============================================
+   Large Phone Optimizations (> 414px)
+   ============================================ */
+.device-phone.screen-large {
+	/* Slightly larger UI elements */
+	.control-panel {
+		height: 160px;
+	}
+
+	.draggable-piece {
+		height: 70px;
+		max-width: 90px;
+	}
+
+	.more-pieces-button {
+		font-size: 14px;
+		padding: 10px 16px;
+	}
+}
+
+/* ============================================
+   Phablet Optimizations
+   ============================================ */
+.device-phablet {
+	/* Hybrid between phone and tablet */
+	.control-panel {
+		height: 180px;
+		max-height: 220px;
+	}
+
+	.pieces-container {
+		gap: 12px;
+	}
+
+	.draggable-piece {
+		height: 80px;
+		max-width: 100px;
+	}
+
+	.bottom-controls {
+		min-width: 140px;
+	}
+
+	.bottom-controls button {
+		width: 120px;
+		font-size: 15px;
+	}
+
+	/* Larger difficulty selection */
+	.difficulty-options {
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 16px;
+	}
+}
+
+/* ============================================
+   Tablet Optimizations
+   ============================================ */
+.device-tablet {
+	/* Larger UI for bigger screens */
+	.game-title {
+		font-size: 28px;
+		top: 30px;
+		left: 30px;
+	}
+
+	.game-container {
+		padding: 20px;
+	}
+
+	/* Side panel in landscape */
+	@media (orientation: landscape) {
+		.game-container {
+			flex-direction: row;
+		}
+
+		.control-panel {
+			width: 300px;
+			max-width: 300px;
+			height: 100%;
+			border-radius: 0 16px 16px 0;
+			border-top: none;
+			border-left: 2px solid #0f3460;
+			flex-direction: column;
+		}
+
+		.piece-panel {
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.pieces-container {
+			flex-direction: column;
+			width: 100%;
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
+
+		.draggable-piece {
+			width: 90%;
+			max-width: none;
+			height: 100px;
+			margin: 0 auto;
+		}
+
+		.more-pieces-button {
+			width: 90%;
+			margin: 10px auto;
+		}
+	}
+
+	/* Bottom panel in portrait */
+	@media (orientation: portrait) {
+		.control-panel {
+			height: 220px;
+			max-height: 30vh;
+		}
+
+		.pieces-container {
+			padding: 10px;
+		}
+
+		.draggable-piece {
+			height: 100px;
+			max-width: 120px;
+		}
+
+		.bottom-controls {
+			flex-direction: row;
+			gap: 12px;
+		}
+
+		.bottom-controls button {
+			flex: 1;
+			min-width: 100px;
+		}
+	}
+
+	/* Larger modals */
+	.modal-content {
+		max-width: 700px;
+		font-size: 16px;
+	}
+
+	/* Grid layout for difficulty selection */
+	.difficulty-options {
+		grid-template-columns: repeat(3, 1fr);
+		gap: 20px;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+}
+
+/* ============================================
+   Performance-Based Optimizations
+   ============================================ */
+
+/* Low Performance Mode */
+.performance-low {
+	/* Disable shadows and complex effects */
+	* {
+		box-shadow: none !important;
+		text-shadow: none !important;
+	}
+
+	/* Simplify backgrounds */
+	.control-panel,
+	.hamburger-dropdown {
+		background: #16213e;
+		backdrop-filter: none;
+	}
+
+	/* Reduce border radius for better rendering */
+	.draggable-piece,
+	button,
+	.control-panel {
+		border-radius: 4px;
+	}
+
+	/* Disable hover effects */
+	.draggable-piece:hover,
+	button:hover {
+		transform: none;
+	}
+}
+
+/* Medium Performance Mode */
+.performance-medium {
+	/* Simplified shadows */
+	.control-panel {
+		box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+	}
+
+	/* Reduced animations */
+	* {
+		animation-duration: 0.3s !important;
+	}
+}
+
+/* High Performance Mode - full effects enabled by default */
+
+/* ============================================
+   Screen Density Variations
+   ============================================ */
+
+/* Low DPI screens */
+@media (-webkit-max-device-pixel-ratio: 1.5), (max-resolution: 144dpi) {
+	/* Thicker borders for visibility */
+	#gameCanvas {
+		border-width: 3px;
+	}
+
+	.draggable-piece {
+		border-width: 2px;
+	}
+}
+
+/* Ultra-high DPI screens (3x and above) */
+.high-dpi-3x {
+	/* Thinner lines for crisp display */
+	* {
+		border-width: 0.5px;
+	}
+
+	/* Lighter font weights */
+	body {
+		font-weight: 300;
+	}
+
+	button {
+		font-weight: 400;
+	}
+}
+
+/* ============================================
+   Aspect Ratio Specific Adjustments
+   ============================================ */
+
+/* Extra wide screens (21:9 and wider) */
+@media (min-aspect-ratio: 21 / 9) {
+	.game-container {
+		max-width: 1600px;
+		margin: 0 auto;
+	}
+
+	@media (orientation: landscape) {
+		.control-panel {
+			max-width: 350px;
+		}
+	}
+}
+
+/* Square-ish screens (like some tablets) */
+@media (min-aspect-ratio: 3 / 4) and (max-aspect-ratio: 4 / 3) {
+	.control-panel {
+		height: 25vh;
+	}
+
+	.canvas-container {
+		max-height: 60vh;
+	}
+}
+
+/* ============================================
+   Dynamic Font Scaling
+   ============================================ */
+
+/* Base font size scaling with UI scale */
+body {
+	font-size: calc(14px * var(--ui-scale));
+}
+
+h1 {
+	font-size: calc(24px * var(--ui-scale));
+}
+
+button {
+	font-size: calc(14px * var(--ui-scale));
+}
+
+.difficulty-card h3 {
+	font-size: calc(18px * var(--ui-scale));
+}
+
+.difficulty-card p {
+	font-size: calc(14px * var(--ui-scale));
+}
+
+/* ============================================
+   Notch and Safe Area Handling
+   ============================================ */
+
+/* Phones with notches */
+@supports (padding-top: env(safe-area-inset-top)) {
+	.game-container {
+		padding-top: max(10px, var(--safe-area-top));
+		padding-bottom: max(10px, var(--safe-area-bottom));
+		padding-left: max(10px, var(--safe-area-left));
+		padding-right: max(10px, var(--safe-area-right));
+	}
+
+	/* Landscape adjustments for notched devices */
+	@media (orientation: landscape) {
+		.game-title {
+			left: max(20px, calc(var(--safe-area-left) + 10px));
+		}
+
+		.hamburger-menu-container {
+			right: max(10px, calc(var(--safe-area-right) + 10px));
+		}
+	}
+}
+
+/* ============================================
+   Specific Device Quirks
+   ============================================ */
+
+/* iPhone SE and small iPhones */
+.device-phone.screen-small {
+	/* Adjust for smaller status bar */
+	.game-container {
+		height: calc(100vh - 40px);
+	}
+}
+
+/* iPad Pro with rounded corners */
+@media (min-width: 1024px) and (-webkit-min-device-pixel-ratio: 2) {
+	.game-container {
+		border-radius: 12px;
+		overflow: hidden;
+	}
+}
+
+/* Android devices with gesture navigation */
+.device-phone[data-platform="android"] {
+	.control-panel {
+		padding-bottom: max(10px, calc(var(--safe-area-bottom) + 10px));
+	}
+}
+
+/* ============================================
+   Responsive Canvas Sizing
+   ============================================ */
+
+#gameCanvas {
+	/* Use CSS transform for scaling instead of changing canvas size */
+	transform: scale(var(--canvas-scale));
+	transform-origin: center center;
+}
+
+/* Adjust container to account for scaling */
+.canvas-container {
+	overflow: visible;
+}
+
+/* ============================================
+   Loading and Transition States
+   ============================================ */
+
+/* Smooth transitions between orientations */
+@media (orientation: portrait) {
+	.game-container {
+		transition: all 0.3s ease-out;
+	}
+}
+
+@media (orientation: landscape) {
+	.game-container {
+		transition: all 0.3s ease-out;
+	}
+}
+
+/* ============================================
+   Accessibility for Different Screen Sizes
+   ============================================ */
+
+/* Ensure minimum touch targets on all devices */
+button,
+.draggable-piece,
+.difficulty-card {
+	min-height: 44px;
+	min-width: 44px;
+}
+
+/* Larger touch targets on tablets */
+.device-tablet button,
+.device-tablet .draggable-piece {
+	min-height: 48px;
+	min-width: 48px;
+}
+
+/* Focus indicators scale with UI */
+*:focus-visible {
+	outline-width: calc(3px * var(--ui-scale));
+	outline-offset: calc(2px * var(--ui-scale));
+}
