@@ -1,5 +1,6 @@
 import {calculateHexSize} from '../canvas-utils';
 import {MobilePerformanceOptimizer} from '../performance/MobilePerformanceOptimizer';
+import {DeviceVariationOptimizer} from '../device-variation-optimizer';
 
 export class CanvasManager {
 	private canvas: HTMLCanvasElement;
@@ -7,6 +8,7 @@ export class CanvasManager {
 	private previewCanvas: HTMLCanvasElement;
 	private previewCtx: CanvasRenderingContext2D;
 	private performanceOptimizer: MobilePerformanceOptimizer;
+	private deviceOptimizer: DeviceVariationOptimizer;
 
 	constructor(canvasId: string, previewCanvasId: string) {
 		this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
@@ -26,6 +28,9 @@ export class CanvasManager {
 		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
 		this.performanceOptimizer.optimizeCanvasContext(this.ctx);
 		this.performanceOptimizer.optimizeCanvasContext(this.previewCtx);
+
+		// Initialize device optimizer
+		this.deviceOptimizer = DeviceVariationOptimizer.getInstance();
 	}
 
 	getCanvas(): HTMLCanvasElement {
@@ -50,12 +55,16 @@ export class CanvasManager {
 		// Get optimal canvas size from performance optimizer
 		const optimalSize = this.performanceOptimizer.getOptimalCanvasSize(rect.width, rect.height);
 
+		// Apply device-specific canvas scale
+		const deviceCanvasScale = this.deviceOptimizer.getCanvasScale();
+		const finalScale = optimalSize.scale * deviceCanvasScale;
+
 		// Set canvas size with optimized dimensions
 		this.canvas.width = optimalSize.width;
 		this.canvas.height = optimalSize.height;
 
 		// Scale the context to ensure correct drawing dimensions
-		this.ctx.setTransform(optimalSize.scale, 0, 0, optimalSize.scale, 0, 0);
+		this.ctx.setTransform(finalScale, 0, 0, finalScale, 0, 0);
 
 		return calculateHexSize(rect.width, rect.height, radius, zoomFactor);
 	}

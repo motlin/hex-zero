@@ -15,6 +15,7 @@ import {MobilePerformanceOptimizer} from './performance/MobilePerformanceOptimiz
 import {PerformanceMonitor} from './performance/PerformanceMonitor';
 import {scheduleIdleWork} from './performance/idle-callback-polyfill';
 import {SharingService} from './services/sharing';
+import {DeviceVariationOptimizer} from './device-variation-optimizer';
 
 declare global {
 	interface Window {
@@ -120,6 +121,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 	// Set up status bar for native platforms
 	await setupStatusBar();
+
+	// Initialize device variation optimizer
+	const deviceOptimizer = DeviceVariationOptimizer.getInstance();
+	await deviceOptimizer.initialize();
 
 	// Initialize mobile UI enhancements
 	initializeMobileUIEnhancements();
@@ -311,7 +316,12 @@ class HexSeptominoGame {
 	constructor(radius: number, numPieces: number) {
 		this.canvasManager = new CanvasManager('gameCanvas', 'piecePreview');
 		this.gameState = new GameState(radius, numPieces);
-		this.renderer = new HexRenderer(30);
+
+		// Get device-optimized hex size
+		const deviceOptimizer = DeviceVariationOptimizer.getInstance();
+		const optimalHexSize = deviceOptimizer.getOptimalHexSize();
+
+		this.renderer = new HexRenderer(optimalHexSize);
 		this.optimizedRenderer = new OptimizedHexRenderer();
 		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
 		this.performanceMonitor = new PerformanceMonitor();
@@ -336,7 +346,8 @@ class HexSeptominoGame {
 		this.invalidPlacementAnimation = null;
 
 		this.currentPage = 0;
-		this.piecesPerPage = 3;
+		// Use device-optimized pieces per page
+		this.piecesPerPage = deviceOptimizer.getPiecesPerPage();
 		this.isDragging = false;
 		this.draggedPieceIndex = null;
 		this.draggedPieceElement = null;
