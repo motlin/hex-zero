@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { SkiaTest } from './src/components/SkiaTest';
 import { DependencyTest } from './src/components/DependencyTest';
 import { GameLogicTest } from './src/components/GameLogicTest';
@@ -8,8 +8,16 @@ import { GameStateProvider } from './src/contexts/GameStateContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 import { PiecePreviewDemo } from './src/screens/PiecePreviewDemo';
 import { HexGridDemo } from './src/screens/HexGridDemo';
+import { GameDemo } from './src/screens/GameDemo';
+import { useState } from 'react';
 
 export default function App() {
+  const [showGame, setShowGame] = useState(false);
+
+  if (showGame) {
+    return <GameDemo onBackToMenu={() => setShowGame(false)} />;
+  }
+
   return (
     <ThemeProvider>
       <GameStateProvider>
@@ -22,6 +30,13 @@ export default function App() {
             <GameStateTest />
             <View style={styles.demoSection}>
               <Text style={styles.demoHeader}>Interactive Demos</Text>
+              <TouchableOpacity
+                style={styles.playButton}
+                onPress={() => setShowGame(true)}
+              >
+                <Text style={styles.playButtonText}>🎮 Play Full Game</Text>
+              </TouchableOpacity>
+              <View style={styles.separator} />
               <HexGridDemo />
               <View style={styles.separator} />
               <PiecePreviewDemo />
@@ -65,5 +80,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#ccc',
     marginVertical: 20,
     marginHorizontal: 20,
+  },
+  playButton: {
+    backgroundColor: '#4CAF50',
+    paddingHorizontal: 30,
+    paddingVertical: 15,
+    borderRadius: 25,
+    marginHorizontal: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  playButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
