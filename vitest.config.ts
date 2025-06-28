@@ -10,6 +10,7 @@ export default defineConfig({
 		alias: {
 			'react-native': path.resolve(__dirname, '__mocks__/react-native.ts'),
 			'@shopify/react-native-skia': path.resolve(__dirname, '__mocks__/react-native-skia.ts'),
+			'react-native-reanimated': path.resolve(__dirname, '__mocks__/react-native-reanimated.ts'),
 		},
 	},
 });

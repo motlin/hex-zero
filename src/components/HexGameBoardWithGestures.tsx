@@ -52,7 +52,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	const savedTranslateY = useSharedValue(0);
 
 	// State for rendering
-	const [hoveredHex] = React.useState<HexPoint | null>(null);
+	const [hoveredHex, setHoveredHex] = React.useState<HexPoint | null>(null);
 	const [invalidPlacementCells, setInvalidPlacementCells] = React.useState<HexPoint[]>([]);
 	const [animatingCells, setAnimatingCells] = React.useState<
 		Array<{
@@ -76,7 +76,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		renderer.current = new SkiaHexRendererCompat(grid, hexSize);
 	}
 
-	// Handle touch/mouse position to hex conversion
+	// Handle touch/mouse position to hex conversion with proper hit testing
 	const handlePointerPosition = useCallback(
 		(x: number, y: number, currentScale: number, offsetX: number, offsetY: number) => {
 			if (!renderer.current) return null;
@@ -86,9 +86,10 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			const worldX = (x - screenWidth / 2) / currentScale - offsetX;
 			const worldY = (y - screenHeight / 2) / currentScale - offsetY;
 
-			return renderer.current.pixelToHex(worldX, worldY);
+			// Use enhanced hit detection with proper hexagonal boundary testing
+			return renderer.current.pixelToHexWithHitTest(worldX, worldY);
 		},
-		[],
+		[grid, hexSize],
 	);
 
 	// Handle hex selection/piece placement
@@ -118,9 +119,10 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 					onPiecePlaced(selectedPiece, hex);
 
 					// Clear animation after completion
+					// Allow extra time for staggered animations and particles
 					setTimeout(() => {
 						setAnimatingCells([]);
-					}, 500);
+					}, 800);
 				} else {
 					// Show invalid placement feedback
 					setInvalidPlacementCells(worldCoords);
@@ -152,8 +154,17 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		.onUpdate((event) => {
 			translateX.value = savedTranslateX.value + event.translationX / scale.value;
 			translateY.value = savedTranslateY.value + event.translationY / scale.value;
+
+			// Update hovered hex during pan for better user feedback
+			runOnJS(() => {
+				const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
+				setHoveredHex(hex);
+			})();
 		})
 		.onEnd(() => {
+			// Clear hover state when pan ends
+			runOnJS(setHoveredHex)(null);
+
 			// Optional: Add bounds checking to prevent panning too far
 			const maxTranslate = 500 / scale.value;
 			translateX.value = withSpring(clamp(translateX.value, -maxTranslate, maxTranslate), SPRING_CONFIG);
@@ -198,8 +209,28 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			resetView();
 		});
 
+	// Long press gesture for hex info or special actions
+	const longPressGesture = Gesture.LongPress()
+		.minDuration(500)
+		.onStart((event) => {
+			runOnJS(() => {
+				const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
+				if (hex) {
+					// Update hovered hex for visual feedback
+					setHoveredHex(hex);
+				}
+			})();
+		})
+		.onEnd(() => {
+			runOnJS(setHoveredHex)(null);
+		});
+
 	// Combine gestures
-	const composedGesture = Gesture.Race(doubleTapGesture, Gesture.Simultaneous(tapGesture, panGesture, pinchGesture));
+	const composedGesture = Gesture.Race(
+		doubleTapGesture,
+		longPressGesture,
+		Gesture.Simultaneous(tapGesture, panGesture, pinchGesture),
+	);
 
 	// State to track animated values for rendering
 	const [renderTransform, setRenderTransform] = React.useState({

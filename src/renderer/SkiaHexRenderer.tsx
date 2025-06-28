@@ -3,22 +3,16 @@
  * Replaces HTML canvas-based HexRenderer
  */
 
-import React, {useMemo, useRef, useEffect, useState} from 'react';
-import {Path, Text, Group, Circle, DashPathEffect, matchFont} from '@shopify/react-native-skia';
+import React, {useMemo, useEffect, useState} from 'react';
+import {Path, Text, Group, DashPathEffect, matchFont} from '@shopify/react-native-skia';
 import {PixelRatio, Platform} from 'react-native';
 import type {HexGrid} from '../state/HexGrid';
 import type {Piece} from '../state/SeptominoGenerator';
-import {hexToPixel, pixelToHex, type Point, type HexPoint} from '../utils/hex-calculations';
+import {hexToPixel, pixelToHex, isPointInHex, type Point, type HexPoint} from '../utils/hex-calculations';
 import {createHexPath, calculateTextSize} from '../utils/skia-drawing';
-import {
-	getTheme,
-	getHeightColorFromTheme,
-	withAlpha,
-	getAnimationColors,
-	getContrastColor,
-	type ThemeType,
-} from '../ui/SkiaColorTheme';
-import type {SkPath} from '@shopify/react-native-skia';
+import {getTheme, getHeightColorFromTheme, withAlpha, getContrastColor, type ThemeType} from '../ui/SkiaColorTheme';
+import type {SkPath, SkFont} from '@shopify/react-native-skia';
+import {AnimatedHexCell, createStaggeredAnimation} from '../components/AnimatedHexCell';
 
 interface SkiaHexRendererProps {
 	grid: HexGrid;
@@ -37,6 +31,89 @@ interface SkiaHexRendererProps {
 
 // Deprecated: Use SkiaTheme instead
 
+// Helper component for delayed animation start
+const DelayedAnimatedHexCell = ({
+	delay,
+	path,
+	center,
+	height,
+	animatingCell,
+	actualHexSize,
+	skiaTheme,
+	gridLineColor,
+	font,
+	fontSize,
+	onAnimationComplete,
+}: {
+	delay: number;
+	path: SkPath;
+	center: Point;
+	height: number;
+	animatingCell: {startHeight: number; endHeight: number};
+	actualHexSize: number;
+	skiaTheme: ReturnType<typeof getTheme>;
+	gridLineColor: string;
+	font: SkFont | null;
+	fontSize: number;
+	onAnimationComplete: () => void;
+}) => {
+	const [shouldAnimate, setShouldAnimate] = useState(false);
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setShouldAnimate(true);
+		}, delay);
+
+		return () => clearTimeout(timer);
+	}, [delay]);
+
+	if (!shouldAnimate) {
+		// Render static hex until animation starts
+		return (
+			<Group>
+				<Path
+					path={path}
+					color={getHeightColorFromTheme(height, skiaTheme)}
+					style="fill"
+				/>
+				<Path
+					path={path}
+					color={gridLineColor}
+					style="stroke"
+					strokeWidth={2}
+				/>
+				{font && height > 0 && (
+					<Text
+						x={center.x}
+						y={center.y + fontSize / 3}
+						text={height.toString()}
+						font={font}
+						color={getContrastColor(getHeightColorFromTheme(height, skiaTheme))}
+						opacity={0.9}
+					/>
+				)}
+			</Group>
+		);
+	}
+
+	return (
+		<AnimatedHexCell
+			path={path}
+			centerX={center.x}
+			centerY={center.y}
+			hexSize={actualHexSize}
+			startHeight={animatingCell.startHeight}
+			endHeight={animatingCell.endHeight}
+			theme={skiaTheme}
+			gridLineColor={gridLineColor}
+			font={font}
+			fontSize={fontSize}
+			animationDuration={400}
+			onAnimationComplete={onAnimationComplete}
+		/>
+	);
+};
+
 export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	grid,
 	hexSize,
@@ -53,7 +130,6 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 }) => {
 	// Get theme configuration
 	const skiaTheme = useMemo(() => getTheme(theme), [theme]);
-	const animationColors = useMemo(() => getAnimationColors(skiaTheme), [skiaTheme]);
 	// Load system font
 	const fontSize = useMemo(() => calculateTextSize(hexSize * scale), [hexSize, scale]);
 	const fontFamily = Platform.select({
@@ -69,39 +145,40 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	const font = useMemo(() => matchFont(fontStyle), [fontSize, fontFamily]);
 
 	const devicePixelRatio = PixelRatio.get();
-	const [animationProgress, setAnimationProgress] = useState(0);
-	const animationRef = useRef<number | null>(null);
 
-	// Start animations when cells change
+	// Track which cells have completed animation
+	const [completedAnimations, setCompletedAnimations] = useState<Set<string>>(new Set());
+
+	// Create staggered animation data when cells change
+	const staggeredAnimations = useMemo(() => {
+		if (animatingCells.length === 0) return [];
+
+		// Find center of animated cells for ripple effect
+		const centerQ = Math.round(animatingCells.reduce((sum, cell) => sum + cell.q, 0) / animatingCells.length);
+		const centerR = Math.round(animatingCells.reduce((sum, cell) => sum + cell.r, 0) / animatingCells.length);
+
+		return createStaggeredAnimation(
+			animatingCells.map((cell) => ({q: cell.q, r: cell.r})),
+			{q: centerQ, r: centerR},
+			// 40ms stagger delay
+			40,
+		);
+	}, [animatingCells]);
+
+	// Reset completed animations when new animations start
 	useEffect(() => {
-		if (animatingCells.length === 0) {
-			return;
+		if (animatingCells.length > 0) {
+			setCompletedAnimations(new Set());
 		}
+	}, [animatingCells]);
 
-		setAnimationProgress(0);
-		const startTime = Date.now();
-		const duration = 500;
-
-		const animate = () => {
-			const elapsed = Date.now() - startTime;
-			const progress = Math.min(elapsed / duration, 1);
-			setAnimationProgress(progress);
-
-			if (progress < 1) {
-				animationRef.current = requestAnimationFrame(animate);
-			} else {
-				onAnimationComplete?.();
-			}
-		};
-
-		animationRef.current = requestAnimationFrame(animate);
-
-		return () => {
-			if (animationRef.current) {
-				cancelAnimationFrame(animationRef.current);
-			}
-		};
-	}, [animatingCells, onAnimationComplete]);
+	// Check if all animations are complete
+	useEffect(() => {
+		if (animatingCells.length > 0 && completedAnimations.size === animatingCells.length) {
+			// All animations complete
+			onAnimationComplete?.();
+		}
+	}, [completedAnimations, animatingCells.length, onAnimationComplete]);
 
 	// Calculate actual rendering size with device pixel ratio
 	const actualHexSize = hexSize * scale * devicePixelRatio;
@@ -157,56 +234,51 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 			{/* Render hex grid */}
 			{Array.from(hexPaths.entries()).map(([key, {path, center, height}]) => {
 				const [q, r] = key.split(',').map(Number);
-				const isAnimating = animatingCells.some((cell) => cell.q === q && cell.r === r);
+				const animatingCell = animatingCells.find((cell) => cell.q === q && cell.r === r);
 
-				if (isAnimating) {
-					const animatingCell = animatingCells.find((cell) => cell.q === q && cell.r === r)!;
-					const animatedHeight =
-						animatingCell.startHeight +
-						(animatingCell.endHeight - animatingCell.startHeight) * animationProgress;
-
-					// Calculate burst animation values
-					const burstRadius =
-						animationProgress < 0.5
-							? actualHexSize * 3 * animationProgress
-							: actualHexSize * 1.5 + actualHexSize * 0.5 * (animationProgress - 0.5) * 2;
-					const burstOpacity =
-						animationProgress < 0.5
-							? skiaTheme.opacity.strong - skiaTheme.opacity.medium * (animationProgress * 2)
-							: skiaTheme.opacity.medium - skiaTheme.opacity.medium * ((animationProgress - 0.5) * 2);
+				if (animatingCell) {
+					// Find the stagger delay for this cell
+					const staggerData = staggeredAnimations.find((item) => item.cell.q === q && item.cell.r === r);
+					const delay = staggerData?.delay || 0;
 
 					return (
 						<Group key={key}>
-							<Path
-								path={path}
-								color={getHeightColorFromTheme(animatedHeight, skiaTheme)}
-								style="fill"
-							/>
-							<Path
-								path={path}
-								color={gridLineColor}
-								style="stroke"
-								strokeWidth={2}
-							/>
-							{font && animatedHeight > 0 && (
-								<Text
-									x={center.x}
-									y={center.y + fontSize / 3}
-									text={Math.round(animatedHeight).toString()}
+							{/* Add a delayed wrapper for staggered animation */}
+							{delay === 0 ? (
+								<AnimatedHexCell
+									path={path}
+									centerX={center.x}
+									centerY={center.y}
+									hexSize={actualHexSize}
+									startHeight={animatingCell.startHeight}
+									endHeight={animatingCell.endHeight}
+									theme={skiaTheme}
+									gridLineColor={gridLineColor}
 									font={font}
-									color={getContrastColor(getHeightColorFromTheme(animatedHeight, skiaTheme))}
-									opacity={0.9}
+									fontSize={fontSize}
+									animationDuration={400}
+									onAnimationComplete={() => {
+										setCompletedAnimations((prev) => new Set(prev).add(key));
+									}}
+								/>
+							) : (
+								<DelayedAnimatedHexCell
+									key={`${key}-delayed`}
+									delay={delay}
+									path={path}
+									center={center}
+									height={height}
+									animatingCell={animatingCell}
+									actualHexSize={actualHexSize}
+									skiaTheme={skiaTheme}
+									gridLineColor={gridLineColor}
+									font={font}
+									fontSize={fontSize}
+									onAnimationComplete={() => {
+										setCompletedAnimations((prev) => new Set(prev).add(key));
+									}}
 								/>
 							)}
-							{/* Burst animation */}
-							<Circle
-								cx={center.x}
-								cy={center.y}
-								r={burstRadius}
-								color={withAlpha(animationColors.burst, burstOpacity)}
-								style="stroke"
-								strokeWidth={3}
-							/>
 						</Group>
 					);
 				}
@@ -371,6 +443,70 @@ export class SkiaHexRendererCompat {
 		const adjustedX = (x - this.offsetX) * devicePixelRatio;
 		const adjustedY = (y - this.offsetY) * devicePixelRatio;
 		return pixelToHex(adjustedX, adjustedY, actualHexSize);
+	}
+
+	pixelToHexWithHitTest(x: number, y: number): HexPoint | null {
+		const devicePixelRatio = PixelRatio.get();
+		const actualHexSize = this.hexSize * this.scale * devicePixelRatio;
+		const adjustedX = (x - this.offsetX) * devicePixelRatio;
+		const adjustedY = (y - this.offsetY) * devicePixelRatio;
+
+		// Get the nearest hex coordinate using mathematical conversion
+		const candidateHex = pixelToHex(adjustedX, adjustedY, actualHexSize);
+
+		// Verify the touch point is actually within the hexagon boundaries
+		if (this.grid.isValidCoordinate(candidateHex.q, candidateHex.r)) {
+			const hexCenter = hexToPixel(candidateHex.q, candidateHex.r, actualHexSize);
+			const isWithinHex = isPointInHex(adjustedX, adjustedY, hexCenter.x, hexCenter.y, actualHexSize);
+
+			if (isWithinHex) {
+				return candidateHex;
+			}
+		}
+
+		// If the primary candidate isn't valid, check nearby hexes
+		const searchRadius = 2;
+		let closestHex: HexPoint | null = null;
+		let closestDistance = Infinity;
+
+		for (let dq = -searchRadius; dq <= searchRadius; dq++) {
+			for (let dr = -searchRadius; dr <= searchRadius; dr++) {
+				const testHex = {q: candidateHex.q + dq, r: candidateHex.r + dr};
+
+				if (this.grid.isValidCoordinate(testHex.q, testHex.r)) {
+					const testHexCenter = hexToPixel(testHex.q, testHex.r, actualHexSize);
+					const isWithinTestHex = isPointInHex(
+						adjustedX,
+						adjustedY,
+						testHexCenter.x,
+						testHexCenter.y,
+						actualHexSize,
+					);
+
+					if (isWithinTestHex) {
+						return testHex;
+					}
+
+					// Track closest hex for fallback
+					const distance = Math.sqrt(
+						Math.pow(adjustedX - testHexCenter.x, 2) + Math.pow(adjustedY - testHexCenter.y, 2),
+					);
+					if (distance < closestDistance) {
+						closestDistance = distance;
+						closestHex = testHex;
+					}
+				}
+			}
+		}
+
+		// As a last resort, return the closest hex if within reasonable distance
+		// 1.5x hex size tolerance
+		const maxDistance = actualHexSize * 1.5;
+		if (closestHex && closestDistance <= maxDistance) {
+			return closestHex;
+		}
+
+		return null;
 	}
 
 	hexToPixel(q: number, r: number): Point {
