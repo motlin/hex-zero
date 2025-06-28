@@ -43,5 +43,10 @@ android/app/src/main/assets/public
 android/.gradle
 local.properties
 
+# Android Keystores and Signing
+*.keystore
+*.jks
+gradle.properties.local
+
 # Capacitor
 .sourcemaps

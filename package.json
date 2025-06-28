@@ -42,6 +42,12 @@
 		"version:patch": "node scripts/update-version.js patch",
 		"version:minor": "node scripts/update-version.js minor",
 		"version:major": "node scripts/update-version.js major",
+		"build:ios": "node scripts/build-ios.js",
+		"build:android": "node scripts/build-android.js",
+		"test:platforms": "node scripts/test-all-platforms.js",
+		"sync": "pnpm run build && pnpm exec cap sync",
+		"sync:ios": "pnpm run build && pnpm exec cap sync ios",
+		"sync:android": "pnpm run build && pnpm exec cap sync android",
 		"prepare": "vp config"
 	},
 	"dependencies": {
