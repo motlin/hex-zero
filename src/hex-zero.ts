@@ -17,6 +17,7 @@ import {scheduleIdleWork} from './performance/idle-callback-polyfill';
 import {SharingService} from './services/sharing';
 import {DeviceVariationOptimizer} from './device-variation-optimizer';
 import {PlatformGestureHandler} from './platform-gesture-handler';
+import {AccessibilityManager} from './accessibility-manager';
 
 declare global {
 	interface Window {
@@ -42,6 +43,7 @@ interface AnimatingHex {
 
 let game: HexSeptominoGame | null = null;
 let globalAchievementManager: AchievementManager | null = null;
+let globalAccessibilityManager: AccessibilityManager | null = null;
 
 function startGame(radius: number, numPieces: number): void {
 	HapticFeedback.lightTap();
@@ -68,6 +70,7 @@ PlatformGestureHandler.getInstance().registerBackButtonHandler(() => {
 	// Check if any modals are open
 	const modals = document.querySelectorAll('.modal:not(.hidden)');
 	if (modals.length > 0) {
+		// Close the topmost modal
 		const lastModal = modals[modals.length - 1];
 		if (lastModal) {
 			lastModal.classList.add('hidden');
@@ -172,6 +175,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 
+	// Initialize global accessibility manager
+	globalAccessibilityManager = AccessibilityManager.getInstance();
+	globalAccessibilityManager.setupGameAccessibility();
+	globalAccessibilityManager.setupFocusManagement();
+
 	const instructionsModal = document.getElementById('instructionsModal');
 	const instructionsOverlay = instructionsModal?.querySelector('.modal-overlay');
 	const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
@@ -191,7 +199,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 		hamburgerBtn.addEventListener('click', (e) => {
 			e.stopPropagation();
 			HapticFeedback.lightTap();
+			const isOpen = !hamburgerMenu.classList.contains('hidden');
 			hamburgerMenu.classList.toggle('hidden');
+			globalAccessibilityManager?.updateHamburgerMenuAccessibility(!isOpen, 'hamburgerBtn');
 		});
 
 		document.addEventListener('click', (e) => {
@@ -247,7 +257,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 		menuHamburgerBtn.addEventListener('click', (e) => {
 			e.stopPropagation();
 			HapticFeedback.lightTap();
+			const isOpen = !menuHamburgerMenu.classList.contains('hidden');
 			menuHamburgerMenu.classList.toggle('hidden');
+			globalAccessibilityManager?.updateHamburgerMenuAccessibility(!isOpen, 'menuHamburgerBtn');
 		});
 
 		document.addEventListener('click', (e) => {
@@ -333,6 +345,7 @@ class HexSeptominoGame {
 	} | null;
 	private achievementManager: AchievementManager;
 	private sharingService: SharingService;
+	private accessibilityManager: AccessibilityManager;
 	private gameStartTime: number;
 
 	private currentPage: number;
@@ -403,6 +416,7 @@ class HexSeptominoGame {
 
 		// Initialize sharing service
 		this.sharingService = SharingService.getInstance();
+		this.accessibilityManager = globalAccessibilityManager!;
 		this.gameStartTime = Date.now();
 
 		// Initialize haptic feedback
@@ -796,6 +810,10 @@ class HexSeptominoGame {
 		// Add haptic feedback for successful placement
 		HapticFeedback.heavyTap();
 
+		// Announce piece placement for accessibility
+		const positionDescription = this.accessibilityManager.getHexPositionDescription(centerQ, centerR);
+		this.accessibilityManager.announcePiecePlacement(currentPieceIndex + 1, positionDescription, true);
+
 		this.animationStartTime = performance.now();
 		this.requestAnimationFrame();
 
@@ -822,6 +840,14 @@ class HexSeptominoGame {
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
+
+			// Announce piece change for accessibility
+			const currentPieceIndex = this.gameState.getCurrentPieceIndex();
+			const totalPieces = this.gameState.getPieces().length;
+			this.accessibilityManager.announce({
+				message: `Piece ${currentPieceIndex + 1} of ${totalPieces} selected`,
+				priority: 'medium',
+			});
 		}
 	}
 
@@ -902,6 +928,7 @@ class HexSeptominoGame {
 		const undone = this.gameState.undo();
 		if (undone) {
 			this.achievementManager.trackUndo();
+			this.accessibilityManager.announceUndo();
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
@@ -911,6 +938,7 @@ class HexSeptominoGame {
 	redo(): void {
 		const redone = this.gameState.redo();
 		if (redone) {
+			this.accessibilityManager.announceRedo();
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
@@ -938,6 +966,11 @@ class HexSeptominoGame {
 			this.hintPos = hint;
 			this.gameState.incrementHintCount();
 			this.achievementManager.trackHint();
+
+			// Announce hint for accessibility
+			const positionDescription = this.accessibilityManager.getHexPositionDescription(hint.q, hint.r);
+			this.accessibilityManager.announceHint(positionDescription);
+
 			this.render();
 
 			this.hintTimeout = window.setTimeout(() => {
@@ -999,6 +1032,14 @@ class HexSeptominoGame {
 				.getHintCount()
 				.toString();
 
+			// Announce game completion for accessibility
+			this.accessibilityManager.announceGameWin({
+				difficulty,
+				undos: this.gameState.getUndoCount(),
+				hints: this.gameState.getHintCount(),
+			});
+
+			// Trigger achievements
 			this.achievementManager.onGameComplete({
 				difficulty: difficulty as DifficultyLevel,
 				undoCount: this.gameState.getUndoCount(),
@@ -1258,6 +1299,10 @@ class HexSeptominoGame {
 
 		// Add haptic feedback for invalid placement
 		HapticFeedback.warningNotification();
+
+		// Announce invalid placement for accessibility
+		const positionDescription = this.accessibilityManager.getHexPositionDescription(position.q, position.r);
+		this.accessibilityManager.announceInvalidMove(`Cannot place piece at ${positionDescription}`);
 	}
 
 	private toggleKeyboardShortcuts(): void {
@@ -1272,16 +1317,23 @@ class HexSeptominoGame {
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 		}
 
+		// Update undo/redo button states
+		const canUndo = this.gameState.canUndo();
+		const canRedo = this.gameState.canRedo();
+
 		const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
 		const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
 
 		if (undoBtn) {
-			undoBtn.disabled = !this.gameState.canUndo();
+			undoBtn.disabled = !canUndo;
 		}
 
 		if (redoBtn) {
-			redoBtn.disabled = !this.gameState.canRedo();
+			redoBtn.disabled = !canRedo;
 		}
+
+		// Update accessibility states
+		this.accessibilityManager.updateButtonStates(canUndo, canRedo);
 
 		this.renderBottomPanel();
 	}
@@ -1655,6 +1707,9 @@ class HexSeptominoGame {
 				// Add touch feedback for better mobile UX
 				addTouchFeedback(pieceContainer, {scale: 1.05, duration: 100});
 			}
+
+			// Set up accessibility for piece
+			this.accessibilityManager.setupPieceAccessibility(pieceContainer, i, isPlaced);
 
 			piecesContainer.appendChild(pieceContainer);
 		}

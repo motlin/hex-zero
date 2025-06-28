@@ -32,6 +32,7 @@
 		<link rel="stylesheet" href="./src/mobile-ui-enhancements.css" />
 		<link rel="stylesheet" href="./src/device-variations.css" />
 		<link rel="stylesheet" href="./src/platform-gestures.css" />
+		<link rel="stylesheet" href="./src/accessibility.css" />
 		<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-8GSBP3FXDS"></script>
 		<script>
@@ -51,16 +52,34 @@
 		></script>
 	</head>
 	<body>
-		<h1 class="game-title">Hex Zero</h1>
+		<!-- Skip navigation for accessibility -->
+		<a href="#main-content" class="skip-nav sr-only-focusable">Skip to main content</a>
+
+		<header>
+			<h1 class="game-title">Hex Zero</h1>
+		</header>
 
 		<!-- Difficulty Selection Screen -->
-		<div id="difficultyScreen" class="difficulty-screen">
+		<div id="difficultyScreen" class="difficulty-screen" role="main" aria-labelledby="difficulty-heading">
 			<div class="hamburger-menu-container">
-				<button id="menuHamburgerBtn" class="hamburger-button">☰</button>
-				<div id="menuHamburgerMenu" class="hamburger-dropdown hidden">
-					<button id="howToPlayMenuBtn">How to Play</button>
-					<button id="menuAchievementsButton">🏆 Achievements (0/15)</button>
-					<button id="menuFullscreenButton">⛶ Fullscreen</button>
+				<button
+					id="menuHamburgerBtn"
+					class="hamburger-button"
+					aria-label="Open main menu"
+					aria-expanded="false"
+					aria-haspopup="menu"
+				>
+					☰
+				</button>
+				<div
+					id="menuHamburgerMenu"
+					class="hamburger-dropdown hidden"
+					role="menu"
+					aria-labelledby="menuHamburgerBtn"
+				>
+					<button id="howToPlayMenuBtn" role="menuitem">How to Play</button>
+					<button id="menuAchievementsButton" role="menuitem">🏆 Achievements (0/15)</button>
+					<button id="menuFullscreenButton" role="menuitem">⛶ Fullscreen</button>
 					<button
 						id="githubLinkMenuBtn"
 						onclick="window.open('https://github.com/motlin/hex-zero', '_blank')"
@@ -69,26 +88,56 @@
 					</button>
 				</div>
 			</div>
-			<h2>Select Difficulty</h2>
-			<div class="difficulty-options">
-				<div class="difficulty-card" onclick="startGame(3, 4)">
+			<h2 id="difficulty-heading">Select Difficulty</h2>
+			<div class="difficulty-options" role="group" aria-labelledby="difficulty-heading">
+				<div
+					class="difficulty-card"
+					onclick="startGame(3, 4)"
+					role="button"
+					tabindex="0"
+					aria-label="Easy difficulty: Small board with radius 3 and 4 pieces"
+				>
 					<h3>Easy</h3>
 					<p>Small board (radius 3) with 4 pieces</p>
 				</div>
-				<div class="difficulty-card recommended" onclick="startGame(3, 6)">
+				<div
+					class="difficulty-card recommended"
+					onclick="startGame(3, 6)"
+					role="button"
+					tabindex="0"
+					aria-label="Medium difficulty: Standard board with radius 3 and 6 pieces. Recommended for new players."
+				>
 					<h3>Medium</h3>
 					<p>Standard board (radius 3) with 6 pieces</p>
 					<span class="recommended-badge">Recommended</span>
 				</div>
-				<div class="difficulty-card" onclick="startGame(3, 8)">
+				<div
+					class="difficulty-card"
+					onclick="startGame(3, 8)"
+					role="button"
+					tabindex="0"
+					aria-label="Hard difficulty: Standard board with radius 3 and 8 pieces"
+				>
 					<h3>Hard</h3>
 					<p>Standard board (radius 3) with 8 pieces</p>
 				</div>
-				<div class="difficulty-card" onclick="startGame(4, 10)">
+				<div
+					class="difficulty-card"
+					onclick="startGame(4, 10)"
+					role="button"
+					tabindex="0"
+					aria-label="Extreme difficulty: Large board with radius 4 and 10 pieces"
+				>
 					<h3>Extreme</h3>
 					<p>Large board (radius 4) with 10 pieces</p>
 				</div>
-				<div class="difficulty-card" onclick="startGame(4, 14)">
+				<div
+					class="difficulty-card"
+					onclick="startGame(4, 14)"
+					role="button"
+					tabindex="0"
+					aria-label="Impossible difficulty: Large board with radius 4 and 14 pieces"
+				>
 					<h3>Impossible</h3>
 					<p>Large board (radius 4) with 14 pieces</p>
 				</div>
@@ -115,17 +164,37 @@
 		</div>
 
 		<!-- Game Screen -->
-		<div id="gameScreen" class="game-container hidden">
+		<div id="gameScreen" class="game-container hidden" role="main" aria-labelledby="game-heading">
 			<div class="canvas-container">
-				<canvas id="gameCanvas"></canvas>
+				<canvas
+					id="gameCanvas"
+					role="application"
+					aria-label="Hex Zero game board"
+					aria-description="Interactive hexagonal puzzle game. Use mouse or touch to place pieces, arrow keys to navigate."
+					tabindex="0"
+				></canvas>
+				<h2 id="game-heading" class="sr-only">Hex Zero Game Board</h2>
 				<div class="hamburger-menu-container">
-					<button id="hamburgerBtn" class="hamburger-button">☰</button>
-					<div id="hamburgerMenu" class="hamburger-dropdown hidden">
-						<button id="newGameBtn">New Game</button>
-						<button id="restartBtn">Restart</button>
-						<button id="howToPlayBtn" onclick="showInstructions()">How to Play</button>
-						<button id="achievementsButton">🏆 Achievements (0/15)</button>
-						<button id="fullscreenButton">⛶ Fullscreen</button>
+					<button
+						id="hamburgerBtn"
+						class="hamburger-button"
+						aria-label="Open game menu"
+						aria-expanded="false"
+						aria-haspopup="menu"
+					>
+						☰
+					</button>
+					<div
+						id="hamburgerMenu"
+						class="hamburger-dropdown hidden"
+						role="menu"
+						aria-labelledby="hamburgerBtn"
+					>
+						<button id="newGameBtn" role="menuitem">New Game</button>
+						<button id="restartBtn" role="menuitem">Restart</button>
+						<button id="howToPlayBtn" onclick="showInstructions()" role="menuitem">How to Play</button>
+						<button id="achievementsButton" role="menuitem">🏆 Achievements (0/15)</button>
+						<button id="fullscreenButton" role="menuitem">⛶ Fullscreen</button>
 						<button
 							id="githubLinkBtn"
 							onclick="window.open('https://github.com/motlin/hex-zero', '_blank')"
@@ -137,17 +206,28 @@
 			</div>
 
 			<!-- Control Panel for 1010-style piece drag/drop -->
-			<div id="controlPanel" class="control-panel">
-				<div class="piece-panel">
-					<div id="piecesContainer" class="pieces-container"></div>
-					<button id="morePiecesBtn" class="more-pieces-button">More Pieces</button>
+			<div id="controlPanel" class="control-panel" role="complementary" aria-label="Game controls">
+				<div class="piece-panel" role="group" aria-label="Available game pieces">
+					<div
+						id="piecesContainer"
+						class="pieces-container"
+						role="group"
+						aria-label="Draggable game pieces"
+					></div>
+					<button id="morePiecesBtn" class="more-pieces-button" aria-label="Navigate to next page of pieces">
+						More Pieces
+					</button>
 				</div>
 
-				<div class="bottom-controls">
-					<button id="undoBtn">Undo</button>
-					<button id="hintBtn">Hint</button>
-					<button id="redoBtn">Redo</button>
-					<div class="solution-status" id="solutionStatus"></div>
+				<div class="bottom-controls" role="group" aria-label="Game action buttons">
+					<button id="undoBtn" aria-label="Undo last move" aria-keyshortcuts="Left Arrow">Undo</button>
+					<button id="hintBtn" aria-label="Show hint for current piece placement" aria-keyshortcuts="h H">
+						Hint
+					</button>
+					<button id="redoBtn" aria-label="Redo last undone move" aria-keyshortcuts="Right Arrow">
+						Redo
+					</button>
+					<div class="solution-status" id="solutionStatus" role="status" aria-live="polite"></div>
 				</div>
 			</div>
 
@@ -340,6 +420,9 @@
 				<span id="mobileSolutionStatus" class="solution-status"></span>
 			</div>
 		</div>
+
+		<!-- Accessibility announcements region -->
+		<div id="a11y-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
 		<script type="module" src="./src/hex-zero.ts"></script>
 	</body>
