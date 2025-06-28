@@ -143,6 +143,19 @@ export function getHeightColorFromTheme(height: number, theme: SkiaTheme): strin
 }
 
 /**
+ * 🎨 Get animation colors from theme
+ */
+export interface AnimationColors {
+	burst: string;
+	burstFade: string;
+	particle: string;
+	glow: string;
+	selection: string;
+	hint: string;
+	invalid: string;
+}
+
+/**
  * 🎨 Add alpha to any color
  */
 export function withAlpha(color: string, alpha: number): string {
@@ -234,10 +247,12 @@ export function blendColors(color1: string, color2: string, ratio: number): stri
 /**
  * 🎨 Theme-aware animation colors
  */
-export function getAnimationColors(theme: SkiaTheme) {
+export function getAnimationColors(theme: SkiaTheme): AnimationColors {
 	return {
-		burst: withAlpha(theme.colors.burstColor, 0.8),
+		burst: withAlpha(theme.colors.burstColor, 1.0),
 		burstFade: withAlpha(theme.colors.burstColor, 0.0),
+		particle: withAlpha(theme.colors.burstColor, 0.8),
+		glow: withAlpha(theme.colors.selectionColor, 0.4),
 		selection: withAlpha(theme.colors.selectionColor, 0.6),
 		hint: withAlpha(theme.colors.hintStroke, 0.4),
 		invalid: withAlpha(theme.colors.invalidFill, 0.8),

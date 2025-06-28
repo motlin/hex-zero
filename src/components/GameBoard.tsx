@@ -5,7 +5,7 @@
 
 import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, LayoutChangeEvent} from 'react-native';
-import {HexGameBoard} from './HexGameBoard';
+import {HexGameBoardWithGestures} from './HexGameBoardWithGestures';
 import {useGameState} from '../contexts/GameStateContext';
 import {useThemeContext} from '../context/ThemeContext';
 import type {HexPoint} from '../utils/hex-calculations';
@@ -14,11 +14,24 @@ import type {Piece} from '../state/SeptominoGenerator';
 interface GameBoardProps {
 	showHints?: boolean;
 	onBoardReady?: () => void;
+	draggedPiece?: Piece | null;
+	dropPosition?: {x: number; y: number} | null;
+	onDropComplete?: () => void;
+	onInvalidPlacement?: (piece: Piece) => void;
+	validPlacementCells?: HexPoint[];
 }
 
 // Screen dimensions can be accessed if needed for future enhancements
 
-export const GameBoard: React.FC<GameBoardProps> = ({showHints = false, onBoardReady}) => {
+export const GameBoard: React.FC<GameBoardProps> = ({
+	showHints = false,
+	onBoardReady,
+	draggedPiece,
+	dropPosition,
+	onDropComplete,
+	onInvalidPlacement,
+	validPlacementCells = [],
+}) => {
 	const {themeType} = useThemeContext();
 	const {gameState, placePiece, canPlacePiece, getCurrentPiece, getSolutionHint, incrementHintCount} = useGameState();
 
@@ -123,14 +136,19 @@ export const GameBoard: React.FC<GameBoardProps> = ({showHints = false, onBoardR
 			style={styles.container}
 			onLayout={handleLayout}
 		>
-			<HexGameBoard
+			<HexGameBoardWithGestures
 				grid={grid}
 				selectedPiece={currentPiece}
 				onHexPress={handleHexPress}
 				onPiecePlaced={handlePiecePlaced}
+				onInvalidPlacement={onInvalidPlacement}
 				showHints={showHints}
 				hintCells={hintCells}
+				validPlacementCells={validPlacementCells}
 				theme={themeType}
+				draggedPiece={draggedPiece}
+				dropPosition={dropPosition}
+				onDropComplete={onDropComplete}
 			/>
 		</View>
 	);

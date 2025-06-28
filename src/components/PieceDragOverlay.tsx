@@ -15,6 +15,7 @@ interface PieceDragOverlayProps {
 	isValid: boolean;
 	visible: boolean;
 	hexSize?: number;
+	testID?: string;
 }
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -25,6 +26,7 @@ export const PieceDragOverlay: React.FC<PieceDragOverlayProps> = ({
 	isValid,
 	visible,
 	hexSize = 30,
+	testID,
 }) => {
 	const {theme} = useThemeContext();
 	const opacity = useRef(new Animated.Value(0)).current;
@@ -72,6 +74,7 @@ export const PieceDragOverlay: React.FC<PieceDragOverlayProps> = ({
 
 	return (
 		<Animated.View
+			testID={testID}
 			style={[
 				styles.container,
 				{

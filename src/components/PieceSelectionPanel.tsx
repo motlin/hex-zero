@@ -3,7 +3,7 @@
  * Displays available pieces for the player to choose and drag
  */
 
-import React, {useState, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {
 	View,
 	ScrollView,
@@ -15,8 +15,9 @@ import {
 	Platform,
 	UIManager,
 } from 'react-native';
+import {PanGestureHandler, State, type PanGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
 import type {Piece} from '../state/SeptominoGenerator';
-import {DraggablePiece} from './DraggablePiece';
+import {DraggablePiece, type DraggablePieceRef} from './DraggablePiece';
 import {useThemeContext} from '../context/ThemeContext';
 import {usePieces} from '../hooks/usePieces';
 
@@ -33,6 +34,7 @@ interface PieceSelectionPanelProps {
 	onPieceDragStart?: (piece: Piece, index: number) => void;
 	onPieceDragMove?: (piece: Piece, x: number, y: number) => void;
 	onPieceDragEnd?: (piece: Piece, x: number, y: number) => void;
+	onInvalidPlacement?: (piece: Piece, index: number) => void;
 	onPageChange?: (page: number) => void;
 	selectedPieceIndex?: number | null;
 	hexSize?: number;
@@ -48,6 +50,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 	onPieceDragStart,
 	onPieceDragMove,
 	onPieceDragEnd,
+	onInvalidPlacement,
 	onPageChange,
 	selectedPieceIndex,
 	hexSize = 20,
@@ -56,6 +59,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 	const scrollViewRef = useRef<ScrollView>(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const {isPiecePlaced} = usePieces();
+	const pieceRefs = useRef<Map<number, DraggablePieceRef>>(new Map());
 
 	// Calculate page data
 	const totalPages = Math.ceil(pieces.length / piecesPerPage);
@@ -75,6 +79,17 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 		},
 		[isDragging, onPieceSelect, isPiecePlaced, startIndex],
 	);
+
+	// Auto-advance to next page when all current pieces are placed
+	useEffect(() => {
+		if (allCurrentPiecesPlaced && currentPage < totalPages - 1 && onPageChange) {
+			setTimeout(() => {
+				LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+				onPageChange(currentPage + 1);
+			}, 1000);
+			// 1 second delay for user to see completion
+		}
+	}, [allCurrentPiecesPlaced, currentPage, totalPages, onPageChange]);
 
 	const handleDragStart = useCallback(
 		(piece: Piece, index: number) => {
@@ -96,6 +111,18 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 		[onPieceDragEnd],
 	);
 
+	const handleInvalidPlacement = useCallback(
+		(piece: Piece) => {
+			if (onInvalidPlacement) {
+				const pieceIndex = pieces.findIndex((p) => p === piece);
+				if (pieceIndex !== -1) {
+					onInvalidPlacement(piece, pieceIndex);
+				}
+			}
+		},
+		[onInvalidPlacement, pieces],
+	);
+
 	const handleNextPage = useCallback(() => {
 		if (currentPage < totalPages - 1 && onPageChange) {
 			LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -109,6 +136,40 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 			onPageChange(currentPage - 1);
 		}
 	}, [currentPage, onPageChange]);
+
+	// Handle swipe gestures for page navigation
+	const handleSwipeGesture = useCallback(
+		(event: PanGestureHandlerStateChangeEvent) => {
+			if (event.nativeEvent.state === State.END && !isDragging) {
+				const {translationX, velocityX} = event.nativeEvent;
+				const threshold = 50;
+				const velocityThreshold = 500;
+
+				// Swipe right (show previous page)
+				if ((translationX > threshold || velocityX > velocityThreshold) && currentPage > 0) {
+					handlePrevPage();
+				}
+				// Swipe left (show next page)
+				else if (
+					(translationX < -threshold || velocityX < -velocityThreshold) &&
+					currentPage < totalPages - 1
+				) {
+					handleNextPage();
+				}
+			}
+		},
+		[isDragging, currentPage, totalPages, handlePrevPage, handleNextPage],
+	);
+
+	// Function to trigger shake animation for a specific piece
+	// This will be used when we integrate with invalid placement feedback
+	// @ts-expect-error - will be used later for shake animation integration
+	const _triggerPieceShake = useCallback((pieceIndex: number) => {
+		const pieceRef = pieceRefs.current.get(pieceIndex);
+		if (pieceRef) {
+			pieceRef.triggerShakeAnimation();
+		}
+	}, []);
 
 	const pieceSize = Math.min(screenWidth / (piecesPerPage + 1), 80);
 
@@ -125,50 +186,84 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 				</TouchableOpacity>
 			)}
 
-			{/* Pieces ScrollView */}
-			<ScrollView
-				ref={scrollViewRef}
-				horizontal
-				showsHorizontalScrollIndicator={false}
-				contentContainerStyle={styles.scrollContent}
-				scrollEnabled={!isDragging}
+			{/* Swipeable Pieces Container */}
+			<PanGestureHandler
+				onHandlerStateChange={handleSwipeGesture}
+				enabled={!isDragging}
 			>
-				{currentPieces.map((piece, index) => {
-					const globalIndex = startIndex + index;
-					const isPlaced = isPiecePlaced(globalIndex);
-					const isSelected = selectedPieceIndex === globalIndex;
+				<View style={styles.swipeableContainer}>
+					{/* Pieces ScrollView */}
+					<ScrollView
+						ref={scrollViewRef}
+						horizontal
+						showsHorizontalScrollIndicator={false}
+						contentContainerStyle={styles.scrollContent}
+						scrollEnabled={!isDragging}
+					>
+						{currentPieces.map((piece, index) => {
+							const globalIndex = startIndex + index;
+							const isPlaced = isPiecePlaced(globalIndex);
+							const isSelected = selectedPieceIndex === globalIndex;
 
-					return (
-						<TouchableOpacity
-							key={globalIndex}
-							style={[
-								styles.pieceWrapper,
-								isSelected && styles.selectedPiece,
-								isPlaced && styles.placedPiece,
-								{
-									width: pieceSize,
-									height: pieceSize,
-									borderColor: isSelected ? theme.colors.selectionColor : 'transparent',
-								},
-							]}
-							onPress={() => handlePiecePress(piece, index)}
-							activeOpacity={0.8}
-							disabled={isPlaced}
-						>
-							<DraggablePiece
-								piece={piece}
-								index={globalIndex}
-								hexSize={hexSize}
-								onDragStart={handleDragStart}
-								onDragMove={onPieceDragMove}
-								onDragEnd={handleDragEnd}
-								isPlaced={isPlaced}
-								disabled={isDragging && !isSelected}
-							/>
-						</TouchableOpacity>
-					);
-				})}
-			</ScrollView>
+							return (
+								<TouchableOpacity
+									key={globalIndex}
+									style={[
+										styles.pieceWrapper,
+										isSelected && styles.selectedPiece,
+										isPlaced && styles.placedPiece,
+										{
+											width: pieceSize,
+											height: pieceSize,
+											borderColor: isSelected ? theme.colors.selectionColor : 'transparent',
+										},
+									]}
+									onPress={() => handlePiecePress(piece, index)}
+									activeOpacity={0.8}
+									disabled={isPlaced}
+								>
+									<DraggablePiece
+										ref={(ref) => {
+											if (ref) {
+												pieceRefs.current.set(globalIndex, ref);
+											} else {
+												pieceRefs.current.delete(globalIndex);
+											}
+										}}
+										piece={piece}
+										index={globalIndex}
+										hexSize={hexSize}
+										onDragStart={handleDragStart}
+										onDragMove={onPieceDragMove}
+										onDragEnd={handleDragEnd}
+										onInvalidPlacement={handleInvalidPlacement}
+										isPlaced={isPlaced}
+										disabled={isDragging && !isSelected}
+									/>
+								</TouchableOpacity>
+							);
+						})}
+					</ScrollView>
+
+					{/* Page Indicator */}
+					{totalPages > 1 && (
+						<View style={styles.pageIndicator}>
+							{Array.from({length: totalPages}, (_, index) => (
+								<View
+									key={index}
+									style={[
+										styles.pageIndicatorDot,
+										{
+											backgroundColor:
+												index === currentPage ? theme.colors.text : theme.colors.textSecondary,
+										},
+									]}
+								/>
+							))}
+						</View>
+					)}
+				</View>
+			</PanGestureHandler>
 
 			{/* Next Page or More Pieces Button */}
 			{(currentPage < totalPages - 1 || allCurrentPiecesPlaced) && (
@@ -204,6 +299,10 @@ const styles = StyleSheet.create({
 		paddingVertical: 10,
 		paddingHorizontal: 5,
 	},
+	swipeableContainer: {
+		flex: 1,
+		alignItems: 'center',
+	},
 	scrollContent: {
 		alignItems: 'center',
 		paddingHorizontal: 10,
@@ -221,6 +320,19 @@ const styles = StyleSheet.create({
 	},
 	placedPiece: {
 		opacity: 0.3,
+	},
+	pageIndicator: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginTop: 8,
+		gap: 6,
+	},
+	pageIndicatorDot: {
+		width: 6,
+		height: 6,
+		borderRadius: 3,
+		opacity: 0.6,
 	},
 	navButton: {
 		width: 40,
