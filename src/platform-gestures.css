@@ -1,0 +1,359 @@
+/* Platform-Specific Gesture Styles */
+
+/* ============================================
+   iOS Gesture Handling
+   ============================================ */
+.ios-gestures {
+	/* Prevent conflicts with iOS system gestures */
+
+	/* Home indicator safe zone */
+	.control-panel {
+		padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 10px));
+	}
+
+	/* Prevent accidental control center / notification center activation */
+	.game-title,
+	.hamburger-menu-container {
+		/* Move elements away from top edge */
+		top: max(20px, calc(env(safe-area-inset-top) + 10px));
+	}
+
+	/* Adjust canvas to avoid home indicator */
+	.canvas-container {
+		margin-bottom: env(safe-area-inset-bottom);
+	}
+
+	/* Disable pull-to-refresh in game area */
+	#gameCanvas {
+		overscroll-behavior-y: contain;
+	}
+}
+
+/* iOS Edge swipe indicators */
+.ios-gestures .edge-swipe-indicator {
+	position: fixed;
+	background: rgba(255, 255, 255, 0.2);
+	pointer-events: none;
+	animation: edge-swipe-fade 0.5s ease-out;
+	z-index: 9999;
+}
+
+.ios-gestures .edge-swipe-indicator.edge-left {
+	left: 0;
+	top: 0;
+	width: 20px;
+	height: 100vh;
+}
+
+.ios-gestures .edge-swipe-indicator.edge-right {
+	right: 0;
+	top: 0;
+	width: 20px;
+	height: 100vh;
+}
+
+/* ============================================
+   Android Gesture Handling
+   ============================================ */
+.android-gestures {
+	/* Handle Android navigation gestures */
+
+	/* Bottom navigation gesture area */
+	.control-panel {
+		/* Add extra padding for gesture navigation */
+		padding-bottom: max(48px, env(safe-area-inset-bottom));
+	}
+
+	/* Side swipe back gesture areas */
+	.game-container {
+		/* Inset from edges to avoid back gesture */
+		margin-left: 20px;
+		margin-right: 20px;
+		width: calc(100% - 40px);
+	}
+
+	/* Ensure draggable pieces don't start in back gesture zone */
+	.draggable-piece {
+		margin-left: 10px;
+		margin-right: 10px;
+	}
+}
+
+/* Android back gesture indicators */
+.android-gestures .edge-swipe-indicator {
+	position: fixed;
+	background: rgba(255, 255, 255, 0.3);
+	pointer-events: none;
+	animation: edge-swipe-fade 0.5s ease-out;
+	z-index: 9999;
+}
+
+.android-gestures .edge-swipe-indicator.edge-left,
+.android-gestures .edge-swipe-indicator.edge-right {
+	top: 0;
+	width: 20px;
+	height: 100vh;
+}
+
+.android-gestures .edge-swipe-indicator.edge-left {
+	left: 0;
+	background: linear-gradient(to right, rgba(255, 255, 255, 0.3), transparent);
+}
+
+.android-gestures .edge-swipe-indicator.edge-right {
+	right: 0;
+	background: linear-gradient(to left, rgba(255, 255, 255, 0.3), transparent);
+}
+
+/* ============================================
+   Edge Swipe Animation
+   ============================================ */
+@keyframes edge-swipe-fade {
+	0% {
+		opacity: 0;
+		transform: scaleX(0);
+	}
+	50% {
+		opacity: 1;
+		transform: scaleX(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scaleX(1);
+	}
+}
+
+/* ============================================
+   Multi-Touch Visual Feedback
+   ============================================ */
+.multi-touch-indicator {
+	position: fixed;
+	width: 60px;
+	height: 60px;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent);
+	pointer-events: none;
+	transform: translate(-50%, -50%);
+	animation: touch-pulse 0.5s ease-out;
+	z-index: 9998;
+}
+
+@keyframes touch-pulse {
+	0% {
+		transform: translate(-50%, -50%) scale(0);
+		opacity: 1;
+	}
+	100% {
+		transform: translate(-50%, -50%) scale(2);
+		opacity: 0;
+	}
+}
+
+/* ============================================
+   System Gesture Safe Zones (Debug Mode)
+   ============================================ */
+.debug-gesture-zones .gesture-safe-zone {
+	position: fixed;
+	background: rgba(255, 0, 0, 0.1);
+	border: 1px dashed rgba(255, 0, 0, 0.3);
+	pointer-events: none;
+	z-index: 9997;
+}
+
+.debug-gesture-zones .gesture-safe-zone.zone-top {
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 44px;
+}
+
+.debug-gesture-zones .gesture-safe-zone.zone-bottom {
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: var(--safe-zone-height, 34px);
+}
+
+.debug-gesture-zones .gesture-safe-zone.zone-left {
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 20px;
+}
+
+.debug-gesture-zones .gesture-safe-zone.zone-right {
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 20px;
+}
+
+/* ============================================
+   Platform-Specific Touch Target Adjustments
+   ============================================ */
+
+/* iOS: Larger touch targets near edges */
+.ios-gestures {
+	.bottom-controls button {
+		min-height: 48px;
+		margin-bottom: 10px;
+	}
+
+	.hamburger-menu-container {
+		/* Move away from corner to avoid control center */
+		right: 60px;
+	}
+}
+
+/* Android: Avoid navigation gesture areas */
+.android-gestures {
+	.bottom-controls {
+		margin-bottom: 20px;
+	}
+
+	.bottom-controls button {
+		/* Ensure buttons are above navigation area */
+		margin-bottom: 15px;
+	}
+
+	/* Full-width elements need special handling */
+	.control-panel {
+		width: calc(100% - 40px);
+		margin: 0 20px;
+	}
+}
+
+/* ============================================
+   Gesture Conflict Resolution
+   ============================================ */
+
+/* When system gestures are detected */
+.gesture-conflict-active {
+	/* Temporarily disable game interactions */
+	.draggable-piece {
+		pointer-events: none;
+		opacity: 0.7;
+	}
+
+	/* Show visual feedback */
+	&::before {
+		content: "";
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.1);
+		pointer-events: none;
+		animation: conflict-flash 0.3s ease-out;
+	}
+}
+
+@keyframes conflict-flash {
+	0% {
+		opacity: 0;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+/* ============================================
+   Platform Gesture Hints
+   ============================================ */
+
+/* Show hints for platform gestures on first launch */
+.show-gesture-hints {
+	.gesture-hint {
+		position: fixed;
+		background: rgba(0, 0, 0, 0.8);
+		color: white;
+		padding: 10px 15px;
+		border-radius: 8px;
+		font-size: 14px;
+		z-index: 10000;
+		animation: hint-fade-in 0.5s ease-out;
+	}
+
+	.gesture-hint.hint-back {
+		bottom: 100px;
+		left: 20px;
+		&::before {
+			content: "👈 ";
+		}
+	}
+
+	.gesture-hint.hint-home {
+		bottom: 40px;
+		left: 50%;
+		transform: translateX(-50%);
+		&::before {
+			content: "⬇️ ";
+		}
+	}
+}
+
+@keyframes hint-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* ============================================
+   Responsive Adjustments for Gestures
+   ============================================ */
+
+/* Small phones need more gesture space */
+@media (max-width: 360px) {
+	.android-gestures .game-container,
+	.ios-gestures .game-container {
+		margin-left: 25px;
+		margin-right: 25px;
+		width: calc(100% - 50px);
+	}
+}
+
+/* Tablets have different gesture zones */
+@media (min-width: 768px) {
+	.android-gestures .game-container {
+		/* Tablets may have different back gesture zones */
+		margin-left: 30px;
+		margin-right: 30px;
+		width: calc(100% - 60px);
+	}
+
+	.ios-gestures {
+		/* iPad specific adjustments */
+		.hamburger-menu-container {
+			right: 20px; /* Can be closer to edge on iPad */
+		}
+	}
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) {
+	.android-gestures {
+		/* Side gestures more important in landscape */
+		.game-container {
+			margin-left: 40px;
+			margin-right: 40px;
+			width: calc(100% - 80px);
+		}
+	}
+
+	.ios-gestures {
+		/* Home indicator on the side in landscape */
+		.game-container {
+			margin-bottom: 0;
+			margin-right: max(20px, env(safe-area-inset-right));
+		}
+	}
+}

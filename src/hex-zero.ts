@@ -16,6 +16,7 @@ import {PerformanceMonitor} from './performance/PerformanceMonitor';
 import {scheduleIdleWork} from './performance/idle-callback-polyfill';
 import {SharingService} from './services/sharing';
 import {DeviceVariationOptimizer} from './device-variation-optimizer';
+import {PlatformGestureHandler} from './platform-gesture-handler';
 
 declare global {
 	interface Window {
@@ -61,6 +62,38 @@ function showDifficultyScreen(): void {
 	document.getElementById('gameScreen')!.classList.add('hidden');
 	document.getElementById('difficultyScreen')!.classList.remove('hidden');
 }
+
+// Register custom back button handler
+PlatformGestureHandler.getInstance().registerBackButtonHandler(() => {
+	// Check if any modals are open
+	const modals = document.querySelectorAll('.modal:not(.hidden)');
+	if (modals.length > 0) {
+		const lastModal = modals[modals.length - 1];
+		if (lastModal) {
+			lastModal.classList.add('hidden');
+		}
+		HapticFeedback.lightTap();
+		return true;
+	}
+
+	// Check if in game screen
+	const gameScreen = document.getElementById('gameScreen');
+
+	if (gameScreen && !gameScreen.classList.contains('hidden')) {
+		// Confirm before exiting game
+		if (game && game.getMoveCount() > 0) {
+			const confirmExit = confirm('Exit the current game?');
+			if (!confirmExit) {
+				return true;
+			}
+		}
+		showDifficultyScreen();
+		HapticFeedback.lightTap();
+		return true;
+	}
+
+	return false;
+});
 
 function showInstructions(): void {
 	const modal = document.getElementById('instructionsModal');
@@ -125,6 +158,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	// Initialize device variation optimizer
 	const deviceOptimizer = DeviceVariationOptimizer.getInstance();
 	await deviceOptimizer.initialize();
+
+	// Initialize platform gesture handler
+	const platformGestureHandler = PlatformGestureHandler.getInstance();
+	await platformGestureHandler.initialize();
 
 	// Initialize mobile UI enhancements
 	initializeMobileUIEnhancements();
@@ -389,6 +426,10 @@ class HexSeptominoGame {
 		});
 	}
 
+	public getMoveCount(): number {
+		return this.gameState.getMoveCount();
+	}
+
 	private updateCanvasSize(): void {
 		const settings = this.gameState.getSettings();
 		this.renderer.hexSize = this.canvasManager.updateCanvasSize(settings.radius, this.zoomFactor);
@@ -416,6 +457,13 @@ class HexSeptominoGame {
 		this.touchOptimizer = new TouchOptimizer(
 			// onTap
 			(x, y) => {
+				// Check if tap is in system gesture zone
+				const platformHandler = PlatformGestureHandler.getInstance();
+				if (platformHandler.isInSystemGestureZone(x, y)) {
+					// Don't process taps in system gesture zones
+					return;
+				}
+
 				const rect = canvas.getBoundingClientRect();
 				const canvasX = x - rect.left - canvas.width / 2 - this.panOffsetX;
 				const canvasY = y - rect.top - canvas.height / 2 - this.panOffsetY;
@@ -441,6 +489,13 @@ class HexSeptominoGame {
 			},
 			// onDragStart
 			(x, y) => {
+				// Check if drag starts in system gesture zone
+				const platformHandler = PlatformGestureHandler.getInstance();
+				if (platformHandler.isInSystemGestureZone(x, y)) {
+					// Don't start drag in system gesture zones
+					return;
+				}
+
 				const rect = canvas.getBoundingClientRect();
 				const canvasX = x - rect.left - canvas.width / 2 - this.panOffsetX;
 				const canvasY = y - rect.top - canvas.height / 2 - this.panOffsetY;
