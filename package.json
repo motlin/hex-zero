@@ -29,7 +29,13 @@
 		"version:update": "node scripts/update-version.js",
 		"version:patch": "node scripts/update-version.js patch",
 		"version:minor": "node scripts/update-version.js minor",
-		"version:major": "node scripts/update-version.js major"
+		"version:major": "node scripts/update-version.js major",
+		"build:ios": "node scripts/build-ios.js",
+		"build:android": "node scripts/build-android.js",
+		"test:platforms": "node scripts/test-all-platforms.js",
+		"sync": "npm run build && npx cap sync",
+		"sync:ios": "npm run build && npx cap sync ios",
+		"sync:android": "npm run build && npx cap sync android"
 	},
 	"repository": {
 		"type": "git",
