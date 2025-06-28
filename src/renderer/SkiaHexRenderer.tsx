@@ -262,14 +262,32 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 			))}
 
 			{/* Render piece preview */}
-			{previewPaths.map((path, index) => (
-				<Path
-					key={`preview-${index}`}
-					path={path}
-					color={skiaTheme.colors.previewFill}
-					style="fill"
-				/>
-			))}
+			{previewPaths.map((path, index) => {
+				// Check if this preview position is valid
+				if (!hoveredHex || !selectedPiece) return null;
+
+				const tileIndex = index;
+				const tile = selectedPiece.tiles[tileIndex];
+				const worldQ = hoveredHex.q + tile.q - selectedPiece.center.q;
+				const worldR = hoveredHex.r + tile.r - selectedPiece.center.r;
+				const isValid = grid.isValidCoordinate(worldQ, worldR) && grid.getHeight(worldQ, worldR) > 0;
+
+				return (
+					<Group key={`preview-${index}`}>
+						<Path
+							path={path}
+							color={isValid ? skiaTheme.colors.previewFill : skiaTheme.colors.invalidFill}
+							style="fill"
+						/>
+						<Path
+							path={path}
+							color={isValid ? withAlpha(skiaTheme.colors.gridLines, 0.5) : skiaTheme.colors.invalidFill}
+							style="stroke"
+							strokeWidth={2}
+						/>
+					</Group>
+				);
+			})}
 		</Group>
 	);
 };
