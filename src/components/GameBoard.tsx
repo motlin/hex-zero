@@ -5,7 +5,7 @@
 
 import React, {useState, useCallback, useEffect} from 'react';
 import {View, StyleSheet, LayoutChangeEvent} from 'react-native';
-import {HexGameBoard} from './HexGameBoard';
+import {HexGameBoardWithGestures} from './HexGameBoardWithGestures';
 import {useGameState} from '../contexts/GameStateContext';
 import {useThemeContext} from '../context/ThemeContext';
 import type {HexPoint} from '../utils/hex-calculations';
@@ -123,7 +123,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({showHints = false, onBoardR
 			style={styles.container}
 			onLayout={handleLayout}
 		>
-			<HexGameBoard
+			<HexGameBoardWithGestures
 				grid={grid}
 				selectedPiece={currentPiece}
 				onHexPress={handleHexPress}
