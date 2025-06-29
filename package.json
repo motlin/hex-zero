@@ -48,6 +48,9 @@
 		"sync": "pnpm run build && pnpm exec cap sync",
 		"sync:ios": "pnpm run build && pnpm exec cap sync ios",
 		"sync:android": "pnpm run build && pnpm exec cap sync android",
+		"screenshots": "node scripts/generate-screenshots.js",
+		"screenshots:android": "node scripts/generate-android-screenshots.js",
+		"play-store:graphics": "node scripts/generate-feature-graphic.js",
 		"prepare": "vp config"
 	},
 	"dependencies": {

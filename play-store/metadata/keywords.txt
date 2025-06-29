@@ -1,0 +1,1 @@
+hex,puzzle,strategy,brain,logic,hexagon,spatial,reasoning,board,casual

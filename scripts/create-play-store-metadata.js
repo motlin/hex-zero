@@ -1,0 +1,66 @@
+#!/usr/bin/env node
+
+/* eslint-disable no-console, no-undef */
+
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
+
+const metadataDir = join(process.cwd(), 'play-store', 'metadata');
+if (!existsSync(metadataDir)) {
+    mkdirSync(metadataDir, { recursive: true });
+}
+
+// Short description (80 characters max)
+const shortDescription = 'Strategic hex puzzle game - place pieces to fill the board completely';
+writeFileSync(join(metadataDir, 'short-description.txt'), shortDescription);
+
+// Full description (4000 characters max)
+const fullDescription = `Hex Zero is a strategic puzzle game that challenges your spatial reasoning and planning skills.
+
+🎯 GAMEPLAY
+Place hexagonal pieces on the board to fill every space. Each piece must fit perfectly, and every hex must be covered to complete the level. Simple to learn, challenging to master!
+
+🎮 FEATURES
+• Clean, minimalist design focused on gameplay
+• Intuitive drag-and-drop controls
+• Multiple difficulty levels
+• Smooth animations and responsive feedback
+• No ads, no in-app purchases - just pure puzzle solving
+
+🧩 PERFECT FOR
+• Puzzle enthusiasts looking for a new challenge
+• Fans of spatial reasoning games
+• Anyone who enjoys strategic thinking
+• Players seeking a relaxing yet engaging experience
+
+💡 CHALLENGE YOUR MIND
+Each level presents a unique puzzle that requires careful planning. Can you find the perfect arrangement to fill the entire board?
+
+🌟 WHY HEX ZERO?
+• No time pressure - solve at your own pace
+• Elegant hex-based gameplay
+• Satisfying completion animations
+• Progressive difficulty curve
+• Designed for both quick sessions and extended play
+
+Master the art of hexagonal placement in this captivating puzzle experience!`;
+
+writeFileSync(join(metadataDir, 'full-description.txt'), fullDescription);
+
+// Title (30 characters max)
+const title = 'Hex Zero: Puzzle Strategy';
+writeFileSync(join(metadataDir, 'title.txt'), title);
+
+// Keywords
+const keywords = 'hex,puzzle,strategy,brain,logic,hexagon,spatial,reasoning,board,casual';
+writeFileSync(join(metadataDir, 'keywords.txt'), keywords);
+
+// Category suggestions
+const category = 'GAME_PUZZLE';
+writeFileSync(join(metadataDir, 'category.txt'), category);
+
+// Content rating
+const contentRating = 'Everyone';
+writeFileSync(join(metadataDir, 'content-rating.txt'), contentRating);
+
+console.log('✅ Metadata files created successfully');
