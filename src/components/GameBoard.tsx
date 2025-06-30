@@ -14,11 +14,20 @@ import type {Piece} from '../state/SeptominoGenerator';
 interface GameBoardProps {
 	showHints?: boolean;
 	onBoardReady?: () => void;
+	draggedPiece?: Piece | null;
+	dropPosition?: {x: number; y: number} | null;
+	onDropComplete?: () => void;
 }
 
 // Screen dimensions can be accessed if needed for future enhancements
 
-export const GameBoard: React.FC<GameBoardProps> = ({showHints = false, onBoardReady}) => {
+export const GameBoard: React.FC<GameBoardProps> = ({
+	showHints = false,
+	onBoardReady,
+	draggedPiece,
+	dropPosition,
+	onDropComplete,
+}) => {
 	const {themeType} = useThemeContext();
 	const {gameState, placePiece, canPlacePiece, getCurrentPiece, getSolutionHint, incrementHintCount} = useGameState();
 
@@ -131,6 +140,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({showHints = false, onBoardR
 				showHints={showHints}
 				hintCells={hintCells}
 				theme={themeType}
+				draggedPiece={draggedPiece}
+				dropPosition={dropPosition}
+				onDropComplete={onDropComplete}
 			/>
 		</View>
 	);

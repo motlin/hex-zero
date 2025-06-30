@@ -24,6 +24,7 @@ interface DraggablePieceProps {
 	onDragEnd?: (piece: Piece, x: number, y: number) => void;
 	isPlaced?: boolean;
 	disabled?: boolean;
+	testID?: string;
 }
 
 export const DraggablePiece: React.FC<DraggablePieceProps> = ({
@@ -35,6 +36,7 @@ export const DraggablePiece: React.FC<DraggablePieceProps> = ({
 	onDragEnd,
 	isPlaced = false,
 	disabled = false,
+	testID,
 }) => {
 	const {theme} = useThemeContext();
 	const translateX = useRef(new Animated.Value(0)).current;
@@ -123,6 +125,7 @@ export const DraggablePiece: React.FC<DraggablePieceProps> = ({
 			enabled={!disabled && !isPlaced}
 		>
 			<Animated.View
+				testID={testID}
 				style={[
 					styles.container,
 					{

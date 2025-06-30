@@ -39,8 +39,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 
 	// Drag state
 	const [draggedPiece, setDraggedPiece] = useState<Piece | null>(null);
-	const [draggedPieceIndex, setDraggedPieceIndex] = useState<number | null>(null);
+	const [, setDraggedPieceIndex] = useState<number | null>(null);
 	const [dragPosition, setDragPosition] = useState({x: 0, y: 0});
+	const [dropPosition, setDropPosition] = useState<{x: number; y: number} | null>(null);
 
 	const pieces = gameState?.getPieces() || [];
 	const moveCount = getMoveCount();
@@ -87,19 +88,20 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 	}, []);
 
 	// Handle drag end
-	const handleDragEnd = useCallback(
-		(_piece: Piece, _x: number, _y: number) => {
-			// The actual placement is handled by the GameBoard component
-			// through touch events on the hex grid
-			if (draggedPieceIndex !== null) {
-				// Mark piece as placed if it was successfully placed
-				// This will be updated by the game state
-			}
-			setDraggedPiece(null);
-			setDraggedPieceIndex(null);
-		},
-		[draggedPieceIndex],
-	);
+	const handleDragEnd = useCallback((_piece: Piece, x: number, y: number) => {
+		// Set the drop position to trigger placement in GameBoard
+		setDropPosition({x, y});
+
+		// The drag overlay will be cleared after drop is processed
+	}, []);
+
+	// Handle drop complete callback from GameBoard
+	const handleDropComplete = useCallback(() => {
+		// Clear drag state after drop is processed
+		setDraggedPiece(null);
+		setDraggedPieceIndex(null);
+		setDropPosition(null);
+	}, []);
 
 	// Handle hint toggle
 	const handleHintToggle = useCallback(() => {
@@ -203,6 +205,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 				<GameBoard
 					showHints={showHints}
 					onBoardReady={() => setBoardReady(true)}
+					draggedPiece={draggedPiece}
+					dropPosition={dropPosition}
+					onDropComplete={handleDropComplete}
 				/>
 			</View>
 

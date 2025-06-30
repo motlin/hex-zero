@@ -22,6 +22,9 @@ interface HexGameBoardWithGesturesProps {
 	showHints?: boolean;
 	hintCells?: HexPoint[];
 	theme?: 'light' | 'dark';
+	draggedPiece?: Piece | null;
+	dropPosition?: {x: number; y: number} | null;
+	onDropComplete?: () => void;
 }
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -42,6 +45,9 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	showHints = false,
 	hintCells = [],
 	theme = 'light',
+	draggedPiece,
+	dropPosition,
+	onDropComplete,
 }) => {
 	// Shared values for animations
 	const scale = useSharedValue(1);
@@ -65,6 +71,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 
 	// Refs
 	const renderer = useRef<SkiaHexRendererCompat | null>(null);
+	const boardRef = useRef<View>(null);
 
 	// Calculate optimal hex size based on scale
 	const hexSize = useMemo(() => {
@@ -256,6 +263,69 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		[],
 	);
 
+	// Handle drop from external drag
+	React.useEffect(() => {
+		if (draggedPiece && dropPosition && boardRef.current) {
+			// Convert screen coordinates to board-relative coordinates
+			boardRef.current.measure((_x, _y, _width, _height, pageX, pageY) => {
+				// Calculate the drop position relative to the board
+				const boardX = dropPosition.x - pageX;
+				const boardY = dropPosition.y - pageY;
+
+				// Convert to hex coordinates using current transform
+				const hex = handlePointerPosition(
+					boardX,
+					boardY,
+					renderTransform.scale,
+					renderTransform.offsetX,
+					renderTransform.offsetY,
+				);
+
+				if (hex && onPiecePlaced) {
+					// Try to place the piece
+					const worldCoords = draggedPiece.tiles.map((tile) => ({
+						q: hex.q + tile.q - draggedPiece.center.q,
+						r: hex.r + tile.r - draggedPiece.center.r,
+					}));
+
+					const canPlace = worldCoords.every(
+						(coord) => grid.isValidCoordinate(coord.q, coord.r) && grid.getHeight(coord.q, coord.r) > 0,
+					);
+
+					if (canPlace) {
+						// Animate the placement
+						const affectedCells = worldCoords.map((coord) => ({
+							q: coord.q,
+							r: coord.r,
+							startHeight: grid.getHeight(coord.q, coord.r),
+							endHeight: grid.getHeight(coord.q, coord.r) - 1,
+						}));
+						setAnimatingCells(affectedCells);
+
+						// Notify parent about successful placement
+						onPiecePlaced(draggedPiece, hex);
+
+						// Clear animation after completion
+						setTimeout(() => {
+							setAnimatingCells([]);
+						}, 800);
+					} else {
+						// Show invalid placement feedback
+						setInvalidPlacementCells(worldCoords);
+						setTimeout(() => {
+							setInvalidPlacementCells([]);
+						}, 300);
+					}
+				}
+
+				// Notify that drop handling is complete
+				if (onDropComplete) {
+					onDropComplete();
+				}
+			});
+		}
+	}, [draggedPiece, dropPosition, grid, onPiecePlaced, onDropComplete, handlePointerPosition, renderTransform]);
+
 	// Check if view is centered
 	const isViewCentered =
 		Math.abs(renderTransform.offsetX) < 5 &&
@@ -265,7 +335,10 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	return (
 		<GestureHandlerRootView style={styles.container}>
 			<GestureDetector gesture={composedGesture}>
-				<View style={styles.container}>
+				<View
+					ref={boardRef}
+					style={styles.container}
+				>
 					<Canvas style={styles.canvas}>
 						<SkiaHexRenderer
 							grid={grid}
