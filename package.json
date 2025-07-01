@@ -36,7 +36,9 @@
 		"sync": "npm run build && npx cap sync",
 		"sync:ios": "npm run build && npx cap sync ios",
 		"sync:android": "npm run build && npx cap sync android",
-		"screenshots": "node scripts/generate-screenshots.js"
+		"screenshots": "node scripts/generate-screenshots.js",
+		"screenshots:android": "node scripts/generate-android-screenshots.js",
+		"play-store:graphics": "node scripts/generate-feature-graphic.js"
 	},
 	"repository": {
 		"type": "git",
