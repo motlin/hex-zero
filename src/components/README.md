@@ -55,6 +55,7 @@ Bottom panel for selecting and dragging pieces.
 -   🔄 Auto-advance to next page when current pieces are placed
 -   📍 Page indicators for multi-page navigation
 -   👆 Swipe left/right to navigate between pages
+-   🔄 Shake animation for invalid piece placements
 
 ### PiecePreview
 
@@ -66,6 +67,24 @@ Renders individual game pieces using Skia.
 -   📏 Automatic bounds calculation
 -   🎯 Valid/invalid state visualization
 -   👻 Ghost piece preview support
+
+### Piece Placement Feedback System
+
+Enhanced visual feedback system for piece placement interactions.
+
+**Features:**
+
+-   ✅ Valid placement area highlighting during drag
+-   ❌ Invalid placement visual feedback with red overlay
+-   🔄 Shake animations for invalid placements
+-   🎯 Real-time drag position validation
+-   🎨 Theme-aware feedback colors
+
+**Components:**
+
+-   `usePiecePlacementFeedback` - Hook for managing feedback state
+-   `DraggablePiece` - Enhanced with shake animation support
+-   `SkiaHexRenderer` - Enhanced with valid placement area rendering
 
 ## Naming Convention
 

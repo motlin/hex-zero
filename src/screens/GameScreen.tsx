@@ -10,6 +10,7 @@ import {PieceSelectionPanel} from '../components/PieceSelectionPanel';
 import {PieceDragOverlay} from '../components/PieceDragOverlay';
 import {useGameState} from '../contexts/GameStateContext';
 import {useThemeContext} from '../context/ThemeContext';
+import {usePiecePlacementFeedback} from '../hooks/usePiecePlacementFeedback';
 import type {Piece} from '../state/SeptominoGenerator';
 
 interface GameScreenProps {
@@ -32,6 +33,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 		canUndo,
 		canRedo,
 	} = useGameState();
+
+	const {feedbackState, startDrag, updateDrag, endDrag, showInvalidPlacement, clearFeedback} =
+		usePiecePlacementFeedback();
 
 	const [showHints, setShowHints] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
@@ -78,30 +82,60 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 			setDraggedPiece(piece);
 			setDraggedPieceIndex(index);
 			setCurrentPieceIndex(index);
+			startDrag(piece, dragPosition.x, dragPosition.y);
 		},
-		[setCurrentPieceIndex],
+		[setCurrentPieceIndex, startDrag, dragPosition],
 	);
 
 	// Handle drag move
-	const handleDragMove = useCallback((_piece: Piece, x: number, y: number) => {
-		setDragPosition({x, y});
-	}, []);
+	const handleDragMove = useCallback(
+		(piece: Piece, x: number, y: number) => {
+			setDragPosition({x, y});
+			updateDrag(piece, x, y);
+		},
+		[updateDrag],
+	);
 
 	// Handle drag end
-	const handleDragEnd = useCallback((_piece: Piece, x: number, y: number) => {
-		// Set the drop position to trigger placement in GameBoard
-		setDropPosition({x, y});
+	const handleDragEnd = useCallback(
+		(piece: Piece, x: number, y: number) => {
+			// Set the drop position to trigger placement in GameBoard
+			setDropPosition({x, y});
+			endDrag(piece, x, y);
 
-		// The drag overlay will be cleared after drop is processed
-	}, []);
+			// The drag overlay will be cleared after drop is processed
+		},
+		[endDrag],
+	);
+
+	// Handle invalid placement for shake animation from board
+	const handleBoardInvalidPlacement = useCallback(
+		(piece: Piece) => {
+			// Find the piece index to trigger shake animation
+			const pieceIndex = pieces.findIndex((p) => p === piece);
+			if (pieceIndex !== -1) {
+				showInvalidPlacement(piece, pieceIndex);
+			}
+		},
+		[pieces, showInvalidPlacement],
+	);
+
+	// Handle invalid placement for shake animation from piece panel
+	const handlePieceInvalidPlacement = useCallback(
+		(piece: Piece, index: number) => {
+			showInvalidPlacement(piece, index);
+		},
+		[showInvalidPlacement],
+	);
 
 	// Handle drop complete callback from GameBoard
 	const handleDropComplete = useCallback(() => {
 		// Clear drag state after drop is processed
+		clearFeedback();
 		setDraggedPiece(null);
 		setDraggedPieceIndex(null);
 		setDropPosition(null);
-	}, []);
+	}, [clearFeedback]);
 
 	// Handle hint toggle
 	const handleHintToggle = useCallback(() => {
@@ -208,6 +242,8 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 					draggedPiece={draggedPiece}
 					dropPosition={dropPosition}
 					onDropComplete={handleDropComplete}
+					onInvalidPlacement={handleBoardInvalidPlacement}
+					validPlacementCells={feedbackState.validPlacements}
 				/>
 			</View>
 
@@ -266,6 +302,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 					onPieceDragStart={handleDragStart}
 					onPieceDragMove={handleDragMove}
 					onPieceDragEnd={handleDragEnd}
+					onInvalidPlacement={handlePieceInvalidPlacement}
 					onPageChange={setCurrentPage}
 					selectedPieceIndex={currentPieceIndex}
 					hexSize={25}

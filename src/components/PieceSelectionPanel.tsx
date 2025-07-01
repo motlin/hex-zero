@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import {PanGestureHandler, State, type PanGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
 import type {Piece} from '../state/SeptominoGenerator';
-import {DraggablePiece} from './DraggablePiece';
+import {DraggablePiece, type DraggablePieceRef} from './DraggablePiece';
 import {useThemeContext} from '../context/ThemeContext';
 import {usePieces} from '../hooks/usePieces';
 
@@ -34,6 +34,7 @@ interface PieceSelectionPanelProps {
 	onPieceDragStart?: (piece: Piece, index: number) => void;
 	onPieceDragMove?: (piece: Piece, x: number, y: number) => void;
 	onPieceDragEnd?: (piece: Piece, x: number, y: number) => void;
+	onInvalidPlacement?: (piece: Piece, index: number) => void;
 	onPageChange?: (page: number) => void;
 	selectedPieceIndex?: number | null;
 	hexSize?: number;
@@ -49,6 +50,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 	onPieceDragStart,
 	onPieceDragMove,
 	onPieceDragEnd,
+	onInvalidPlacement,
 	onPageChange,
 	selectedPieceIndex,
 	hexSize = 20,
@@ -57,6 +59,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 	const scrollViewRef = useRef<ScrollView>(null);
 	const [isDragging, setIsDragging] = useState(false);
 	const {isPiecePlaced} = usePieces();
+	const pieceRefs = useRef<Map<number, DraggablePieceRef>>(new Map());
 
 	// Calculate page data
 	const totalPages = Math.ceil(pieces.length / piecesPerPage);
@@ -108,6 +111,18 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 		[onPieceDragEnd],
 	);
 
+	const handleInvalidPlacement = useCallback(
+		(piece: Piece) => {
+			if (onInvalidPlacement) {
+				const pieceIndex = pieces.findIndex((p) => p === piece);
+				if (pieceIndex !== -1) {
+					onInvalidPlacement(piece, pieceIndex);
+				}
+			}
+		},
+		[onInvalidPlacement, pieces],
+	);
+
 	const handleNextPage = useCallback(() => {
 		if (currentPage < totalPages - 1 && onPageChange) {
 			LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -145,6 +160,16 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 		},
 		[isDragging, currentPage, totalPages, handlePrevPage, handleNextPage],
 	);
+
+	// Function to trigger shake animation for a specific piece
+	// This will be used when we integrate with invalid placement feedback
+	// @ts-expect-error - will be used later for shake animation integration
+	const _triggerPieceShake = useCallback((pieceIndex: number) => {
+		const pieceRef = pieceRefs.current.get(pieceIndex);
+		if (pieceRef) {
+			pieceRef.triggerShakeAnimation();
+		}
+	}, []);
 
 	const pieceSize = Math.min(screenWidth / (piecesPerPage + 1), 80);
 
@@ -198,12 +223,20 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 									disabled={isPlaced}
 								>
 									<DraggablePiece
+										ref={(ref) => {
+											if (ref) {
+												pieceRefs.current.set(globalIndex, ref);
+											} else {
+												pieceRefs.current.delete(globalIndex);
+											}
+										}}
 										piece={piece}
 										index={globalIndex}
 										hexSize={hexSize}
 										onDragStart={handleDragStart}
 										onDragMove={onPieceDragMove}
 										onDragEnd={handleDragEnd}
+										onInvalidPlacement={handleInvalidPlacement}
 										isPlaced={isPlaced}
 										disabled={isDragging && !isSelected}
 									/>

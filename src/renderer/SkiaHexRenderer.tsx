@@ -24,6 +24,7 @@ interface SkiaHexRendererProps {
 	hoveredHex?: HexPoint | null;
 	selectedPiece?: Piece | null;
 	hintCells?: HexPoint[];
+	validPlacementCells?: HexPoint[];
 	invalidPlacementCells?: HexPoint[];
 	animatingCells?: Array<{q: number; r: number; startHeight: number; endHeight: number}>;
 	onAnimationComplete?: () => void;
@@ -124,6 +125,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	hoveredHex,
 	selectedPiece,
 	hintCells = [],
+	validPlacementCells = [],
 	invalidPlacementCells = [],
 	animatingCells = [],
 	onAnimationComplete,
@@ -213,6 +215,14 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 			return createHexPath(center.x, center.y, actualHexSize);
 		});
 	}, [invalidPlacementCells, actualHexSize]);
+
+	// Memoize valid placement paths
+	const validPlacementPaths = useMemo(() => {
+		return validPlacementCells.map(({q, r}) => {
+			const center = hexToPixel(q, r, actualHexSize);
+			return createHexPath(center.x, center.y, actualHexSize * 0.9);
+		});
+	}, [validPlacementCells, actualHexSize]);
 
 	// Calculate preview piece positions
 	const previewPaths = useMemo(() => {
@@ -320,6 +330,27 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 					strokeWidth={3}
 				>
 					<DashPathEffect intervals={[10, 5]} />
+				</Path>
+			))}
+
+			{/* Render valid placement areas */}
+			{validPlacementPaths.map((path, index) => (
+				<Path
+					key={`valid-${index}`}
+					path={path}
+					color={withAlpha(skiaTheme.colors.selectionColor, 0.2)}
+					style="fill"
+				/>
+			))}
+			{validPlacementPaths.map((path, index) => (
+				<Path
+					key={`valid-stroke-${index}`}
+					path={path}
+					color={withAlpha(skiaTheme.colors.selectionColor, 0.6)}
+					style="stroke"
+					strokeWidth={2}
+				>
+					<DashPathEffect intervals={[8, 4]} />
 				</Path>
 			))}
 

@@ -19,8 +19,10 @@ interface HexGameBoardWithGesturesProps {
 	selectedPiece?: Piece | null;
 	onHexPress?: (hex: HexPoint) => void;
 	onPiecePlaced?: (piece: Piece, position: HexPoint) => void;
+	onInvalidPlacement?: (piece: Piece) => void;
 	showHints?: boolean;
 	hintCells?: HexPoint[];
+	validPlacementCells?: HexPoint[];
 	theme?: 'light' | 'dark';
 	draggedPiece?: Piece | null;
 	dropPosition?: {x: number; y: number} | null;
@@ -42,8 +44,10 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	selectedPiece,
 	onHexPress,
 	onPiecePlaced,
+	onInvalidPlacement,
 	showHints = false,
 	hintCells = [],
+	validPlacementCells = [],
 	theme = 'light',
 	draggedPiece,
 	dropPosition,
@@ -136,12 +140,17 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 					setTimeout(() => {
 						setInvalidPlacementCells([]);
 					}, 300);
+
+					// Notify about invalid placement for shake animation
+					if (onInvalidPlacement) {
+						onInvalidPlacement(selectedPiece);
+					}
 				}
 			} else if (onHexPress) {
 				onHexPress(hex);
 			}
 		},
-		[selectedPiece, onPiecePlaced, onHexPress, grid],
+		[selectedPiece, onPiecePlaced, onInvalidPlacement, onHexPress, grid],
 	);
 
 	// Reset view to center
@@ -315,6 +324,11 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 						setTimeout(() => {
 							setInvalidPlacementCells([]);
 						}, 300);
+
+						// Notify about invalid placement for shake animation
+						if (onInvalidPlacement) {
+							onInvalidPlacement(draggedPiece);
+						}
 					}
 				}
 
@@ -324,7 +338,16 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 				}
 			});
 		}
-	}, [draggedPiece, dropPosition, grid, onPiecePlaced, onDropComplete, handlePointerPosition, renderTransform]);
+	}, [
+		draggedPiece,
+		dropPosition,
+		grid,
+		onPiecePlaced,
+		onInvalidPlacement,
+		onDropComplete,
+		handlePointerPosition,
+		renderTransform,
+	]);
 
 	// Check if view is centered
 	const isViewCentered =
@@ -350,6 +373,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 							hoveredHex={hoveredHex}
 							selectedPiece={selectedPiece}
 							hintCells={showHints ? hintCells : []}
+							validPlacementCells={validPlacementCells}
 							invalidPlacementCells={invalidPlacementCells}
 							animatingCells={animatingCells}
 							onAnimationComplete={() => setAnimatingCells([])}

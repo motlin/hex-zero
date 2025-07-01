@@ -17,6 +17,8 @@ interface GameBoardProps {
 	draggedPiece?: Piece | null;
 	dropPosition?: {x: number; y: number} | null;
 	onDropComplete?: () => void;
+	onInvalidPlacement?: (piece: Piece) => void;
+	validPlacementCells?: HexPoint[];
 }
 
 // Screen dimensions can be accessed if needed for future enhancements
@@ -27,6 +29,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 	draggedPiece,
 	dropPosition,
 	onDropComplete,
+	onInvalidPlacement,
+	validPlacementCells = [],
 }) => {
 	const {themeType} = useThemeContext();
 	const {gameState, placePiece, canPlacePiece, getCurrentPiece, getSolutionHint, incrementHintCount} = useGameState();
@@ -137,8 +141,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 				selectedPiece={currentPiece}
 				onHexPress={handleHexPress}
 				onPiecePlaced={handlePiecePlaced}
+				onInvalidPlacement={onInvalidPlacement}
 				showHints={showHints}
 				hintCells={hintCells}
+				validPlacementCells={validPlacementCells}
 				theme={themeType}
 				draggedPiece={draggedPiece}
 				dropPosition={dropPosition}
