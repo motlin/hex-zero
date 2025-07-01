@@ -49,9 +49,12 @@ Bottom panel for selecting and dragging pieces.
 **Features:**
 
 -   📜 Horizontal scrolling piece list
--   📄 Page-based navigation
+-   📄 Page-based navigation with swipe gestures
 -   🎯 Drag-and-drop support
 -   ✅ Shows placed piece states
+-   🔄 Auto-advance to next page when current pieces are placed
+-   📍 Page indicators for multi-page navigation
+-   👆 Swipe left/right to navigate between pages
 
 ### PiecePreview
 
