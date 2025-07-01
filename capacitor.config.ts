@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
 	ios: {
 		contentInset: 'automatic',
 		scrollEnabled: false,
-		scheme: 'capacitor',
+		scheme: 'App',
 	},
 	android: {
 		allowMixedContent: false,

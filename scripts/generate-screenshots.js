@@ -114,8 +114,17 @@ function launchSimulator(deviceName) {
     }
 
     try {
-        // Boot the simulator
-        execSync(`xcrun simctl boot "${udid}"`, { stdio: 'pipe' });
+        // Check if simulator is already booted
+        try {
+            const deviceInfo = execSync(`xcrun simctl list devices | grep "${udid}"`, { encoding: 'utf8' });
+            if (!deviceInfo.includes('Booted')) {
+                // Boot the simulator only if not already booted
+                execSync(`xcrun simctl boot "${udid}"`, { stdio: 'pipe' });
+            }
+        } catch {
+            // If grep fails, try to boot anyway
+            execSync(`xcrun simctl boot "${udid}"`, { stdio: 'pipe' });
+        }
 
         // Open Simulator app
         execSync('open -a Simulator', { stdio: 'pipe' });
@@ -148,7 +157,7 @@ function installAndLaunchApp(udid) {
 
     try {
         // Build and run the app
-        execSync(`npx cap run ios --target "${udid}"`, { stdio: 'inherit' });
+        execSync(`npx cap run ios --target "${udid}" --scheme App`, { stdio: 'inherit' });
 
         // Wait for app to launch
         console.log('⏳ Waiting for app to launch...');
