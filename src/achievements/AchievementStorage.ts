@@ -20,6 +20,10 @@ export type AchievementMap = Partial<Record<AchievementId, AchievementData>>;
 export interface AchievementSaveData {
 	achievements: AchievementMap;
 	stats: AchievementStats;
+	streak?: {
+		currentStreak: number;
+		lastWinDate: string | null;
+	};
 }
 
 const STORAGE_KEY = 'hexZeroAchievements';

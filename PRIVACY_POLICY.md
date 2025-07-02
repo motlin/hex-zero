@@ -1,6 +1,6 @@
 # Hex Zero Privacy Policy
 
-_Last updated: June 27, 2025_
+Last updated: June 27, 2025
 
 ## Introduction
 

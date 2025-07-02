@@ -5,6 +5,7 @@
 ### iPhone Screenshots
 
 #### 6.7" Display (iPhone 15 Pro Max)
+
 - [ ] Screenshot 1: Game Overview
 - [ ] Screenshot 2: Piece Selection
 - [ ] Screenshot 3: Drag and Drop Action
@@ -12,6 +13,7 @@
 - [ ] Screenshot 5: Menu/Settings
 
 #### 6.1" Display (iPhone 15)
+
 - [ ] Screenshot 1: Game Overview
 - [ ] Screenshot 2: Piece Selection
 - [ ] Screenshot 3: Drag and Drop Action
@@ -19,6 +21,7 @@
 - [ ] Screenshot 5: Menu/Settings
 
 #### 5.5" Display (iPhone 8 Plus)
+
 - [ ] Screenshot 1: Game Overview
 - [ ] Screenshot 2: Piece Selection
 - [ ] Screenshot 3: Drag and Drop Action
@@ -28,6 +31,7 @@
 ### iPad Screenshots
 
 #### 12.9" iPad Pro
+
 - [ ] Screenshot 1: Game Overview
 - [ ] Screenshot 2: Piece Selection
 - [ ] Screenshot 3: Drag and Drop Action
@@ -37,6 +41,7 @@
 ## Screenshot Quality Checklist
 
 For each screenshot, verify:
+
 - [ ] High resolution and sharp quality
 - [ ] No debug overlays or developer tools visible
 - [ ] Status bar shows appropriate time (9:41 AM is App Store standard)
@@ -49,6 +54,7 @@ For each screenshot, verify:
 ## File Organization
 
 Screenshots should be named:
+
 - iPhone-15-Pro-Max-1.png
 - iPhone-15-Pro-Max-2.png
 - iPhone-15-1.png

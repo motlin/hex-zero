@@ -12,11 +12,10 @@ describe('calculateHexSize', () => {
 		const canvasHeight = 600;
 		const radius = 4;
 		const hexSize = calculateHexSize(canvasWidth, canvasHeight, radius);
-		const padding = 60;
-		const fitFactor = 0.9;
+		const padding = 80;
 
-		const boardWidth = (radius * 3 * hexSize) / fitFactor + padding;
-		const boardHeight = (radius * 2 * Math.sqrt(3) * hexSize) / fitFactor + padding;
+		const boardWidth = ((radius * 2 - 1) * 1.5 + 0.5) * hexSize + padding;
+		const boardHeight = (radius * 2 - 1) * Math.sqrt(3) * hexSize + padding;
 
 		expect(boardWidth).toBeLessThanOrEqual(canvasWidth + 1);
 		expect(boardHeight).toBeLessThanOrEqual(canvasHeight + 1);

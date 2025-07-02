@@ -77,5 +77,24 @@
 		<key>NSAllowsLocalNetworking</key>
 		<false/>
 	</dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.hexzero.game</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>hexzero</string>
+			</array>
+		</dict>
+	</array>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.hexzero.game.startEasyGame</string>
+		<string>com.hexzero.game.startMediumGame</string>
+		<string>com.hexzero.game.startHardGame</string>
+		<string>com.hexzero.game.startExtremeGame</string>
+		<string>com.hexzero.game.startImpossibleGame</string>
+	</array>
 </dict>
 </plist>

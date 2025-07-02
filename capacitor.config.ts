@@ -4,7 +4,6 @@ const config: CapacitorConfig = {
 	appId: 'com.hexzero.game',
 	appName: 'Hex Zero',
 	webDir: 'dist',
-	bundledWebRuntime: false,
 	server: {
 		androidScheme: 'https',
 		iosScheme: 'capacitor',
@@ -15,6 +14,7 @@ const config: CapacitorConfig = {
 		contentInset: 'automatic',
 		scrollEnabled: false,
 		scheme: 'App',
+		handleApplicationNotifications: false,
 	},
 	android: {
 		allowMixedContent: false,

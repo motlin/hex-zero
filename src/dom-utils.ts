@@ -21,3 +21,18 @@ export function getElementByIdOrNull<T extends Element>(id: string, type: Elemen
 	}
 	return element;
 }
+
+export function getRequiredDescendant<T extends Element>(
+	root: ParentNode,
+	selector: string,
+	type: ElementConstructor<T>,
+): T {
+	const element = root.querySelector(selector);
+	if (element === null) {
+		throw new Error(`Element matching "${selector}" not found`);
+	}
+	if (!(element instanceof type)) {
+		throw new Error(`Element matching "${selector}" is not a ${type.name}`);
+	}
+	return element;
+}

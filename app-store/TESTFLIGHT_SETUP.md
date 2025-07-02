@@ -8,28 +8,28 @@ TestFlight allows you to test your app with up to 10,000 external testers before
 
 ### Benefits of TestFlight
 
--   **Real Device Testing**: Test on actual devices without individual provisioning
--   **Crash Reporting**: Automatic crash logs and analytics
--   **Feedback Collection**: Built-in feedback system
--   **Version Management**: Easy distribution of new test builds
--   **No Cost**: Free with Apple Developer account
+- **Real Device Testing**: Test on actual devices without individual provisioning
+- **Crash Reporting**: Automatic crash logs and analytics
+- **Feedback Collection**: Built-in feedback system
+- **Version Management**: Easy distribution of new test builds
+- **No Cost**: Free with Apple Developer account
 
 ## 📋 Prerequisites
 
 ### Required Items
 
--   [ ] Active Apple Developer Account ($99/year)
--   [ ] iOS Distribution Certificate
--   [ ] App Store Distribution Provisioning Profile
--   [ ] App Store Connect app listing created
--   [ ] Archive build ready for upload
+- [ ] Active Apple Developer Account ($99/year)
+- [ ] iOS Distribution Certificate
+- [ ] App Store Distribution Provisioning Profile
+- [ ] App Store Connect app listing created
+- [ ] Archive build ready for upload
 
 ### App Store Connect Setup
 
--   [ ] App created in App Store Connect
--   [ ] Basic app information completed
--   [ ] Age rating and content descriptions set
--   [ ] Privacy information configured
+- [ ] App created in App Store Connect
+- [ ] Basic app information completed
+- [ ] Age rating and content descriptions set
+- [ ] Privacy information configured
 
 ## 🚀 Setting Up TestFlight
 
@@ -67,7 +67,7 @@ In Xcode:
 **Beta App Name**: Hex Zero Beta
 **Beta App Description**:
 
-```
+```text
 Welcome to the beta test of Hex Zero, a relaxing hex puzzle game!
 
 This beta version allows you to experience the full game before its public release. We're looking for feedback on gameplay, performance, and any bugs you might encounter.
@@ -84,7 +84,7 @@ Please test thoroughly and provide feedback on your experience!
 
 **Beta App Review Information**:
 
-```
+```text
 This is a puzzle game with no network connectivity, user accounts, or data collection. The game is fully functional and ready for testing across all included features.
 
 Test focus areas:
@@ -100,7 +100,7 @@ No special setup or accounts required - just install and play!
 
 #### What to Test Instructions
 
-```
+```text
 🧪 TESTING INSTRUCTIONS
 
 Please help us test these key areas:
@@ -160,10 +160,10 @@ Internal testers can install beta builds immediately without review.
 
 **Recommended Internal Testers**:
 
--   Development team members
--   Close friends and family
--   QA team (if applicable)
--   Design stakeholders
+- Development team members
+- Close friends and family
+- QA team (if applicable)
+- Design stakeholders
 
 ### Step 4: Set Up External Testing
 
@@ -181,23 +181,23 @@ External testing requires beta app review (usually 24-48 hours).
 
 #### Recruiting Beta Testers
 
-**Option 1: Public Link**
+##### Option 1: Public Link
 
--   Generate public TestFlight link
--   Share on social media, forums, etc.
--   Testers can join automatically (up to limit)
+- Generate public TestFlight link
+- Share on social media, forums, etc.
+- Testers can join automatically (up to limit)
 
-**Option 2: Direct Invitations**
+##### Option 2: Direct Invitations
 
--   Add specific email addresses
--   Send personal invitations
--   More control over tester quality
+- Add specific email addresses
+- Send personal invitations
+- More control over tester quality
 
-**Option 3: Gaming Communities**
+##### Option 3: Gaming Communities
 
--   Post in puzzle game forums
--   Share in mobile gaming Discord servers
--   Reach out to puzzle game reviewers
+- Post in puzzle game forums
+- Share in mobile gaming Discord servers
+- Reach out to puzzle game reviewers
 
 ### Step 5: Beta Testing Workflow
 
@@ -222,26 +222,26 @@ External testing requires beta app review (usually 24-48 hours).
 
 ### Key Metrics to Monitor
 
--   **Install Rate**: How many invited testers actually install
--   **Session Duration**: How long testers play
--   **Crash Rate**: Frequency of app crashes
--   **Feedback Volume**: Amount of feedback received
--   **Device Coverage**: Range of devices tested
+- **Install Rate**: How many invited testers actually install
+- **Session Duration**: How long testers play
+- **Crash Rate**: Frequency of app crashes
+- **Feedback Volume**: Amount of feedback received
+- **Device Coverage**: Range of devices tested
 
 ### Crash Reporting
 
 TestFlight provides detailed crash logs including:
 
--   Device model and iOS version
--   Exact crash location in code
--   Memory usage at time of crash
--   Stack trace for debugging
+- Device model and iOS version
+- Exact crash location in code
+- Memory usage at time of crash
+- Stack trace for debugging
 
 ## 📧 Tester Communication
 
 ### Initial Invitation Email Template
 
-```
+```text
 Subject: You're invited to beta test Hex Zero! 🧩
 
 Hi [Name],
@@ -268,7 +268,7 @@ The Hex Zero Team
 
 ### Update Notification Template
 
-```
+```text
 Subject: New Hex Zero Beta Update Available! 🎮
 
 Hi Beta Testers,
@@ -298,7 +298,7 @@ The Hex Zero Team
 
 ### Feedback Request Template
 
-```
+```text
 Subject: We need your feedback on Hex Zero Beta! 💭
 
 Hi [Name],
@@ -329,108 +329,108 @@ The Hex Zero Team
 **Issue**: Archive upload fails
 **Solutions**:
 
--   Verify distribution certificate is valid
--   Check provisioning profile includes all devices
--   Ensure bundle ID matches exactly
--   Try uploading with Application Loader
+- Verify distribution certificate is valid
+- Check provisioning profile includes all devices
+- Ensure bundle ID matches exactly
+- Try uploading with Application Loader
 
 **Issue**: Build processing takes too long
 **Solutions**:
 
--   Processing normally takes 15-30 minutes
--   If over 1 hour, contact Apple Developer Support
--   Check App Store Connect status page for issues
+- Processing normally takes 15-30 minutes
+- If over 1 hour, contact Apple Developer Support
+- Check App Store Connect status page for issues
 
 ### Tester Issues
 
 **Issue**: Testers can't install app
 **Solutions**:
 
--   Verify they have TestFlight app installed
--   Check invitation email didn't go to spam
--   Ensure device is compatible (iOS 15.0+)
--   Confirm TestFlight link is correct
+- Verify they have TestFlight app installed
+- Check invitation email didn't go to spam
+- Ensure device is compatible (iOS 15.0+)
+- Confirm TestFlight link is correct
 
 **Issue**: Low tester participation
 **Solutions**:
 
--   Send reminder emails after 3-5 days
--   Provide clear testing instructions
--   Offer incentives (e.g., early access, credits)
--   Make feedback process simple
+- Send reminder emails after 3-5 days
+- Provide clear testing instructions
+- Offer incentives (e.g., early access, credits)
+- Make feedback process simple
 
 ### Feedback Management
 
 **Issue**: Too much feedback to manage
 **Solutions**:
 
--   Use spreadsheet to categorize feedback
--   Focus on critical bugs first
--   Set up automated crash reporting
--   Prioritize feedback from active testers
+- Use spreadsheet to categorize feedback
+- Focus on critical bugs first
+- Set up automated crash reporting
+- Prioritize feedback from active testers
 
 **Issue**: Feedback is too vague
 **Solutions**:
 
--   Ask specific follow-up questions
--   Provide testing scenarios
--   Request device info and steps to reproduce
--   Create feedback form with structured questions
+- Ask specific follow-up questions
+- Provide testing scenarios
+- Request device info and steps to reproduce
+- Create feedback form with structured questions
 
 ## 📅 Beta Testing Timeline
 
 ### Week 1: Internal Testing
 
--   Upload first beta build
--   Add internal testers (team, friends, family)
--   Fix critical bugs and crashes
--   Gather initial feedback
+- Upload first beta build
+- Add internal testers (team, friends, family)
+- Fix critical bugs and crashes
+- Gather initial feedback
 
 ### Week 2: External Testing Setup
 
--   Submit for Beta App Review
--   Prepare external tester recruitment
--   Create feedback collection systems
--   Plan communication strategy
+- Submit for Beta App Review
+- Prepare external tester recruitment
+- Create feedback collection systems
+- Plan communication strategy
 
 ### Week 3-4: External Testing
 
--   Add external testers once approved
--   Monitor crash reports and feedback
--   Release updated builds as needed
--   Refine based on tester input
+- Add external testers once approved
+- Monitor crash reports and feedback
+- Release updated builds as needed
+- Refine based on tester input
 
 ### Week 5: Final Polish
 
--   Address remaining critical issues
--   Prepare final build for App Store submission
--   Thank beta testers
--   Prepare App Store marketing materials
+- Address remaining critical issues
+- Prepare final build for App Store submission
+- Thank beta testers
+- Prepare App Store marketing materials
 
 ## 📋 Pre-Launch Checklist
 
 ### Technical Readiness
 
--   [ ] No critical crashes in latest build
--   [ ] Performance acceptable on target devices
--   [ ] All major features working correctly
--   [ ] Feedback incorporated from beta testing
--   [ ] Final build uploaded and tested
+- [ ] No critical crashes in latest build
+- [ ] Performance acceptable on target devices
+- [ ] All major features working correctly
+- [ ] Feedback incorporated from beta testing
+- [ ] Final build uploaded and tested
 
 ### Marketing Readiness
 
--   [ ] App Store screenshots finalized
--   [ ] App description optimized
--   [ ] Keywords researched and selected
--   [ ] Review response templates prepared
--   [ ] Launch day communications planned
+- [ ] App Store screenshots finalized
+- [ ] App description optimized
+- [ ] Keywords researched and selected
+- [ ] Review response templates prepared
+- [ ] Launch day communications planned
 
 ### Team Readiness
 
--   [ ] Support email and processes ready
--   [ ] Monitoring and analytics set up
--   [ ] Update/patch process documented
--   [ ] Team roles for launch day defined
+- [ ] Support email and processes ready
+- [ ] Monitoring and analytics set up
+- [ ] Update/patch process documented
+- [ ] Team roles for launch day defined
 
 ## 🎉 Graduation to App Store
 

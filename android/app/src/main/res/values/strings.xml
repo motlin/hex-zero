@@ -7,4 +7,17 @@
     <string name="app_description">A challenging puzzle game where you place hexagonal pieces to clear the board. Test your spatial reasoning and strategic thinking in this addictive hex-based puzzle.</string>
     <string name="app_category">Game</string>
     <string name="app_copyright">Copyright © 2024 Hex Zero. All rights reserved.</string>
+    <string name="widget_description">View your Hex Zero game statistics</string>
+
+    <!-- Shortcut labels -->
+    <string name="shortcut_easy_short">Easy Game</string>
+    <string name="shortcut_easy_long">Start Easy Hex Zero Game</string>
+    <string name="shortcut_medium_short">Medium Game</string>
+    <string name="shortcut_medium_long">Start Medium Hex Zero Game</string>
+    <string name="shortcut_hard_short">Hard Game</string>
+    <string name="shortcut_hard_long">Start Hard Hex Zero Game</string>
+    <string name="shortcut_extreme_short">Extreme Game</string>
+    <string name="shortcut_extreme_long">Start Extreme Hex Zero Game</string>
+    <string name="shortcut_impossible_short">Impossible Game</string>
+    <string name="shortcut_impossible_long">Start Impossible Hex Zero Game</string>
 </resources>

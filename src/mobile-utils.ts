@@ -1,6 +1,6 @@
 // Mobile utility functions for better compatibility
 
-export function setupMobileViewport(): void {
+function setupMobileViewport(): void {
 	// Fix for mobile viewport height (accounts for browser chrome)
 	function setViewportHeight() {
 		const vh = window.innerHeight * 0.01;
@@ -15,13 +15,14 @@ export function setupMobileViewport(): void {
 	window.addEventListener('orientationchange', setViewportHeight);
 }
 
-export function preventDefaultTouchBehavior(): void {
+function preventDefaultTouchBehavior(): void {
 	// Prevent pull-to-refresh and bounce scrolling
 	document.body.addEventListener(
 		'touchmove',
 		(e) => {
 			// Only prevent default if we're not in a scrollable element
-			const target = e.target as HTMLElement;
+			const target = e.target;
+			if (!(target instanceof HTMLElement)) return;
 			const isScrollable = target.closest('.modal-content, .instructions-content');
 
 			if (!isScrollable) {
@@ -36,7 +37,8 @@ export function preventDefaultTouchBehavior(): void {
 	document.addEventListener(
 		'touchend',
 		(e) => {
-			const target = e.target as HTMLElement;
+			const target = e.target;
+			if (!(target instanceof HTMLElement)) return;
 			const isGameElement = target.closest('#gameCanvas, .draggable-piece, .control-panel');
 
 			if (isGameElement) {
@@ -51,7 +53,7 @@ export function preventDefaultTouchBehavior(): void {
 	);
 }
 
-export function addIOSWebAppMeta(): void {
+function addIOSWebAppMeta(): void {
 	// Add iOS web app meta tags for better fullscreen experience
 	const metaTags = [
 		{name: 'apple-mobile-web-app-capable', content: 'yes'},

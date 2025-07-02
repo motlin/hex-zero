@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_hexagon"
+            android:tint="@color/widget_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hex Zero"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/widget_text_primary"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- Stats Container -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <!-- Games Played -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Games"
+                android:textSize="12sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_games_played"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+
+        <!-- Win Rate -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Win Rate"
+                android:textSize="12sp"
+                android:textColor="@color/widget_text_secondary" />
+
+            <TextView
+                android:id="@+id/widget_win_rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0%"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/widget_text_primary" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Streak (conditional) -->
+    <LinearLayout
+        android:id="@+id/widget_streak_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/widget_streak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔥 0"
+            android:textSize="14sp"
+            android:textColor="@color/widget_accent" />
+    </LinearLayout>
+
+    <!-- Play Button -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Play Now →"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="@color/widget_primary"
+        android:gravity="center"
+        android:padding="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/widget_button_background" />
+
+</LinearLayout>

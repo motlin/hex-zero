@@ -49,14 +49,14 @@ npx cap sync ios
 
 This command:
 
--   Copies web assets to `ios/App/App/public`
--   Updates native dependencies
--   Syncs Capacitor plugins
--   Updates iOS project configuration
+- Copies web assets to `ios/App/App/public`
+- Updates native dependencies
+- Syncs Capacitor plugins
+- Updates iOS project configuration
 
 #### Step 3: Run on Simulator
 
-**Option A: Command Line (Recommended)**
+##### Option A: Command Line (Recommended)
 
 ```bash
 npx cap run ios
@@ -72,7 +72,7 @@ npx cap run ios --list
 npx cap run ios --target "iPhone 15"
 ```
 
-**Option B: Via Xcode**
+##### Option B: Via Xcode
 
 ```bash
 npx cap open ios
@@ -133,6 +133,7 @@ In Xcode:
 2. **Android SDK**: API 23+ (via Android Studio)
 3. **Java JDK**: Version 11+ recommended
 4. **Environment Variables**:
+
     ```bash
     export ANDROID_HOME=$HOME/Library/Android/sdk
     export PATH=$PATH:$ANDROID_HOME/emulator
@@ -155,14 +156,14 @@ npx cap sync android
 
 This command:
 
--   Copies web assets to `android/app/src/main/assets/public`
--   Updates native dependencies
--   Syncs Capacitor plugins
--   Updates Android project configuration
+- Copies web assets to `android/app/src/main/assets/public`
+- Updates native dependencies
+- Syncs Capacitor plugins
+- Updates Android project configuration
 
 #### Step 3: Run on Emulator
 
-**Option A: Command Line (Recommended)**
+##### Option A: Command Line (Recommended)
 
 ```bash
 npx cap run android
@@ -178,7 +179,7 @@ npx cap run android --list
 npx cap run android --target "Pixel_7_API_34"
 ```
 
-**Option B: Via Android Studio**
+##### Option B: Via Android Studio
 
 ```bash
 npx cap open android
@@ -227,52 +228,52 @@ In Android Studio:
 
 ### Core Functionality
 
--   [ ] Game loads without errors
--   [ ] Canvas renders correctly
--   [ ] Touch/click interactions work
--   [ ] Drag and drop functions properly
--   [ ] Game state saves and restores
--   [ ] All game modes accessible
--   [ ] Victory conditions trigger correctly
+- [ ] Game loads without errors
+- [ ] Canvas renders correctly
+- [ ] Touch/click interactions work
+- [ ] Drag and drop functions properly
+- [ ] Game state saves and restores
+- [ ] All game modes accessible
+- [ ] Victory conditions trigger correctly
 
 ### iOS-Specific Testing
 
--   [ ] **Safe Areas**: Content doesn't overlap with notch/home indicator
--   [ ] **Status Bar**: Correct style (light/dark) and visibility
--   [ ] **Orientations**: Portrait and landscape work correctly
--   [ ] **Gestures**: No conflicts with iOS system gestures
--   [ ] **Haptics**: Feedback works on supported devices
--   [ ] **Performance**: 60 FPS on recent devices, playable on iPhone SE
--   [ ] **Memory**: No crashes on 2GB RAM devices
--   [ ] **App Switcher**: Correct app preview image
--   [ ] **Background/Foreground**: Game pauses/resumes properly
+- [ ] **Safe Areas**: Content doesn't overlap with notch/home indicator
+- [ ] **Status Bar**: Correct style (light/dark) and visibility
+- [ ] **Orientations**: Portrait and landscape work correctly
+- [ ] **Gestures**: No conflicts with iOS system gestures
+- [ ] **Haptics**: Feedback works on supported devices
+- [ ] **Performance**: 60 FPS on recent devices, playable on iPhone SE
+- [ ] **Memory**: No crashes on 2GB RAM devices
+- [ ] **App Switcher**: Correct app preview image
+- [ ] **Background/Foreground**: Game pauses/resumes properly
 
 ### Android-Specific Testing
 
--   [ ] **Navigation**: Back button behavior correct
--   [ ] **Status Bar**: Correct color and transparency
--   [ ] **Navigation Bar**: Content doesn't overlap
--   [ ] **Orientations**: Configuration changes handled
--   [ ] **Haptics**: Vibration works where supported
--   [ ] **Performance**: Playable on mid-range devices
--   [ ] **Memory**: No crashes on 3GB RAM devices
--   [ ] **Split Screen**: App handles multi-window (if supported)
--   [ ] **Different Screen Sizes**: Phones and tablets render correctly
+- [ ] **Navigation**: Back button behavior correct
+- [ ] **Status Bar**: Correct color and transparency
+- [ ] **Navigation Bar**: Content doesn't overlap
+- [ ] **Orientations**: Configuration changes handled
+- [ ] **Haptics**: Vibration works where supported
+- [ ] **Performance**: Playable on mid-range devices
+- [ ] **Memory**: No crashes on 3GB RAM devices
+- [ ] **Split Screen**: App handles multi-window (if supported)
+- [ ] **Different Screen Sizes**: Phones and tablets render correctly
 
 ### Accessibility Testing
 
--   [ ] **iOS VoiceOver**: All elements have proper labels
--   [ ] **Android TalkBack**: Navigation works correctly
--   [ ] **Font Scaling**: UI adapts to system font size
--   [ ] **Color Contrast**: Meets WCAG guidelines
--   [ ] **Touch Targets**: Minimum 44x44pt (iOS) / 48x48dp (Android)
+- [ ] **iOS VoiceOver**: All elements have proper labels
+- [ ] **Android TalkBack**: Navigation works correctly
+- [ ] **Font Scaling**: UI adapts to system font size
+- [ ] **Color Contrast**: Meets WCAG guidelines
+- [ ] **Touch Targets**: Minimum 44x44pt (iOS) / 48x48dp (Android)
 
 ### Network and Data
 
--   [ ] **Offline Mode**: Game works without internet
--   [ ] **Data Persistence**: Progress saves correctly
--   [ ] **App Updates**: Data migrates properly
--   [ ] **Fresh Install**: No crashes on first launch
+- [ ] **Offline Mode**: Game works without internet
+- [ ] **Data Persistence**: Progress saves correctly
+- [ ] **App Updates**: Data migrates properly
+- [ ] **Fresh Install**: No crashes on first launch
 
 ## 🤖 Automated Build Scripts
 
@@ -499,15 +500,15 @@ Add these scripts to `package.json`:
 
 ### iOS Testing
 
--   **Devices**: iPhone 15 Pro (17.0), iPhone SE (15.0), iPad Pro (16.0)
--   **Status**: ✅ Pass / ❌ Fail
--   **Issues**: None / [List issues]
+- **Devices**: iPhone 15 Pro (17.0), iPhone SE (15.0), iPad Pro (16.0)
+- **Status**: ✅ Pass / ❌ Fail
+- **Issues**: None / [List issues]
 
 ### Android Testing
 
--   **Devices**: Pixel 7 (API 34), Nexus 5X (API 28), Pixel Tablet (API 34)
--   **Status**: ✅ Pass / ❌ Fail
--   **Issues**: None / [List issues]
+- **Devices**: Pixel 7 (API 34), Nexus 5X (API 28), Pixel Tablet (API 34)
+- **Status**: ✅ Pass / ❌ Fail
+- **Issues**: None / [List issues]
 
 ### Notes
 
@@ -538,9 +539,9 @@ npm run sync
 
 ### Troubleshooting
 
--   **iOS build fails**: Check Xcode version and run `cd ios/App && pod install`
--   **Android build fails**: Sync project in Android Studio, clean and rebuild
--   **Emulator not starting**: Check virtualization enabled in BIOS
--   **Device not detected**: Check USB debugging enabled and cables
+- **iOS build fails**: Check Xcode version and run `cd ios/App && pod install`
+- **Android build fails**: Sync project in Android Studio, clean and rebuild
+- **Emulator not starting**: Check virtualization enabled in BIOS
+- **Device not detected**: Check USB debugging enabled and cables
 
 Remember: Test early, test often, test on multiple devices!

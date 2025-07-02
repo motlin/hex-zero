@@ -54,10 +54,10 @@ node scripts/generate-android-keystore.js
 
 The script will:
 
--   Generate a 2048-bit RSA keystore valid for 25 years
--   Prompt for required certificate information
--   Create `android/app/hex-zero-release.keystore`
--   Provide verification and next steps
+- Generate a 2048-bit RSA keystore valid for 25 years
+- Prompt for required certificate information
+- Create `android/app/hex-zero-release.keystore`
+- Provide verification and next steps
 
 ### Manual Keystore Generation
 
@@ -79,18 +79,18 @@ keytool -genkeypair -v \
 
 You'll be prompted for:
 
--   **Keystore password**: Strong password (12+ characters)
--   **Key password**: Can be same as keystore password
--   **Name**: Your full name
--   **Organization unit**: Development team name (optional)
--   **Organization**: Company/project name
--   **City**: Your city
--   **State**: Your state/province
--   **Country code**: Two-letter country code (US, GB, CA, etc.)
+- **Keystore password**: Strong password (12+ characters)
+- **Key password**: Can be same as keystore password
+- **Name**: Your full name
+- **Organization unit**: Development team name (optional)
+- **Organization**: Company/project name
+- **City**: Your city
+- **State**: Your state/province
+- **Country code**: Two-letter country code (US, GB, CA, etc.)
 
 ### Keystore Information to Provide
 
-```
+```text
 What is your first and last name?
   [Unknown]:  John Doe
 
@@ -222,9 +222,9 @@ cd android
 
 ### Build Outputs
 
--   **Debug APK**: `android/app/build/outputs/apk/debug/app-debug.apk`
--   **Release APK**: `android/app/build/outputs/apk/release/app-release.apk`
--   **Release AAB**: `android/app/build/outputs/bundle/release/app-release.aab`
+- **Debug APK**: `android/app/build/outputs/apk/debug/app-debug.apk`
+- **Release APK**: `android/app/build/outputs/apk/release/app-release.apk`
+- **Release AAB**: `android/app/build/outputs/bundle/release/app-release.aab`
 
 ## 🏪 Google Play Console Setup
 
@@ -330,39 +330,39 @@ android/app/release/
 
 ### Pre-Release Testing
 
--   [ ] Build debug APK successfully
--   [ ] Install and test on Android emulator
--   [ ] Test all game features work correctly
--   [ ] Verify app permissions are minimal and necessary
--   [ ] Test on different screen sizes and orientations
--   [ ] Check performance on lower-end device profiles
--   [ ] Verify no console errors in WebView
--   [ ] Test app lifecycle (pause/resume/background)
+- [ ] Build debug APK successfully
+- [ ] Install and test on Android emulator
+- [ ] Test all game features work correctly
+- [ ] Verify app permissions are minimal and necessary
+- [ ] Test on different screen sizes and orientations
+- [ ] Check performance on lower-end device profiles
+- [ ] Verify no console errors in WebView
+- [ ] Test app lifecycle (pause/resume/background)
 
 ### Release Testing
 
--   [ ] Build release AAB successfully
--   [ ] Install release APK on device/emulator
--   [ ] Verify signing configuration is correct
--   [ ] Test app works without development tools
--   [ ] Verify app size is reasonable (<150MB)
--   [ ] Check no debug logs or development features
--   [ ] Test offline functionality (if applicable)
+- [ ] Build release AAB successfully
+- [ ] Install release APK on device/emulator
+- [ ] Verify signing configuration is correct
+- [ ] Test app works without development tools
+- [ ] Verify app size is reasonable (<150MB)
+- [ ] Check no debug logs or development features
+- [ ] Test offline functionality (if applicable)
 
 ## 📚 Additional Resources
 
 ### Documentation
 
--   [Android Developer Documentation](https://developer.android.com/docs)
--   [Google Play Console Help](https://support.google.com/googleplay/android-developer)
--   [Capacitor Android Documentation](https://capacitorjs.com/docs/android)
--   [Android App Signing](https://developer.android.com/studio/publish/app-signing)
+- [Android Developer Documentation](https://developer.android.com/docs)
+- [Google Play Console Help](https://support.google.com/googleplay/android-developer)
+- [Capacitor Android Documentation](https://capacitorjs.com/docs/android)
+- [Android App Signing](https://developer.android.com/studio/publish/app-signing)
 
 ### Tools and Services
 
--   [Firebase Test Lab](https://firebase.google.com/docs/test-lab) - Real device testing
--   [Android Asset Studio](https://romannurik.github.io/AndroidAssetStudio/) - Icon generation
--   [App Bundle Explorer](https://github.com/google/bundletool) - AAB analysis
+- [Firebase Test Lab](https://firebase.google.com/docs/test-lab) - Real device testing
+- [Android Asset Studio](https://romannurik.github.io/AndroidAssetStudio/) - Icon generation
+- [App Bundle Explorer](https://github.com/google/bundletool) - AAB analysis
 
 ### Troubleshooting
 
@@ -391,9 +391,9 @@ android/app/release/
 
 #### Getting Help
 
--   [Stack Overflow - Android Development](https://stackoverflow.com/questions/tagged/android)
--   [Google Play Console Support](https://support.google.com/googleplay/android-developer/answer/6112435)
--   [Capacitor Community Discord](https://discord.com/invite/UPYYRhtyzp)
+- [Stack Overflow - Android Development](https://stackoverflow.com/questions/tagged/android)
+- [Google Play Console Support](https://support.google.com/googleplay/android-developer/answer/6112435)
+- [Capacitor Community Discord](https://discord.com/invite/UPYYRhtyzp)
 
 ## 🚀 Quick Start Summary
 

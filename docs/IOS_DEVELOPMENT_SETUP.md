@@ -38,6 +38,7 @@ This document provides step-by-step instructions for setting up iOS development 
     - Download and install certificate
 
 3. **Install Certificate**
+
     ```bash
     # Double-click downloaded certificate to install in Keychain
     # Verify certificate appears in "My Certificates" section
@@ -69,7 +70,7 @@ This document provides step-by-step instructions for setting up iOS development 
 
 2. **Configure App ID Details**
 
-    ```
+    ```text
     Description: Hex Zero Game
     Bundle ID: com.hexzero.game (explicit App ID)
     Platform: iOS
@@ -103,6 +104,7 @@ This document provides step-by-step instructions for setting up iOS development 
     - Download .mobileprovision file
 
 4. **Install Profile**
+
     ```bash
     # Double-click .mobileprovision file to install
     # Or drag to Xcode to install automatically
@@ -148,7 +150,7 @@ This document provides step-by-step instructions for setting up iOS development 
 
     **For Development (Recommended: Automatic)**
 
-    ```
+    ```text
     ✅ Automatically manage signing
     Team: [Your Development Team]
     Provisioning Profile: Xcode Managed Profile
@@ -156,7 +158,7 @@ This document provides step-by-step instructions for setting up iOS development 
 
     **For Distribution (Manual)**
 
-    ```
+    ```text
     ❌ Automatically manage signing
     Provisioning Profile: Hex Zero App Store
     Signing Certificate: iOS Distribution
@@ -166,13 +168,14 @@ This document provides step-by-step instructions for setting up iOS development 
 
 1. **Debug Configuration**
 
-    ```
+    ```text
     Code Signing Identity: iPhone Developer
     Provisioning Profile: Automatic (or manual dev profile)
     ```
 
 2. **Release Configuration**
-    ```
+
+    ```text
     Code Signing Identity: iPhone Distribution
     Provisioning Profile: Hex Zero App Store
     ```
@@ -189,6 +192,7 @@ This document provides step-by-step instructions for setting up iOS development 
     - Add to development provisioning profile
 
 2. **Get Device UDID**
+
     ```bash
     # Connect device via USB
     # Xcode > Window > Devices and Simulators
@@ -212,6 +216,7 @@ This document provides step-by-step instructions for setting up iOS development 
     ```
 
 2. **Archive for Distribution**
+
     ```bash
     # In Xcode:
     # Product > Archive
@@ -261,7 +266,8 @@ This document provides step-by-step instructions for setting up iOS development 
     - Visit [appstoreconnect.apple.com](https://appstoreconnect.apple.com)
     - My Apps > "+" > New App
     - Enter app information:
-        ```
+
+        ```text
         Name: Hex Zero
         Primary Language: English
         Bundle ID: com.hexzero.game
@@ -309,10 +315,10 @@ security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/[profile-uuid].
 
 ## 📚 Resources
 
--   [Apple Developer Documentation](https://developer.apple.com/documentation/)
--   [Code Signing Guide](https://developer.apple.com/support/code-signing/)
--   [App Store Connect Help](https://help.apple.com/app-store-connect/)
--   [Capacitor iOS Development](https://capacitorjs.com/docs/ios)
+- [Apple Developer Documentation](https://developer.apple.com/documentation/)
+- [Code Signing Guide](https://developer.apple.com/support/code-signing/)
+- [App Store Connect Help](https://help.apple.com/app-store-connect/)
+- [Capacitor iOS Development](https://capacitorjs.com/docs/ios)
 
 ---
 

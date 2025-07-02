@@ -304,7 +304,7 @@
    ============================================ */
 
 /* Extra wide screens (21:9 and wider) */
-@media (min-aspect-ratio: 21 / 9) {
+@media (min-aspect-ratio: 21/9) {
 	.game-container {
 		max-width: 1600px;
 		margin: 0 auto;
@@ -318,7 +318,7 @@
 }
 
 /* Square-ish screens (like some tablets) */
-@media (min-aspect-ratio: 3 / 4) and (max-aspect-ratio: 4 / 3) {
+@media (min-aspect-ratio: 3/4) and (max-aspect-ratio: 4/3) {
 	.control-panel {
 		height: 25vh;
 	}
@@ -399,7 +399,7 @@ button {
 }
 
 /* Android devices with gesture navigation */
-.device-phone[data-platform="android"] {
+.device-phone[data-platform='android'] {
 	.control-panel {
 		padding-bottom: max(10px, calc(var(--safe-area-bottom) + 10px));
 	}

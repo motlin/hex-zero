@@ -18,12 +18,30 @@ importers:
 
   .:
     dependencies:
+      '@capacitor/app':
+        specifier: ^7.0.1
+        version: 7.1.2(@capacitor/core@7.6.8)
       '@capacitor/cli':
         specifier: ^7.3.0
         version: 7.6.8
       '@capacitor/core':
         specifier: ^7.3.0
         version: 7.6.8
+      '@capacitor/device':
+        specifier: ^7.0.1
+        version: 7.0.5(@capacitor/core@7.6.8)
+      '@capacitor/haptics':
+        specifier: ^7.0.1
+        version: 7.0.5(@capacitor/core@7.6.8)
+      '@capacitor/local-notifications':
+        specifier: ^7.0.1
+        version: 7.0.7(@capacitor/core@7.6.8)
+      '@capacitor/share':
+        specifier: ^7.0.1
+        version: 7.0.4(@capacitor/core@7.6.8)
+      '@capacitor/status-bar':
+        specifier: ^7.0.1
+        version: 7.0.6(@capacitor/core@7.6.8)
       canvas-confetti:
         specifier: ^1.9.4
         version: 1.9.4
@@ -104,6 +122,11 @@ packages:
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
 
+  '@capacitor/app@7.1.2':
+    resolution: {integrity: sha512-d4I/oF/PRu4megL7/IGKYfe5j7yzSON1FRFgq6kH+m5kH6g7V+wyjHRLauCzGNjdRx4S+nWOumINds0qcRBtKg==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
   '@capacitor/cli@7.6.8':
     resolution: {integrity: sha512-sJYLoSS1wVHjDPwRc0grtNZcQZnkQc7TJKoVZdHL2HI5TPCq+27WBrMAo0mXvQQSH2axPYCz5cyRrcqqakOvxQ==}
     engines: {node: '>=20.0.0'}
@@ -111,6 +134,31 @@ packages:
 
   '@capacitor/core@7.6.8':
     resolution: {integrity: sha512-x1xfxvNcTSnj6OoYaAB0n0a0HRvi5f2YjcVnMLxpMhbHDgGDAzzN9z8cnPCYV+SKTvqGF1hezHm82Op32XaAGg==}
+
+  '@capacitor/device@7.0.5':
+    resolution: {integrity: sha512-tf6BYeQMBARNLKELQq2RGsvG3z03oM/ga+aqVhvE8M4IM8+h/516eeSz07Eqm4+yySGaQFT+2rIkpJrvA7gaAA==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/haptics@7.0.5':
+    resolution: {integrity: sha512-ujXuUkL8UG1YLhuJo/q+jiHr0K5JmclGZHmV1RttmiUBRG1XpC4Fc4gXUJyEX+6IoyfwWhgtPvJFRUB31HYnRQ==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/local-notifications@7.0.7':
+    resolution: {integrity: sha512-3qSpa8PpVMONHqBOaJ4RbA/lB5vOdEngtep0myGmP3S56gShPScDCotbw7dwmQy3NCdY4Up9nH3ySrGvUh2jZg==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/share@7.0.4':
+    resolution: {integrity: sha512-wNXxmXUcChrtbZ5jQv8scFIbIGKo3rk6B7qpWySxfUhYJP5NANgAqQ9Z69m0k/zYsucdh66SBU7XW1ykd9aUug==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
+
+  '@capacitor/status-bar@7.0.6':
+    resolution: {integrity: sha512-7AVqj46b26QikImQzWfsJmzG8NUJZBGkrVSuoeTo+SX/YH3hXH0MqwwFgMqMGHfa/BICDgSvTjM9miVFlq0+RQ==}
+    peerDependencies:
+      '@capacitor/core': '>=7.0.0'
 
   '@csstools/color-helpers@6.0.2':
     resolution: {integrity: sha512-LMGQLS9EuADloEFkcTBR3BwV/CGHV7zyDxVRtVDTwdI2Ca4it0CCVTT9wCkxSgokjE5Ho41hEPgb8OEUwoXr6Q==}
@@ -2082,6 +2130,10 @@ snapshots:
     dependencies:
       css-tree: 3.2.1
 
+  '@capacitor/app@7.1.2(@capacitor/core@7.6.8)':
+    dependencies:
+      '@capacitor/core': 7.6.8
+
   '@capacitor/cli@7.6.8':
     dependencies:
       '@ionic/cli-framework-output': 2.2.8
@@ -2107,6 +2159,26 @@ snapshots:
   '@capacitor/core@7.6.8':
     dependencies:
       tslib: 2.8.1
+
+  '@capacitor/device@7.0.5(@capacitor/core@7.6.8)':
+    dependencies:
+      '@capacitor/core': 7.6.8
+
+  '@capacitor/haptics@7.0.5(@capacitor/core@7.6.8)':
+    dependencies:
+      '@capacitor/core': 7.6.8
+
+  '@capacitor/local-notifications@7.0.7(@capacitor/core@7.6.8)':
+    dependencies:
+      '@capacitor/core': 7.6.8
+
+  '@capacitor/share@7.0.4(@capacitor/core@7.6.8)':
+    dependencies:
+      '@capacitor/core': 7.6.8
+
+  '@capacitor/status-bar@7.0.6(@capacitor/core@7.6.8)':
+    dependencies:
+      '@capacitor/core': 7.6.8
 
   '@csstools/color-helpers@6.0.2': {}
 

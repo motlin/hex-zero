@@ -20,12 +20,12 @@ export interface PlatformGestureConfig {
  * Ensures game gestures don't conflict with system gestures
  */
 export class PlatformGestureHandler {
-	private static instance: PlatformGestureHandler;
-	private config: PlatformGestureConfig;
-	private edgeSwipeMonitor: EdgeSwipeMonitor;
-	private multiTouchValidator: MultiTouchValidator;
-	private isIOS: boolean;
-	private isAndroid: boolean;
+	private static instance: PlatformGestureHandler | undefined;
+	private readonly config: PlatformGestureConfig;
+	private readonly edgeSwipeMonitor: EdgeSwipeMonitor;
+	private readonly multiTouchValidator: MultiTouchValidator;
+	private readonly isIOS: boolean;
+	private readonly isAndroid: boolean;
 	private backButtonListenerRegistered = false;
 
 	private constructor() {
@@ -38,18 +38,16 @@ export class PlatformGestureHandler {
 	}
 
 	static getInstance(): PlatformGestureHandler {
-		if (!PlatformGestureHandler.instance) {
-			PlatformGestureHandler.instance = new PlatformGestureHandler();
-		}
+		PlatformGestureHandler.instance ??= new PlatformGestureHandler();
 		return PlatformGestureHandler.instance;
 	}
 
-	async initialize(): Promise<void> {
+	initialize(): void {
 		// Set up platform-specific handlers
 		if (this.isAndroid) {
-			await this.setupAndroidGestures();
+			this.setupAndroidGestures();
 		} else if (this.isIOS) {
-			await this.setupIOSGestures();
+			this.setupIOSGestures();
 		}
 
 		// Set up edge swipe monitoring
@@ -91,14 +89,14 @@ export class PlatformGestureHandler {
 		return baseConfig;
 	}
 
-	private async setupAndroidGestures(): Promise<void> {
+	private setupAndroidGestures(): void {
 		// Handle Android back button
 		if (!this.backButtonListenerRegistered) {
-			App.addListener('backButton', ({canGoBack}) => {
+			void App.addListener('backButton', ({canGoBack}) => {
 				const handled = this.handleBackButton();
 				if (!handled && !canGoBack) {
 					// If not handled by game and can't go back, exit app
-					App.exitApp();
+					void App.exitApp();
 				}
 			});
 			this.backButtonListenerRegistered = true;
@@ -108,7 +106,7 @@ export class PlatformGestureHandler {
 		document.body.classList.add('android-gestures');
 	}
 
-	private async setupIOSGestures(): Promise<void> {
+	private setupIOSGestures(): void {
 		// Add CSS class for iOS gesture handling
 		document.body.classList.add('ios-gestures');
 
@@ -120,7 +118,7 @@ export class PlatformGestureHandler {
 		// Ensure safe areas are respected
 		const meta = document.querySelector('meta[name="viewport"]');
 		if (meta) {
-			const content = meta.getAttribute('content') || '';
+			const content = meta.getAttribute('content') ?? '';
 			if (!content.includes('viewport-fit=cover')) {
 				meta.setAttribute('content', content + ', viewport-fit=cover');
 			}
@@ -135,7 +133,7 @@ export class PlatformGestureHandler {
 
 		document.addEventListener('touchmove', (e) => {
 			const conflict = this.edgeSwipeMonitor.onTouchMove(e);
-			if (conflict) {
+			if (conflict !== null) {
 				this.handleEdgeSwipeConflict(conflict);
 			}
 		});
@@ -164,10 +162,10 @@ export class PlatformGestureHandler {
 		const modals = document.querySelectorAll('.modal:not(.hidden)');
 		if (modals.length > 0) {
 			const lastModal = modals[modals.length - 1];
-			if (lastModal) {
+			if (lastModal !== undefined) {
 				lastModal.classList.add('hidden');
 			}
-			HapticFeedback.lightTap();
+			void HapticFeedback.lightTap();
 			return true;
 		}
 
@@ -175,10 +173,10 @@ export class PlatformGestureHandler {
 		const gameScreen = document.getElementById('gameScreen');
 		const difficultyScreen = document.getElementById('difficultyScreen');
 
-		if (gameScreen && !gameScreen.classList.contains('hidden')) {
+		if (gameScreen !== null && !gameScreen.classList.contains('hidden')) {
 			gameScreen.classList.add('hidden');
 			difficultyScreen?.classList.remove('hidden');
-			HapticFeedback.lightTap();
+			void HapticFeedback.lightTap();
 			return true;
 		}
 
@@ -251,13 +249,13 @@ export class PlatformGestureHandler {
 		// Adjust gesture parameters based on platform
 		if (this.isIOS) {
 			// iOS adjustments
-			if (gesture.type === 'swipe' && gesture.startY && gesture.startY < 44) {
+			if (gesture.type === 'swipe' && gesture.startY !== undefined && gesture.startY < 44) {
 				// Reduce sensitivity near status bar
 				gesture.threshold *= 1.5;
 			}
 		} else if (this.isAndroid) {
 			// Android adjustments
-			if (gesture.type === 'swipe' && gesture.startX && gesture.startX < 20) {
+			if (gesture.type === 'swipe' && gesture.startX !== undefined && gesture.startX < 20) {
 				// Reduce sensitivity near back gesture area
 				gesture.threshold *= 1.5;
 			}
@@ -280,7 +278,7 @@ export class PlatformGestureHandler {
  * 📱 Monitors edge swipes to detect system gesture conflicts
  */
 class EdgeSwipeMonitor {
-	private threshold: number;
+	private readonly threshold: number;
 	private activeTouch: Touch | null = null;
 	private startX = 0;
 	private startY = 0;
@@ -345,7 +343,7 @@ class EdgeSwipeMonitor {
  * ✌️ Validates multi-touch gestures
  */
 class MultiTouchValidator {
-	private activeTouches: Map<number, TouchInfo> = new Map();
+	private readonly activeTouches: Map<number, TouchInfo> = new Map();
 	private recognizedGesture: MultiTouchGesture | null = null;
 
 	onTouchStart(e: TouchEvent): void {
@@ -397,14 +395,12 @@ class MultiTouchValidator {
 		);
 
 		// Store initial distance for pinch detection
-		if (!this.recognizedGesture) {
-			this.recognizedGesture = {
-				type: 'pinch',
-				initialDistance: distance,
-				currentDistance: distance,
-				scale: 1,
-			};
-		}
+		this.recognizedGesture ??= {
+			type: 'pinch',
+			initialDistance: distance,
+			currentDistance: distance,
+			scale: 1,
+		};
 	}
 
 	private getDistance(x1: number, y1: number, x2: number, y2: number): number {

@@ -2,12 +2,12 @@
 
 /* eslint-disable no-console, no-undef */
 
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import {writeFileSync, mkdirSync, existsSync} from 'fs';
+import {join} from 'path';
 
 const metadataDir = join(process.cwd(), 'play-store', 'metadata');
 if (!existsSync(metadataDir)) {
-    mkdirSync(metadataDir, { recursive: true });
+	mkdirSync(metadataDir, {recursive: true});
 }
 
 // Short description (80 characters max)

@@ -23,21 +23,21 @@ export class TouchOptimizer {
 	// Time to trigger hold gesture in milliseconds
 	private static readonly HOLD_TIME = 500;
 
-	private touches = new Map<number, TouchState>();
+	private readonly touches = new Map<number, TouchState>();
 	private lastTapTime = 0;
 	private lastTapLocation: {x: number; y: number} | null = null;
 	private holdTimer: number | null = null;
 
 	constructor(
-		private onTap: (x: number, y: number) => void,
-		private onDoubleTap: (x: number, y: number) => void,
-		private onDragStart: (x: number, y: number, element?: HTMLElement) => void,
-		private onDragMove: (x: number, y: number) => void,
-		private onDragEnd: (x: number, y: number) => void,
-		private onPinchStart?: (distance: number, centerX: number, centerY: number) => void,
-		private onPinchMove?: (scale: number, centerX: number, centerY: number) => void,
-		private onPinchEnd?: () => void,
-		private onHold?: (x: number, y: number) => void,
+		private readonly onTap: (x: number, y: number) => void,
+		private readonly onDoubleTap: (x: number, y: number) => void,
+		private readonly onDragStart: (x: number, y: number, element?: HTMLElement) => void,
+		private readonly onDragMove: (x: number, y: number) => void,
+		private readonly onDragEnd: (x: number, y: number) => void,
+		private readonly onPinchStart?: (distance: number, centerX: number, centerY: number) => void,
+		private readonly onPinchMove?: (scale: number, centerX: number, centerY: number) => void,
+		private readonly onPinchEnd?: () => void,
+		private readonly onHold?: (x: number, y: number) => void,
 	) {}
 
 	handleTouchStart(event: TouchEvent, element?: HTMLElement): void {
@@ -60,7 +60,7 @@ export class TouchOptimizer {
 		}
 
 		// Handle pinch gesture start
-		if (this.touches.size === 2 && this.onPinchStart) {
+		if (this.touches.size === 2 && this.onPinchStart !== undefined) {
 			const touchArray = Array.from(this.touches.values());
 			const touch0 = touchArray[0];
 			const touch1 = touchArray[1];
@@ -73,12 +73,13 @@ export class TouchOptimizer {
 		}
 
 		// Start hold timer for single touch
-		if (this.touches.size === 1 && this.onHold) {
+		const onHold = this.onHold;
+		if (this.touches.size === 1 && onHold !== undefined) {
 			const touch = Array.from(this.touches.values())[0];
 			if (touch) {
 				this.holdTimer = window.setTimeout(() => {
 					if (this.touches.has(touch.identifier) && !touch.isDragging) {
-						this.onHold!(touch.currentX, touch.currentY);
+						onHold(touch.currentX, touch.currentY);
 					}
 				}, TouchOptimizer.HOLD_TIME);
 			}
@@ -107,7 +108,7 @@ export class TouchOptimizer {
 				if (distance > TouchOptimizer.DRAG_THRESHOLD && !touchState.isDragging) {
 					touchState.isDragging = true;
 					// Cancel hold timer on drag
-					if (this.holdTimer) {
+					if (this.holdTimer !== null) {
 						clearTimeout(this.holdTimer);
 						this.holdTimer = null;
 					}
@@ -121,7 +122,7 @@ export class TouchOptimizer {
 		}
 
 		// Handle pinch gesture
-		if (this.touches.size === 2 && this.onPinchMove) {
+		if (this.touches.size === 2 && this.onPinchMove !== undefined) {
 			const touchArray = Array.from(this.touches.values());
 			const touch0 = touchArray[0];
 			const touch1 = touchArray[1];
@@ -169,7 +170,7 @@ export class TouchOptimizer {
 					duration < TouchOptimizer.TAP_TIME_THRESHOLD
 				) {
 					// Check for double tap
-					if (this.lastTapLocation && now - this.lastTapTime < TouchOptimizer.DOUBLE_TAP_TIME) {
+					if (this.lastTapLocation !== null && now - this.lastTapTime < TouchOptimizer.DOUBLE_TAP_TIME) {
 						const tapDistance = this.getDistance(
 							this.lastTapLocation.x,
 							this.lastTapLocation.y,
@@ -200,13 +201,13 @@ export class TouchOptimizer {
 		}
 
 		// Cancel hold timer
-		if (this.holdTimer && this.touches.size === 0) {
+		if (this.holdTimer !== null && this.touches.size === 0) {
 			clearTimeout(this.holdTimer);
 			this.holdTimer = null;
 		}
 
 		// Handle pinch end
-		if (this.touches.size < 2 && this.onPinchEnd) {
+		if (this.touches.size < 2 && this.onPinchEnd !== undefined) {
 			this.onPinchEnd();
 		}
 	}
@@ -218,7 +219,7 @@ export class TouchOptimizer {
 			if (!touch) continue;
 			const touchState = this.touches.get(touch.identifier);
 
-			if (touchState && touchState.isDragging) {
+			if (touchState?.isDragging === true) {
 				this.onDragEnd(touchState.currentX, touchState.currentY);
 			}
 
@@ -226,13 +227,13 @@ export class TouchOptimizer {
 		}
 
 		// Cancel hold timer
-		if (this.holdTimer) {
+		if (this.holdTimer !== null) {
 			clearTimeout(this.holdTimer);
 			this.holdTimer = null;
 		}
 
 		// Handle pinch end
-		if (this.touches.size < 2 && this.onPinchEnd) {
+		if (this.touches.size < 2 && this.onPinchEnd !== undefined) {
 			this.onPinchEnd();
 		}
 	}
@@ -261,7 +262,7 @@ export function addTouchFeedback(
 		activeClass?: string;
 	},
 ): void {
-	const {scale = 0.95, duration = 150, activeClass = 'touch-active'} = options || {};
+	const {scale = 0.95, duration = 150, activeClass = 'touch-active'} = options ?? {};
 
 	let isActive = false;
 

@@ -11,10 +11,10 @@
 
 /* eslint-disable no-console, line-comment-position, no-undef */
 
-import { execSync } from 'child_process';
+import {execSync} from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,11 +24,11 @@ console.log('============================================\n');
 
 // Keystore configuration
 const keystoreConfig = {
-    filename: 'hex-zero-release.keystore',
-    alias: 'hex-zero-key',
-    validity: 25 * 365, // 25 years (recommended for Play Store)
-    keysize: 2048,
-    algorithm: 'RSA',
+	filename: 'hex-zero-release.keystore',
+	alias: 'hex-zero-key',
+	validity: 25 * 365, // 25 years (recommended for Play Store)
+	keysize: 2048,
+	algorithm: 'RSA',
 };
 
 const keystorePath = path.join(__dirname, '..', 'android', 'app', keystoreConfig.filename);
@@ -44,15 +44,15 @@ console.log(`Location: ${keystorePath}\n`);
 
 // Check if keystore already exists
 if (fs.existsSync(keystorePath)) {
-    console.log('⚠️  Keystore already exists at:');
-    console.log(`   ${keystorePath}\n`);
-    console.log('🛡️  Security Warning:');
-    console.log('   Generating a new keystore will invalidate the existing one.');
-    console.log('   Apps signed with different keystores cannot be updated in Play Store.');
-    console.log('   Only proceed if you need to replace the existing keystore.\n');
-    console.log('❌ Aborting keystore generation to prevent accidental replacement.');
-    console.log('   Delete the existing keystore file if you want to generate a new one.\n');
-    process.exit(1);
+	console.log('⚠️  Keystore already exists at:');
+	console.log(`   ${keystorePath}\n`);
+	console.log('🛡️  Security Warning:');
+	console.log('   Generating a new keystore will invalidate the existing one.');
+	console.log('   Apps signed with different keystores cannot be updated in Play Store.');
+	console.log('   Only proceed if you need to replace the existing keystore.\n');
+	console.log('❌ Aborting keystore generation to prevent accidental replacement.');
+	console.log('   Delete the existing keystore file if you want to generate a new one.\n');
+	process.exit(1);
 }
 
 console.log('🔧 Generating Android Release Keystore...\n');
@@ -79,71 +79,69 @@ console.log('• Create secure backups of both keystore and passwords');
 console.log('• Losing the keystore means you cannot update your app!\n');
 
 try {
-    // Generate the keystore using keytool
-    const keytoolCommand = [
-        'keytool',
-        '-genkeypair',
-        '-v',
-        `-keystore "${keystorePath}"`,
-        `-alias ${keystoreConfig.alias}`,
-        `-keyalg ${keystoreConfig.algorithm}`,
-        `-keysize ${keystoreConfig.keysize}`,
-        `-validity ${keystoreConfig.validity}`,
-        '-storetype PKCS12',
-    ].join(' ');
+	// Generate the keystore using keytool
+	const keytoolCommand = [
+		'keytool',
+		'-genkeypair',
+		'-v',
+		`-keystore "${keystorePath}"`,
+		`-alias ${keystoreConfig.alias}`,
+		`-keyalg ${keystoreConfig.algorithm}`,
+		`-keysize ${keystoreConfig.keysize}`,
+		`-validity ${keystoreConfig.validity}`,
+		'-storetype PKCS12',
+	].join(' ');
 
-    console.log('🔨 Running keytool command...\n');
-    console.log('The keytool will now prompt you for the required information.\n');
+	console.log('🔨 Running keytool command...\n');
+	console.log('The keytool will now prompt you for the required information.\n');
 
-    execSync(keytoolCommand, {
-        stdio: 'inherit',
-        cwd: path.dirname(keystorePath),
-    });
+	execSync(keytoolCommand, {
+		stdio: 'inherit',
+		cwd: path.dirname(keystorePath),
+	});
 
-    console.log('\n✅ Keystore generated successfully!');
-    console.log(`📁 Location: ${keystorePath}\n`);
+	console.log('\n✅ Keystore generated successfully!');
+	console.log(`📁 Location: ${keystorePath}\n`);
 
-    // Verify the keystore was created
-    if (fs.existsSync(keystorePath)) {
-        console.log('🔍 Keystore Verification:');
-        console.log('=========================\n');
+	// Verify the keystore was created
+	if (fs.existsSync(keystorePath)) {
+		console.log('🔍 Keystore Verification:');
+		console.log('=========================\n');
 
-        try {
-            const verifyCommand = `keytool -list -v -keystore "${keystorePath}" -alias ${keystoreConfig.alias}`;
-            console.log('Keystore details:');
-            execSync(verifyCommand, { stdio: 'inherit' });
-        } catch (_verifyError) {
-            console.log('⚠️  Could not verify keystore (this is usually not a problem)');
-        }
+		try {
+			const verifyCommand = `keytool -list -v -keystore "${keystorePath}" -alias ${keystoreConfig.alias}`;
+			console.log('Keystore details:');
+			execSync(verifyCommand, {stdio: 'inherit'});
+		} catch (_verifyError) {
+			console.log('⚠️  Could not verify keystore (this is usually not a problem)');
+		}
 
-        console.log('\n📝 Next Steps:');
-        console.log('==============\n');
-        console.log('1. Update android/gradle.properties with signing configuration');
-        console.log('2. Update android/app/build.gradle with release signing config');
-        console.log('3. Store keystore passwords securely');
-        console.log('4. Create backup of keystore file');
-        console.log('5. Add keystore to .gitignore if not already excluded\n');
+		console.log('\n📝 Next Steps:');
+		console.log('==============\n');
+		console.log('1. Update android/gradle.properties with signing configuration');
+		console.log('2. Update android/app/build.gradle with release signing config');
+		console.log('3. Store keystore passwords securely');
+		console.log('4. Create backup of keystore file');
+		console.log('5. Add keystore to .gitignore if not already excluded\n');
 
-        console.log('🔗 For complete setup instructions, see:');
-        console.log('   docs/ANDROID_DEVELOPMENT_SETUP.md\n');
-
-    } else {
-        console.log('❌ Keystore file was not created. Check for errors above.');
-        process.exit(1);
-    }
-
+		console.log('🔗 For complete setup instructions, see:');
+		console.log('   docs/ANDROID_DEVELOPMENT_SETUP.md\n');
+	} else {
+		console.log('❌ Keystore file was not created. Check for errors above.');
+		process.exit(1);
+	}
 } catch (error) {
-    console.log('\n❌ Error generating keystore:');
-    console.log(`   ${error.message}\n`);
+	console.log('\n❌ Error generating keystore:');
+	console.log(`   ${error.message}\n`);
 
-    console.log('💡 Common Solutions:');
-    console.log('====================\n');
-    console.log('• Ensure Java JDK is installed and keytool is in PATH');
-    console.log('• Check that the android/app directory exists');
-    console.log('• Verify you have write permissions to the directory');
-    console.log('• Try running with administrator/sudo privileges if needed\n');
+	console.log('💡 Common Solutions:');
+	console.log('====================\n');
+	console.log('• Ensure Java JDK is installed and keytool is in PATH');
+	console.log('• Check that the android/app directory exists');
+	console.log('• Verify you have write permissions to the directory');
+	console.log('• Try running with administrator/sudo privileges if needed\n');
 
-    process.exit(1);
+	process.exit(1);
 }
 
 console.log('🎉 Android keystore setup complete!');

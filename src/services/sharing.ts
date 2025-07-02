@@ -1,5 +1,6 @@
 import {Share} from '@capacitor/share';
 import {Capacitor} from '@capacitor/core';
+import type {GameDifficulty} from '../state/GameState';
 
 // Temporary type definitions until proper imports are available
 type GameStats = {
@@ -10,20 +11,16 @@ type GameStats = {
 	currentStreak: number;
 };
 
-type Difficulty = 'easy' | 'medium' | 'hard' | 'expert';
-
 /**
  * 🎯 Service for sharing game achievements and stats
  */
 export class SharingService {
-	private static instance: SharingService;
+	private static instance: SharingService | undefined;
 
 	private constructor() {}
 
 	static getInstance(): SharingService {
-		if (!SharingService.instance) {
-			SharingService.instance = new SharingService();
-		}
+		SharingService.instance ??= new SharingService();
 		return SharingService.instance;
 	}
 
@@ -31,7 +28,7 @@ export class SharingService {
 	 * Share victory message when completing a puzzle
 	 */
 	async shareVictory(
-		difficulty: Difficulty,
+		difficulty: GameDifficulty,
 		moveCount: number,
 		timeInSeconds: number,
 		isNewRecord: boolean = false,
@@ -66,8 +63,8 @@ export class SharingService {
 			`🎮 Games Played: ${totalGames}\n` +
 			`✅ Games Won: ${stats.gamesWon}\n` +
 			`📈 Win Rate: ${winRate}%\n` +
-			`⏱️ Best Time: ${this.formatTime(stats.bestTime || 0)}\n` +
-			`🎯 Fewest Moves: ${stats.bestMoves || 'N/A'}\n` +
+			`⏱️ Best Time: ${this.formatTime(stats.bestTime ?? 0)}\n` +
+			`🎯 Fewest Moves: ${stats.bestMoves ?? 'N/A'}\n` +
 			`🔥 Current Streak: ${stats.currentStreak}`;
 
 		await this.share({
@@ -115,12 +112,12 @@ export class SharingService {
 		// Check if sharing is available
 		if (!Capacitor.isNativePlatform()) {
 			// Web fallback - use Web Share API if available
-			if (navigator.share) {
+			if (typeof navigator.share === 'function') {
 				try {
 					const shareData: ShareData = {};
-					if (options.title) shareData.title = options.title;
-					if (options.text) shareData.text = options.text;
-					if (options.url) shareData.url = options.url;
+					if (options.title !== undefined && options.title !== '') shareData.title = options.title;
+					if (options.text !== undefined && options.text !== '') shareData.text = options.text;
+					if (options.url !== undefined && options.url !== '') shareData.url = options.url;
 					await navigator.share(shareData);
 				} catch (error) {
 					// User cancelled or error occurred
@@ -130,12 +127,10 @@ export class SharingService {
 				}
 			} else {
 				// Fallback to copying to clipboard
-				const shareText = [options.title, options.text, options.url].filter(Boolean).join('\n\n');
-
-				if (navigator.clipboard) {
-					await navigator.clipboard.writeText(shareText);
-					// Could show a toast notification here
-				}
+				const shareText = [options.title, options.text, options.url]
+					.filter((value): value is string => value !== undefined && value !== '')
+					.join('\n\n');
+				await navigator.clipboard.writeText(shareText);
 			}
 			return;
 		}
@@ -149,10 +144,12 @@ export class SharingService {
 			}
 
 			const shareOptions: import('@capacitor/share').ShareOptions = {};
-			if (options.title) shareOptions.title = options.title;
-			if (options.text) shareOptions.text = options.text;
-			if (options.url) shareOptions.url = options.url;
-			if (options.dialogTitle) shareOptions.dialogTitle = options.dialogTitle;
+			if (options.title !== undefined && options.title !== '') shareOptions.title = options.title;
+			if (options.text !== undefined && options.text !== '') shareOptions.text = options.text;
+			if (options.url !== undefined && options.url !== '') shareOptions.url = options.url;
+			if (options.dialogTitle !== undefined && options.dialogTitle !== '') {
+				shareOptions.dialogTitle = options.dialogTitle;
+			}
 			await Share.share(shareOptions);
 		} catch (error) {
 			// User cancelled or error occurred
@@ -166,7 +163,7 @@ export class SharingService {
 	 * Format time in MM:SS or HH:MM:SS format
 	 */
 	private formatTime(seconds: number): string {
-		if (!seconds || seconds === 0) return '0:00';
+		if (seconds === 0) return '0:00';
 
 		const hours = Math.floor(seconds / 3600);
 		const minutes = Math.floor((seconds % 3600) / 60);
@@ -181,18 +178,21 @@ export class SharingService {
 	/**
 	 * Get emoji for difficulty level
 	 */
-	private getDifficultyEmoji(difficulty: Difficulty): string {
+	private getDifficultyEmoji(difficulty: GameDifficulty): string {
 		switch (difficulty) {
-			case 'easy':
+			case 'Easy':
 				return '🟢';
-			case 'medium':
+			case 'Medium':
 				return '🟡';
-			case 'hard':
+			case 'Hard':
 				return '🔴';
-			case 'expert':
+			case 'Extreme':
+			case 'Impossible':
 				return '🟣';
-			default:
+			case 'Custom':
 				return '🎮';
+			default:
+				return difficulty satisfies never;
 		}
 	}
 }

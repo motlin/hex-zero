@@ -5,7 +5,7 @@ import {addTouchFeedback} from './touch-optimizer';
 /**
  * Enhanced mobile-specific UI interactions
  */
-export class MobileUIEnhancer {
+class MobileUIEnhancer {
 	private pieceNavButtons: {prev: HTMLButtonElement | null; next: HTMLButtonElement | null} = {
 		prev: null,
 		next: null,
@@ -30,11 +30,11 @@ export class MobileUIEnhancer {
 	}
 
 	private enhanceHamburgerMenu(): void {
-		const hamburgerButtons = document.querySelectorAll('.hamburger-button');
+		const hamburgerButtons = document.querySelectorAll<HTMLElement>('.hamburger-button');
 
 		hamburgerButtons.forEach((button) => {
 			// Add enhanced touch feedback
-			addTouchFeedback(button as HTMLElement, {
+			addTouchFeedback(button, {
 				scale: 0.9,
 				duration: 150,
 				activeClass: 'hamburger-active',
@@ -49,9 +49,9 @@ export class MobileUIEnhancer {
 		});
 
 		// Enhance dropdown menu items
-		const dropdownButtons = document.querySelectorAll('.hamburger-dropdown button');
+		const dropdownButtons = document.querySelectorAll<HTMLElement>('.hamburger-dropdown button');
 		dropdownButtons.forEach((button) => {
-			addTouchFeedback(button as HTMLElement, {
+			addTouchFeedback(button, {
 				scale: 0.97,
 				duration: 100,
 			});
@@ -127,7 +127,9 @@ export class MobileUIEnhancer {
 		});
 
 		// Update navigation button visibility after scroll
-		setTimeout(() => this.updateNavigationButtons(), 300);
+		setTimeout(() => {
+			this.updateNavigationButtons();
+		}, 300);
 	}
 
 	private updateNavigationButtons(): void {
@@ -161,8 +163,8 @@ export class MobileUIEnhancer {
 		observer.observe(container, {childList: true});
 
 		// Enhance existing pieces
-		container.querySelectorAll('.draggable-piece').forEach((piece) => {
-			this.enhanceDraggablePiece(piece as HTMLElement);
+		container.querySelectorAll<HTMLElement>('.draggable-piece').forEach((piece) => {
+			this.enhanceDraggablePiece(piece);
 		});
 
 		// Listen for container scroll to update nav buttons
@@ -192,14 +194,14 @@ export class MobileUIEnhancer {
 		});
 
 		piece.addEventListener('touchend', () => {
-			if (longPressTimer) {
+			if (longPressTimer !== null) {
 				clearTimeout(longPressTimer);
 				piece.classList.remove('ready-to-drag');
 			}
 		});
 
 		piece.addEventListener('touchcancel', () => {
-			if (longPressTimer) {
+			if (longPressTimer !== null) {
 				clearTimeout(longPressTimer);
 				piece.classList.remove('ready-to-drag');
 			}
@@ -207,11 +209,11 @@ export class MobileUIEnhancer {
 	}
 
 	private enhanceBottomControls(): void {
-		const controls = document.querySelectorAll('.bottom-controls button');
+		const controls = document.querySelectorAll<HTMLElement>('.bottom-controls button');
 
 		controls.forEach((button) => {
 			// Add enhanced touch feedback
-			addTouchFeedback(button as HTMLElement, {
+			addTouchFeedback(button, {
 				scale: 0.92,
 				duration: 120,
 				activeClass: 'control-active',
@@ -228,12 +230,12 @@ export class MobileUIEnhancer {
 
 	private addUniversalTouchFeedback(): void {
 		// Add touch feedback to all interactive elements
-		const interactiveElements = document.querySelectorAll(
+		const interactiveElements = document.querySelectorAll<HTMLElement>(
 			'button:not(.hamburger-button):not(.piece-nav-button):not(.bottom-controls button), ' + '.difficulty-card',
 		);
 
 		interactiveElements.forEach((element) => {
-			addTouchFeedback(element as HTMLElement, {
+			addTouchFeedback(element, {
 				scale: 0.97,
 				duration: 150,
 			});
@@ -306,8 +308,4 @@ export function initializeMobileUIEnhancements(): void {
 			mobileEnhancer?.handleOrientationChange();
 		});
 	}
-}
-
-export function getMobileUIEnhancer(): MobileUIEnhancer | null {
-	return mobileEnhancer;
 }

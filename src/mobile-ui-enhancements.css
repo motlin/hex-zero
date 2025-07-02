@@ -21,7 +21,7 @@
 
 /* Touch feedback ripple effect */
 .hamburger-button::after {
-	content: "";
+	content: '';
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -65,7 +65,7 @@
 
 /* Icon placeholders for menu items */
 .hamburger-dropdown button::before {
-	content: "";
+	content: '';
 	position: absolute;
 	left: 12px;
 	width: 20px;
@@ -75,22 +75,22 @@
 
 /* Specific icons for each menu item */
 .hamburger-dropdown button:nth-child(1)::before {
-	content: "🎮";
+	content: '🎮';
 	font-size: 18px;
 }
 
 .hamburger-dropdown button:nth-child(2)::before {
-	content: "🔄";
+	content: '🔄';
 	font-size: 18px;
 }
 
 .hamburger-dropdown button:nth-child(3)::before {
-	content: "❓";
+	content: '❓';
 	font-size: 18px;
 }
 
 .hamburger-dropdown button:nth-child(4)::before {
-	content: "🏆";
+	content: '🏆';
 	font-size: 18px;
 }
 
@@ -99,7 +99,7 @@
    ============================================ */
 
 /* Enhanced bottom control panel for thumb accessibility */
-@media (max-aspect-ratio: 1 / 1) {
+@media (max-aspect-ratio: 1/1) {
 	.control-panel {
 		/* Rounded corners for modern look */
 		border-radius: 16px 16px 0 0;
@@ -162,7 +162,7 @@
 	}
 
 	.draggable-piece::before {
-		content: "";
+		content: '';
 		position: absolute;
 		top: -4px;
 		left: -4px;
@@ -209,7 +209,7 @@
 
 	/* Ripple effect for bottom control buttons */
 	.bottom-controls button::before {
-		content: "";
+		content: '';
 		position: absolute;
 		top: 50%;
 		left: 50%;
@@ -264,7 +264,7 @@
 }
 
 .loading::after {
-	content: "";
+	content: '';
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -328,7 +328,7 @@
    Landscape Mode Enhancements
    ============================================ */
 
-@media (min-aspect-ratio: 1 / 1) {
+@media (min-aspect-ratio: 1/1) {
 	/* Side panel improvements for landscape */
 	.control-panel {
 		border-radius: 0 16px 16px 0;
@@ -421,7 +421,7 @@ button:focus-visible,
 }
 
 /* Piece container scrolling */
-@media (max-aspect-ratio: 1 / 1) {
+@media (max-aspect-ratio: 1/1) {
 	.pieces-container {
 		overflow-x: auto;
 		overflow-y: hidden;

@@ -232,8 +232,8 @@ button:active,
 }
 
 /* Prevent accidental zooming on form inputs */
-input[type="number"],
-input[type="text"],
+input[type='number'],
+input[type='text'],
 button {
 	font-size: 16px; /* Prevents zoom on iOS when focusing inputs */
 }
@@ -283,7 +283,7 @@ button {
 	}
 
 	/* In landscape, the control panel should respect safe areas */
-	@media (min-aspect-ratio: 1 / 1) {
+	@media (min-aspect-ratio: 1/1) {
 		.control-panel {
 			width: calc(220px + var(--safe-area-inset-right));
 			padding-right: calc(10px + var(--safe-area-inset-right));

@@ -18,14 +18,14 @@ interface RenderBatch {
  * ⚡ Optimized hex renderer with caching and batch rendering
  */
 export class OptimizedHexRenderer {
-	private performanceOptimizer: MobilePerformanceOptimizer;
-	private hexCache: Map<string, CachedHex> = new Map();
-	private dirtyRegions: Set<string> = new Set();
+	private readonly performanceOptimizer: MobilePerformanceOptimizer;
+	private readonly hexCache: Map<string, CachedHex> = new Map();
+	private readonly dirtyRegions: Set<string> = new Set();
 	private offscreenCanvas: HTMLCanvasElement | OffscreenCanvas | null = null;
 	private offscreenCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
 	private renderBatches: RenderBatch[] = [];
-	private hexPathCache: Map<string, Path2D> = new Map();
-	private textMetricsCache: Map<string, TextMetrics> = new Map();
+	private readonly hexPathCache: Map<string, Path2D> = new Map();
+	private readonly textMetricsCache: Map<string, TextMetrics> = new Map();
 
 	constructor() {
 		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
@@ -39,10 +39,10 @@ export class OptimizedHexRenderer {
 			alpha: false,
 			desynchronized: true,
 			willReadFrequently: false,
-		}) as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+		});
 
 		if (this.offscreenCtx) {
-			this.performanceOptimizer.optimizeCanvasContext(this.offscreenCtx as CanvasRenderingContext2D);
+			this.performanceOptimizer.optimizeCanvasContext(this.offscreenCtx);
 		}
 	}
 
@@ -208,7 +208,7 @@ export class OptimizedHexRenderer {
 		const hexesByColor = new Map<string, CachedHex[]>();
 
 		for (const hex of batch.hexes) {
-			const hexes = hexesByColor.get(hex.color) || [];
+			const hexes = hexesByColor.get(hex.color) ?? [];
 			hexes.push(hex);
 			hexesByColor.set(hex.color, hexes);
 		}

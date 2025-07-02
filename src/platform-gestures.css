@@ -237,7 +237,7 @@
 
 	/* Show visual feedback */
 	&::before {
-		content: "";
+		content: '';
 		position: fixed;
 		top: 0;
 		left: 0;
@@ -282,7 +282,7 @@
 		bottom: 100px;
 		left: 20px;
 		&::before {
-			content: "👈 ";
+			content: '👈 ';
 		}
 	}
 
@@ -291,7 +291,7 @@
 		left: 50%;
 		transform: translateX(-50%);
 		&::before {
-			content: "⬇️ ";
+			content: '⬇️ ';
 		}
 	}
 }

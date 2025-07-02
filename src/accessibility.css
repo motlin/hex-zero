@@ -256,7 +256,7 @@ body.keyboard-navigation *:focus {
 }
 
 .loading::before {
-	content: "Loading...";
+	content: 'Loading...';
 	position: absolute;
 	left: -10000px;
 	width: 1px;
@@ -274,7 +274,7 @@ body.keyboard-navigation *:focus {
 }
 
 .progress-indicator::before {
-	content: "";
+	content: '';
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -345,7 +345,7 @@ body.keyboard-navigation *:focus {
 }
 
 /* Victory celebration accessibility */
-.victory-screen[aria-hidden="false"] {
+.victory-screen[aria-hidden='false'] {
 	animation: victory-announce 0.5s ease-out;
 }
 
@@ -406,7 +406,7 @@ body.keyboard-navigation *:focus {
 
 	/* Show game state in print */
 	.game-container::after {
-		content: "Hex Zero Puzzle Game - Visit the website for interactive version";
+		content: 'Hex Zero Puzzle Game - Visit the website for interactive version';
 		display: block;
 		text-align: center;
 		margin-top: 20px;

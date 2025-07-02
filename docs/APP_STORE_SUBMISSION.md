@@ -6,27 +6,27 @@ Complete guide for submitting Hex Zero to the iOS App Store.
 
 ### Required Assets
 
--   [ ] App icons (all sizes) ✅ Complete
--   [ ] Launch screens ✅ Complete
--   [ ] App Store screenshots (6.5", 5.5", 12.9" iPad)
--   [ ] App preview videos (optional)
--   [ ] Marketing materials
+- [ ] App icons (all sizes) ✅ Complete
+- [ ] Launch screens ✅ Complete
+- [ ] App Store screenshots (6.5", 5.5", 12.9" iPad)
+- [ ] App preview videos (optional)
+- [ ] Marketing materials
 
 ### Required Documentation
 
--   [ ] Privacy Policy ✅ Complete
--   [ ] App description and metadata
--   [ ] Keywords and categories
--   [ ] Age rating questionnaire answers
--   [ ] Export compliance information
+- [ ] Privacy Policy ✅ Complete
+- [ ] App description and metadata
+- [ ] Keywords and categories
+- [ ] Age rating questionnaire answers
+- [ ] Export compliance information
 
 ### Technical Requirements
 
--   [ ] iOS signing certificates ✅ Available
--   [ ] Distribution provisioning profile
--   [ ] Archive build for submission
--   [ ] App Store Connect app listing
--   [ ] TestFlight setup (optional)
+- [ ] iOS signing certificates ✅ Available
+- [ ] Distribution provisioning profile
+- [ ] Archive build for submission
+- [ ] App Store Connect app listing
+- [ ] TestFlight setup (optional)
 
 ## 📱 App Store Screenshots
 
@@ -63,38 +63,38 @@ Complete guide for submitting Hex Zero to the iOS App Store.
 
 #### Screenshot 1: Game Overview
 
--   Show main game board with pieces placed
--   Highlight the hex puzzle gameplay
--   Include UI elements (score, controls)
--   Caption: "Solve challenging hex puzzles"
+- Show main game board with pieces placed
+- Highlight the hex puzzle gameplay
+- Include UI elements (score, controls)
+- Caption: "Solve challenging hex puzzles"
 
 #### Screenshot 2: Piece Selection
 
--   Show piece selection interface
--   Demonstrate drag and drop functionality
--   Show multiple pieces available
--   Caption: "Drag and drop puzzle pieces"
+- Show piece selection interface
+- Demonstrate drag and drop functionality
+- Show multiple pieces available
+- Caption: "Drag and drop puzzle pieces"
 
 #### Screenshot 3: Game Completion
 
--   Victory screen or completed puzzle
--   Show celebration effects
--   Display score or achievement
--   Caption: "Experience satisfying victories"
+- Victory screen or completed puzzle
+- Show celebration effects
+- Display score or achievement
+- Caption: "Experience satisfying victories"
 
 #### Screenshot 4: Multiple Difficulties
 
--   Show different difficulty levels
--   Highlight variety of puzzles
--   Display progression system
--   Caption: "Multiple difficulty levels"
+- Show different difficulty levels
+- Highlight variety of puzzles
+- Display progression system
+- Caption: "Multiple difficulty levels"
 
 #### Screenshot 5: Beautiful Design
 
--   Showcase the game's visual appeal
--   Highlight smooth animations
--   Show polished UI design
--   Caption: "Beautifully designed interface"
+- Showcase the game's visual appeal
+- Highlight smooth animations
+- Show polished UI design
+- Caption: "Beautifully designed interface"
 
 ## 📝 App Store Metadata
 
@@ -117,7 +117,7 @@ Complete guide for submitting Hex Zero to the iOS App Store.
 
 **Description (4000 characters max)**:
 
-```
+```text
 Discover the perfect blend of challenge and relaxation with Hex Zero, a beautifully crafted puzzle game that will captivate your mind.
 
 🧩 ENGAGING PUZZLE GAMEPLAY
@@ -153,7 +153,7 @@ Perfect for puzzle lovers, casual gamers, and anyone looking for a relaxing ment
 
 ### Keywords (100 characters max)
 
-```
+```text
 hex,puzzle,brain,strategy,logic,casual,relaxing,pattern,drag,drop
 ```
 
@@ -168,10 +168,10 @@ hex,puzzle,brain,strategy,logic,casual,relaxing,pattern,drag,drop
 **Demo Account**: Not required (no login)
 **Notes**:
 
--   Game works offline
--   No account creation required
--   Suitable for all ages
--   Contains no in-app purchases
+- Game works offline
+- No account creation required
+- Suitable for all ages
+- Contains no in-app purchases
 
 ## 🔒 Privacy and Compliance
 
@@ -179,26 +179,26 @@ hex,puzzle,brain,strategy,logic,casual,relaxing,pattern,drag,drop
 
 **Does this app collect data?**: No
 
--   No user data is collected
--   No analytics or tracking
--   No network requests
--   Fully offline experience
+- No user data is collected
+- No analytics or tracking
+- No network requests
+- Fully offline experience
 
 ### Age Rating (4+)
 
--   No objectionable content
--   No violence
--   No mature themes
--   Suitable for all ages
--   Educational value (logic and problem-solving)
+- No objectionable content
+- No violence
+- No mature themes
+- Suitable for all ages
+- Educational value (logic and problem-solving)
 
 ### Export Compliance
 
 **Uses Encryption**: No
 
--   Standard iOS app encryption only
--   No additional encryption algorithms
--   No custom cryptographic implementations
+- Standard iOS app encryption only
+- No additional encryption algorithms
+- No custom cryptographic implementations
 
 ## 🚀 App Store Connect Setup
 
@@ -245,10 +245,10 @@ hex,puzzle,brain,strategy,logic,casual,relaxing,pattern,drag,drop
 
 ### Benefits of TestFlight
 
--   Test app with up to 10,000 beta testers
--   Gather feedback before public release
--   Test on real devices without individual provisioning
--   Automatic crash reporting and analytics
+- Test app with up to 10,000 beta testers
+- Gather feedback before public release
+- Test on real devices without individual provisioning
+- Automatic crash reporting and analytics
 
 ### TestFlight Setup Steps
 
@@ -262,7 +262,7 @@ hex,puzzle,brain,strategy,logic,casual,relaxing,pattern,drag,drop
 
 **What to Test**:
 
-```
+```text
 Please test the following areas:
 1. Game launches correctly on your device
 2. Touch controls respond accurately
@@ -281,7 +281,7 @@ Please provide feedback on:
 
 **Beta App Description**:
 
-```
+```text
 This is a beta version of Hex Zero, a relaxing hex puzzle game. Help us test the app before its public release by trying all game features and providing feedback.
 ```
 
@@ -319,27 +319,27 @@ npx cap open ios
 
 ### Pre-Launch
 
--   [ ] All screenshots uploaded and approved
--   [ ] App description finalized
--   [ ] Keywords optimized
--   [ ] Privacy policy accessible
--   [ ] Support channels ready
--   [ ] Marketing materials prepared
+- [ ] All screenshots uploaded and approved
+- [ ] App description finalized
+- [ ] Keywords optimized
+- [ ] Privacy policy accessible
+- [ ] Support channels ready
+- [ ] Marketing materials prepared
 
 ### Launch Day
 
--   [ ] Release app in App Store Connect
--   [ ] Monitor for crashes or issues
--   [ ] Respond to user reviews
--   [ ] Share on social media
--   [ ] Monitor download metrics
+- [ ] Release app in App Store Connect
+- [ ] Monitor for crashes or issues
+- [ ] Respond to user reviews
+- [ ] Share on social media
+- [ ] Monitor download metrics
 
 ### Post-Launch
 
--   [ ] Gather user feedback
--   [ ] Plan future updates
--   [ ] Monitor app performance
--   [ ] Respond to user reviews promptly
+- [ ] Gather user feedback
+- [ ] Plan future updates
+- [ ] Monitor app performance
+- [ ] Respond to user reviews promptly
 
 ## 🔧 Troubleshooting
 
@@ -364,14 +364,14 @@ npx cap open ios
 
 ### Resources
 
--   [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
--   [App Store Connect Help](https://developer.apple.com/help/app-store-connect/)
--   [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
+- [App Store Review Guidelines](https://developer.apple.com/app-store/review/guidelines/)
+- [App Store Connect Help](https://developer.apple.com/help/app-store-connect/)
+- [Human Interface Guidelines](https://developer.apple.com/design/human-interface-guidelines/)
 
 ## 📞 Support Contacts
 
--   Apple Developer Support: Available in App Store Connect
--   App Review Board: For appeals and clarifications
--   Technical Support: For build and upload issues
+- Apple Developer Support: Available in App Store Connect
+- App Review Board: For appeals and clarifications
+- Technical Support: For build and upload issues
 
 Ready to submit? Follow this guide step by step for a successful App Store launch! 🚀

@@ -3,6 +3,9 @@ import {ACHIEVEMENTS, isAchievementId} from './AchievementDefinitions';
 import type {AchievementSaveData} from './AchievementStorage';
 import {loadAchievements, saveAchievements} from './AchievementStorage';
 import {AchievementUI} from './AchievementUI';
+import {WidgetManager} from '../widget/WidgetManager';
+import {VoiceAssistantManager} from '../voice/VoiceAssistantManager';
+import {NotificationManager} from '../notifications/NotificationManager';
 
 export interface GameCompletionData {
 	difficulty: DifficultyLevel;
@@ -22,11 +25,25 @@ export class AchievementManager {
 	constructor() {
 		this.data = loadAchievements();
 		this.ui = new AchievementUI();
+
+		// Load streak data into widget manager
+		if (this.data.streak) {
+			const streakData: {currentStreak: number; lastWinDate?: string} = {
+				currentStreak: this.data.streak.currentStreak,
+			};
+			if (this.data.streak.lastWinDate !== null && this.data.streak.lastWinDate !== '') {
+				streakData.lastWinDate = this.data.streak.lastWinDate;
+			}
+			WidgetManager.getInstance().loadStreakData(streakData);
+		}
 	}
 
 	initialize(): void {
 		this.ui.initialize();
 		this.updateAchievementButton();
+
+		// Initial widget update
+		void WidgetManager.getInstance().updateFromStats(this.data.stats);
 	}
 
 	resetInOrderTracking(): void {
@@ -57,6 +74,9 @@ export class AchievementManager {
 		this.data.stats.gamesPlayed++;
 		this.resetInOrderTracking();
 		saveAchievements(this.data);
+
+		// Update widget when game starts
+		void WidgetManager.getInstance().updateFromStats(this.data.stats);
 	}
 
 	trackMove(): void {
@@ -71,6 +91,12 @@ export class AchievementManager {
 		this.data.stats.gamesWon++;
 		this.data.stats.winsByDifficulty[completionData.difficulty] =
 			(this.data.stats.winsByDifficulty[completionData.difficulty] ?? 0) + 1;
+
+		// Update streak
+		WidgetManager.getInstance().updateStreak(true);
+
+		// Donate voice shortcut for the completed difficulty
+		void VoiceAssistantManager.getInstance().donateShortcut(completionData.difficulty.toLowerCase());
 
 		const newAchievements: AchievementId[] = [];
 
@@ -95,7 +121,13 @@ export class AchievementManager {
 			}
 		}
 
+		// Save streak data
+		this.data.streak = WidgetManager.getInstance().getStreakData();
+
 		saveAchievements(this.data);
+
+		// Update widget
+		void WidgetManager.getInstance().updateFromStats(this.data.stats);
 
 		if (newAchievements.length > 0) {
 			this.ui.showUnlockNotifications(newAchievements);
@@ -112,6 +144,25 @@ export class AchievementManager {
 				unlockedAt: Date.now(),
 			};
 			this.unlockedThisSession.add(id);
+
+			// Show notification for special achievements
+			const achievement = ACHIEVEMENTS[id];
+			// High-value achievements
+			const isMilestone = achievement.points >= 30;
+			const isFirstAchievement = this.getUnlockedCount() === 1;
+			const isAllAchievements = this.getUnlockedCount() === this.getTotalCount();
+
+			if (isMilestone || isFirstAchievement || isAllAchievements) {
+				let message = `${achievement.icon} ${achievement.name}`;
+				if (isAllAchievements) {
+					message = '🎊 All achievements unlocked! You are a Hex Zero master!';
+				} else if (isFirstAchievement) {
+					message = `🎉 First achievement! ${achievement.name}`;
+				}
+
+				void NotificationManager.getInstance().showVictoryNotification(message);
+			}
+
 			return true;
 		}
 		return false;

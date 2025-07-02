@@ -1,4 +1,5 @@
 import {Capacitor} from '@capacitor/core';
+import {getElementByIdOrNull} from './dom-utils';
 
 export interface AccessibilityAnnouncement {
 	message: string;
@@ -18,12 +19,12 @@ export interface GameStateForA11y {
 }
 
 export class AccessibilityManager {
-	private static instance: AccessibilityManager;
+	private static instance: AccessibilityManager | undefined;
 	private announcementRegion: HTMLElement | null = null;
 	private lastAnnouncement: string = '';
 	private isVoiceOverEnabled: boolean = false;
 	private isTalkBackEnabled: boolean = false;
-	private platform: string = 'web';
+	private readonly platform: string = 'web';
 
 	private constructor() {
 		this.platform = Capacitor.getPlatform();
@@ -33,9 +34,7 @@ export class AccessibilityManager {
 	}
 
 	public static getInstance(): AccessibilityManager {
-		if (!AccessibilityManager.instance) {
-			AccessibilityManager.instance = new AccessibilityManager();
-		}
+		AccessibilityManager.instance ??= new AccessibilityManager();
 		return AccessibilityManager.instance;
 	}
 
@@ -75,7 +74,7 @@ export class AccessibilityManager {
 	public announce(announcement: AccessibilityAnnouncement): void {
 		if (!this.announcementRegion) return;
 
-		if (announcement.interrupt) {
+		if (announcement.interrupt === true) {
 			this.announcementRegion.setAttribute('aria-live', 'assertive');
 		} else {
 			this.announcementRegion.setAttribute('aria-live', 'polite');
@@ -285,8 +284,8 @@ export class AccessibilityManager {
 			card.setAttribute('role', 'button');
 			card.setAttribute('tabindex', '0');
 
-			const title = card.querySelector('h3')?.textContent || `Difficulty ${index + 1}`;
-			const description = card.querySelector('p')?.textContent || '';
+			const title = card.querySelector('h3')?.textContent ?? `Difficulty ${index + 1}`;
+			const description = card.querySelector('p')?.textContent ?? '';
 			card.setAttribute('aria-label', `${title} difficulty: ${description}`);
 
 			card.addEventListener('keydown', (event: KeyboardEvent) => {
@@ -330,14 +329,14 @@ export class AccessibilityManager {
 	}
 
 	public updateButtonStates(canUndo: boolean, canRedo: boolean): void {
-		const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
-		if (undoBtn) {
+		const undoBtn = getElementByIdOrNull('undoBtn', HTMLButtonElement);
+		if (undoBtn !== null) {
 			undoBtn.disabled = !canUndo;
 			undoBtn.setAttribute('aria-disabled', (!canUndo).toString());
 		}
 
-		const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
-		if (redoBtn) {
+		const redoBtn = getElementByIdOrNull('redoBtn', HTMLButtonElement);
+		if (redoBtn !== null) {
 			redoBtn.disabled = !canRedo;
 			redoBtn.setAttribute('aria-disabled', (!canRedo).toString());
 		}
@@ -366,7 +365,7 @@ export class AccessibilityManager {
 
 		const nextIndex = (currentIndex + 1) % gameElements.length;
 		const nextElementId = gameElements[nextIndex];
-		if (!nextElementId) return;
+		if (nextElementId === undefined) return;
 		const nextElement = document.getElementById(nextElementId);
 
 		if (nextElement && !nextElement.hasAttribute('disabled')) {
@@ -385,7 +384,8 @@ export class AccessibilityManager {
 		const observer = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
 				if (mutation.attributeName === 'class') {
-					const target = mutation.target as HTMLElement;
+					const target = mutation.target;
+					if (!(target instanceof HTMLElement)) return;
 
 					if (target === gameScreen && !target.classList.contains('hidden')) {
 						const canvas = document.getElementById('gameCanvas');
@@ -393,9 +393,9 @@ export class AccessibilityManager {
 							canvas.focus();
 						}
 					} else if (target === difficultyScreen && !target.classList.contains('hidden')) {
-						const firstCard = document.querySelector('.difficulty-card');
-						if (firstCard) {
-							(firstCard as HTMLElement).focus();
+						const firstCard = document.querySelector<HTMLElement>('.difficulty-card');
+						if (firstCard !== null) {
+							firstCard.focus();
 						}
 					}
 				}

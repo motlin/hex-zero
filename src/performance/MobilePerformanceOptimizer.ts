@@ -5,18 +5,18 @@ import {Capacitor} from '@capacitor/core';
  * Provides platform-specific optimizations for iOS and Android
  */
 export class MobilePerformanceOptimizer {
-	private static instance: MobilePerformanceOptimizer;
+	private static instance: MobilePerformanceOptimizer | undefined;
 	// 60 FPS target
-	private frameSkipThreshold: number = 16.67;
+	private readonly frameSkipThreshold: number = 16.67;
 	private lastFrameTime: number = 0;
 	private frameCount: number = 0;
 	// Update FPS every second
-	private fpsUpdateInterval: number = 1000;
+	private readonly fpsUpdateInterval: number = 1000;
 	private lastFpsUpdate: number = 0;
 	private currentFps: number = 60;
 	private isLowPerformanceMode: boolean = false;
-	private platform: 'ios' | 'android' | 'web';
-	private devicePixelRatio: number;
+	private readonly platform: 'ios' | 'android' | 'web';
+	private readonly devicePixelRatio: number;
 	private reducedQualityMode: boolean = false;
 	private renderingOptimizations: {
 		shadowsEnabled: boolean;
@@ -39,9 +39,7 @@ export class MobilePerformanceOptimizer {
 	}
 
 	static getInstance(): MobilePerformanceOptimizer {
-		if (!MobilePerformanceOptimizer.instance) {
-			MobilePerformanceOptimizer.instance = new MobilePerformanceOptimizer();
-		}
+		MobilePerformanceOptimizer.instance ??= new MobilePerformanceOptimizer();
 		return MobilePerformanceOptimizer.instance;
 	}
 
@@ -49,7 +47,8 @@ export class MobilePerformanceOptimizer {
 		if (!Capacitor.isNativePlatform()) {
 			return 'web';
 		}
-		return Capacitor.getPlatform() as 'ios' | 'android';
+		const platform = Capacitor.getPlatform();
+		return platform === 'ios' || platform === 'android' ? platform : 'web';
 	}
 
 	private getOptimalPixelRatio(): number {
@@ -87,15 +86,6 @@ export class MobilePerformanceOptimizer {
             }
         `;
 		document.head.appendChild(style);
-
-		// Enable iOS-specific rendering hints
-		if ('webkitRequestAnimationFrame' in window) {
-			// Use webkit-prefixed RAF if available for better iOS integration
-			const webkitRAF = (window as Record<string, unknown>)[
-				'webkitRequestAnimationFrame'
-			] as typeof requestAnimationFrame;
-			(window as Record<string, unknown>)['requestAnimationFrame'] = webkitRAF;
-		}
 	}
 
 	private initializeAndroidOptimizations(): void {
@@ -116,7 +106,8 @@ export class MobilePerformanceOptimizer {
 
 	private detectAndroidPerformanceTier(): void {
 		// Simple heuristic based on available memory and cores
-		const memory = ((navigator as unknown as Record<string, unknown>)['deviceMemory'] as number | undefined) || 4;
+		const deviceMemory: unknown = Reflect.get(navigator, 'deviceMemory');
+		const memory = typeof deviceMemory === 'number' ? deviceMemory : 4;
 		const cores = navigator.hardwareConcurrency || 4;
 
 		if (memory <= 2 || cores <= 2) {
@@ -135,12 +126,12 @@ export class MobilePerformanceOptimizer {
 		this.reducedQualityMode = true;
 	}
 
-	optimizeCanvasContext(ctx: CanvasRenderingContext2D): void {
+	optimizeCanvasContext(ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D): void {
 		// Platform-specific context optimizations
 		if (this.platform === 'ios') {
 			// iOS benefits from these hints
 			ctx.imageSmoothingEnabled = !this.reducedQualityMode;
-			(ctx as unknown as Record<string, boolean>)['webkitImageSmoothingEnabled'] = !this.reducedQualityMode;
+			Reflect.set(ctx, 'webkitImageSmoothingEnabled', !this.reducedQualityMode);
 		} else if (this.platform === 'android') {
 			// Android optimization
 			// Better performance
@@ -238,9 +229,9 @@ export class MobilePerformanceOptimizer {
 	optimizeMemoryUsage(): void {
 		if (this.platform === 'android') {
 			// More aggressive memory management on Android
-			const gc = (window as unknown as Record<string, unknown>)['gc'] as (() => void) | undefined;
-			if (gc) {
-				gc();
+			const garbageCollect = Reflect.get(window, 'gc');
+			if (typeof garbageCollect === 'function') {
+				garbageCollect();
 			}
 		}
 	}

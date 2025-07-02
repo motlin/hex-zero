@@ -6,33 +6,33 @@ All text content and metadata for the App Store listing.
 
 ### Basic Information
 
--   **App Name**: Hex Zero
--   **Subtitle**: Relaxing Hex Puzzle Game
--   **Bundle ID**: com.hexzero.game
--   **SKU**: hexzero-ios
--   **Primary Language**: English (U.S.)
+- **App Name**: Hex Zero
+- **Subtitle**: Relaxing Hex Puzzle Game
+- **Bundle ID**: com.hexzero.game
+- **SKU**: hexzero-ios
+- **Primary Language**: English (U.S.)
 
 ### Categories
 
--   **Primary Category**: Games > Puzzle
--   **Secondary Category**: Games > Strategy
+- **Primary Category**: Games > Puzzle
+- **Secondary Category**: Games > Strategy
 
 ### Age Rating
 
--   **Rating**: 4+
--   **Content Description**: No objectionable content
+- **Rating**: 4+
+- **Content Description**: No objectionable content
 
 ## 📖 App Descriptions
 
 ### Promotional Text (170 characters max)
 
-```
+```text
 Challenge your mind with beautifully crafted hex puzzles. Drag, drop, and solve in this relaxing puzzle experience designed for all ages.
 ```
 
 ### App Description (4000 characters max)
 
-```
+```text
 Discover the perfect blend of challenge and relaxation with Hex Zero, a beautifully crafted puzzle game that will captivate your mind.
 
 🧩 ENGAGING PUZZLE GAMEPLAY
@@ -68,13 +68,13 @@ Perfect for puzzle lovers, casual gamers, and anyone looking for a relaxing ment
 
 ### Keywords (100 characters max)
 
-```
+```text
 hex,puzzle,brain,strategy,logic,casual,relaxing,pattern,drag,drop
 ```
 
 ### Shorter Description Alternative (2000 characters)
 
-```
+```text
 Challenge your mind with Hex Zero, a beautifully designed puzzle game that combines relaxation with engaging gameplay.
 
 🧩 PUZZLE PERFECTION
@@ -143,31 +143,31 @@ Perfect for puzzle enthusiasts and casual gamers alike. Download Hex Zero and di
 
 ### Long-tail Keywords
 
--   "hex puzzle game"
--   "relaxing puzzle game"
--   "offline puzzle game"
--   "brain training puzzle"
--   "family puzzle game"
+- "hex puzzle game"
+- "relaxing puzzle game"
+- "offline puzzle game"
+- "brain training puzzle"
+- "family puzzle game"
 
 ## 🎯 Target Audience Messaging
 
 ### Primary Audience: Puzzle Enthusiasts (25-55)
 
--   Emphasize challenging but fair difficulty progression
--   Highlight beautiful design and attention to detail
--   Focus on the satisfying puzzle-solving experience
+- Emphasize challenging but fair difficulty progression
+- Highlight beautiful design and attention to detail
+- Focus on the satisfying puzzle-solving experience
 
 ### Secondary Audience: Casual Gamers (18-45)
 
--   Stress the relaxing, no-pressure gameplay
--   Highlight intuitive controls and easy learning curve
--   Emphasize that it works offline
+- Stress the relaxing, no-pressure gameplay
+- Highlight intuitive controls and easy learning curve
+- Emphasize that it works offline
 
 ### Tertiary Audience: Families (Parents 30-50)
 
--   Mention age-appropriate content (4+)
--   Highlight educational benefits (logic, problem-solving)
--   Emphasize no ads or inappropriate content
+- Mention age-appropriate content (4+)
+- Highlight educational benefits (logic, problem-solving)
+- Emphasize no ads or inappropriate content
 
 ## 📊 Competitive Positioning
 
@@ -181,28 +181,28 @@ Perfect for puzzle enthusiasts and casual gamers alike. Download Hex Zero and di
 
 ### Comparison Points
 
--   **vs. Traditional Jigsaw Apps**: More strategic, less random
--   **vs. Match-3 Games**: More thoughtful, less frantic
--   **vs. Sudoku Apps**: More visual, more satisfying completion
--   **vs. Block Puzzle Games**: More elegant design, better UX
+- **vs. Traditional Jigsaw Apps**: More strategic, less random
+- **vs. Match-3 Games**: More thoughtful, less frantic
+- **vs. Sudoku Apps**: More visual, more satisfying completion
+- **vs. Block Puzzle Games**: More elegant design, better UX
 
 ## 🌟 Review Response Templates
 
 ### Positive Review Response
 
-```
+```text
 Thank you so much for the wonderful review! We're thrilled that you're enjoying Hex Zero. Your support means the world to us, and we're committed to continuing to provide the best puzzle experience possible. Happy puzzling! 🧩✨
 ```
 
 ### Constructive Feedback Response
 
-```
+```text
 Thank you for your feedback! We really appreciate players like you who take the time to share their thoughts. Your suggestions help us make Hex Zero even better. We'll definitely consider this for future updates. Keep puzzling! 🧩
 ```
 
 ### Technical Issue Response
 
-```
+```text
 We're sorry to hear you're experiencing issues! Please contact us at [support email] with details about your device and the problem you're facing. We're committed to providing the best experience for all our players and will work to resolve this quickly. Thank you for your patience! 🛠️
 ```
 
@@ -210,28 +210,28 @@ We're sorry to hear you're experiencing issues! Please contact us at [support em
 
 ### Pricing and Availability
 
--   **Price**: Free
--   **Availability**: All territories
--   **Release**: Manual release after approval
+- **Price**: Free
+- **Availability**: All territories
+- **Release**: Manual release after approval
 
 ### App Information
 
--   **Bundle ID**: com.hexzero.game
--   **SKU**: hexzero-ios
--   **Content Rights**: Does not contain, show, or access third-party content
+- **Bundle ID**: com.hexzero.game
+- **SKU**: hexzero-ios
+- **Content Rights**: Does not contain, show, or access third-party content
 
 ### Age Rating Questionnaire Answers
 
--   **Cartoon or Fantasy Violence**: None
--   **Realistic Violence**: None
--   **Sexual Content or Nudity**: None
--   **Profanity or Crude Humor**: None
--   **Alcohol, Tobacco, or Drug Use**: None
--   **Mature/Suggestive Themes**: None
--   **Horror/Fear Themes**: None
--   **Medical/Treatment Information**: None
--   **Gambling**: None
--   **Contests**: None
+- **Cartoon or Fantasy Violence**: None
+- **Realistic Violence**: None
+- **Sexual Content or Nudity**: None
+- **Profanity or Crude Humor**: None
+- **Alcohol, Tobacco, or Drug Use**: None
+- **Mature/Suggestive Themes**: None
+- **Horror/Fear Themes**: None
+- **Medical/Treatment Information**: None
+- **Gambling**: None
+- **Contests**: None
 
 ## 🔐 Privacy Information
 
@@ -241,17 +241,17 @@ We're sorry to hear you're experiencing issues! Please contact us at [support em
 
 **Privacy Policy Summary**:
 
--   No personal information collected
--   No analytics or tracking
--   No network requests
--   Fully offline experience
--   No third-party integrations
+- No personal information collected
+- No analytics or tracking
+- No network requests
+- Fully offline experience
+- No third-party integrations
 
 ### Privacy Labels (iOS 14.5+)
 
--   **Data Used to Track You**: None
--   **Data Linked to You**: None
--   **Data Not Linked to You**: None
+- **Data Used to Track You**: None
+- **Data Linked to You**: None
+- **Data Not Linked to You**: None
 
 ## 📞 Support Information
 
@@ -295,13 +295,13 @@ We're sorry to hear you're experiencing issues! Please contact us at [support em
 
 ## 📋 Pre-Submission Checklist
 
--   [ ] All text content reviewed and approved
--   [ ] Keywords researched and optimized
--   [ ] Screenshot captions written
--   [ ] Age rating questionnaire completed
--   [ ] Privacy information verified
--   [ ] Support and marketing URLs ready
--   [ ] Review response templates prepared
--   [ ] Launch strategy planned
+- [ ] All text content reviewed and approved
+- [ ] Keywords researched and optimized
+- [ ] Screenshot captions written
+- [ ] Age rating questionnaire completed
+- [ ] Privacy information verified
+- [ ] Support and marketing URLs ready
+- [ ] Review response templates prepared
+- [ ] Launch strategy planned
 
 Ready for App Store submission! 🎉

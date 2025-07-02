@@ -4,10 +4,10 @@ This guide covers setting up and managing internal testing for Hex Zero on Googl
 
 ## Prerequisites
 
--   [ ] Google Play Developer account ($25 one-time fee)
--   [ ] Signed release build (AAB format)
--   [ ] List of tester email addresses
--   [ ] Privacy policy URL
+- [ ] Google Play Developer account ($25 one-time fee)
+- [ ] Signed release build (AAB format)
+- [ ] List of tester email addresses
+- [ ] Privacy policy URL
 
 ## Step 1: Create Your App in Play Console
 
@@ -28,7 +28,8 @@ This guide covers setting up and managing internal testing for Hex Zero on Googl
 2. Click **Create new release**
 3. Upload your AAB file
 4. Fill in release notes:
-    ```
+
+    ```text
     Initial internal testing release of Hex Zero
     - Core puzzle gameplay
     - Touch controls optimized for mobile
@@ -53,7 +54,7 @@ This guide covers setting up and managing internal testing for Hex Zero on Googl
 
 Send this to your internal testers:
 
-```
+```text
 Subject: Hex Zero - Internal Testing Invitation
 
 You're invited to test Hex Zero on Android!
@@ -82,28 +83,28 @@ Thank you for testing!
 
 ### Functionality Testing
 
--   [ ] App installs successfully
--   [ ] Game launches without crashes
--   [ ] All game modes work
--   [ ] Touch controls responsive
--   [ ] UI elements properly sized
--   [ ] Orientation changes handled
--   [ ] Back button behavior correct
+- [ ] App installs successfully
+- [ ] Game launches without crashes
+- [ ] All game modes work
+- [ ] Touch controls responsive
+- [ ] UI elements properly sized
+- [ ] Orientation changes handled
+- [ ] Back button behavior correct
 
 ### Performance Testing
 
--   [ ] Smooth animations (60fps target)
--   [ ] Quick load times
--   [ ] No memory leaks
--   [ ] Battery usage reasonable
--   [ ] Works offline
+- [ ] Smooth animations (60fps target)
+- [ ] Quick load times
+- [ ] No memory leaks
+- [ ] Battery usage reasonable
+- [ ] Works offline
 
 ### Device Coverage
 
--   [ ] Test on various screen sizes
--   [ ] Test on different Android versions (5.0+)
--   [ ] Test on low-end devices
--   [ ] Test on tablets
+- [ ] Test on various screen sizes
+- [ ] Test on different Android versions (5.0+)
+- [ ] Test on low-end devices
+- [ ] Test on tablets
 
 ## Step 5: Monitoring Results
 
@@ -111,11 +112,11 @@ Thank you for testing!
 
 Google automatically tests your app. Review:
 
--   Crashes and ANRs
--   Performance metrics
--   Accessibility issues
--   Security warnings
--   Screenshot previews
+- Crashes and ANRs
+- Performance metrics
+- Accessibility issues
+- Security warnings
+- Screenshot previews
 
 ### Crash Reporting
 
@@ -180,21 +181,21 @@ android: {
 
 ### "App not available" after joining test
 
--   Wait 1-2 hours for propagation
--   Clear Play Store cache
--   Ensure tester accepted invitation
+- Wait 1-2 hours for propagation
+- Clear Play Store cache
+- Ensure tester accepted invitation
 
 ### Crashes on specific devices
 
--   Check minimum SDK version
--   Test on emulator with same specs
--   Add device-specific handling if needed
+- Check minimum SDK version
+- Test on emulator with same specs
+- Add device-specific handling if needed
 
 ### Performance issues
 
--   Profile using Android Studio
--   Optimize canvas rendering
--   Reduce memory usage
+- Profile using Android Studio
+- Optimize canvas rendering
+- Reduce memory usage
 
 ## Best Practices
 
@@ -225,18 +226,18 @@ android: {
 
 Before each internal release:
 
--   [ ] Version code incremented
--   [ ] Release notes written
--   [ ] AAB built and signed
--   [ ] Basic smoke test passed
--   [ ] Previous feedback addressed
--   [ ] Testers notified of changes
+- [ ] Version code incremented
+- [ ] Release notes written
+- [ ] AAB built and signed
+- [ ] Basic smoke test passed
+- [ ] Previous feedback addressed
+- [ ] Testers notified of changes
 
 ## Support Resources
 
--   [Play Console Help](https://support.google.com/googleplay/android-developer)
--   [Android Testing Guide](https://developer.android.com/distribute/best-practices/launch/test)
--   [Firebase Test Lab](https://firebase.google.com/products/test-lab) (for automated testing)
+- [Play Console Help](https://support.google.com/googleplay/android-developer)
+- [Android Testing Guide](https://developer.android.com/distribute/best-practices/launch/test)
+- [Firebase Test Lab](https://firebase.google.com/products/test-lab) (for automated testing)
 
 ---
 

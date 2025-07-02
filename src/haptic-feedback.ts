@@ -4,6 +4,7 @@ import {Haptics, ImpactStyle, NotificationType} from '@capacitor/haptics';
 /**
  * Haptic feedback handler for mobile game interactions
  */
+// oxlint-disable-next-line typescript/no-extraneous-class
 export class HapticFeedback {
 	private static isAvailable: boolean = false;
 	private static isEnabled: boolean = true;
@@ -126,11 +127,17 @@ export class HapticFeedback {
 		try {
 			// Create a celebratory pattern with multiple impacts
 			await Haptics.impact({style: ImpactStyle.Light});
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			await new Promise<void>((resolve) => {
+				setTimeout(resolve, 100);
+			});
 			await Haptics.impact({style: ImpactStyle.Medium});
-			await new Promise((resolve) => setTimeout(resolve, 100));
+			await new Promise<void>((resolve) => {
+				setTimeout(resolve, 100);
+			});
 			await Haptics.impact({style: ImpactStyle.Heavy});
-			await new Promise((resolve) => setTimeout(resolve, 200));
+			await new Promise<void>((resolve) => {
+				setTimeout(resolve, 200);
+			});
 			await Haptics.notification({type: NotificationType.Success});
 		} catch (error) {
 			console.error('Haptic victory pattern failed:', error);

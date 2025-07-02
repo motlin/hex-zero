@@ -25,10 +25,10 @@ export interface DeviceInfo {
  * 📱 Optimizes game experience for different device variations
  */
 export class DeviceVariationOptimizer {
-	private static instance: DeviceVariationOptimizer;
+	private static instance: DeviceVariationOptimizer | undefined;
 	private deviceInfo: DeviceInfo | null = null;
 	private deviceProfile: DeviceProfile | null = null;
-	private performanceOptimizer: MobilePerformanceOptimizer;
+	private readonly performanceOptimizer: MobilePerformanceOptimizer;
 
 	// Known device configurations for optimization
 	private readonly deviceConfigs: Map<string, Partial<DeviceProfile>> = new Map([
@@ -87,9 +87,7 @@ export class DeviceVariationOptimizer {
 	}
 
 	static getInstance(): DeviceVariationOptimizer {
-		if (!DeviceVariationOptimizer.instance) {
-			DeviceVariationOptimizer.instance = new DeviceVariationOptimizer();
-		}
+		DeviceVariationOptimizer.instance ??= new DeviceVariationOptimizer();
 		return DeviceVariationOptimizer.instance;
 	}
 
@@ -99,7 +97,7 @@ export class DeviceVariationOptimizer {
 
 			this.deviceInfo = {
 				model: info.model || 'Unknown',
-				platform: info.platform as 'ios' | 'android' | 'web',
+				platform: info.platform,
 				osVersion: info.osVersion || '0',
 				screenWidth: window.innerWidth,
 				screenHeight: window.innerHeight,
@@ -160,16 +158,16 @@ export class DeviceVariationOptimizer {
 		}
 
 		// Determine performance tier
-		const performance = knownConfig?.performance || this.detectPerformanceTier();
+		const performance = knownConfig?.performance ?? this.detectPerformanceTier();
 
 		// Calculate optimal hex size
-		const baseHexSize = knownConfig?.hexSize || this.calculateOptimalHexSize(screenSize, deviceType);
+		const baseHexSize = knownConfig?.hexSize ?? this.calculateOptimalHexSize(screenSize, deviceType);
 
 		// Calculate pieces per page
-		const piecesPerPage = knownConfig?.piecesPerPage || this.calculatePiecesPerPage(screenSize, deviceType);
+		const piecesPerPage = knownConfig?.piecesPerPage ?? this.calculatePiecesPerPage(screenSize, deviceType);
 
 		// Calculate canvas scale
-		const canvasScale = knownConfig?.canvasScale || this.calculateCanvasScale(pixelRatio, performance);
+		const canvasScale = knownConfig?.canvasScale ?? this.calculateCanvasScale(pixelRatio, performance);
 
 		// UI scale based on screen density
 		const uiScale = this.calculateUIScale(pixelRatio, screenSize);
@@ -192,7 +190,8 @@ export class DeviceVariationOptimizer {
 		}
 
 		// Additional heuristics
-		const memory = (navigator as unknown as {deviceMemory?: number}).deviceMemory || 4;
+		const deviceMemory: unknown = Reflect.get(navigator, 'deviceMemory');
+		const memory = typeof deviceMemory === 'number' ? deviceMemory : 4;
 		const cores = navigator.hardwareConcurrency || 4;
 
 		if (memory >= 8 && cores >= 8) {
@@ -278,10 +277,11 @@ export class DeviceVariationOptimizer {
 		document.body.classList.add(`performance-${this.deviceProfile.performance}`);
 
 		// Add pixel ratio classes
-		if (this.deviceInfo?.pixelRatio) {
-			if (this.deviceInfo.pixelRatio >= 3) {
+		const pixelRatio = this.deviceInfo?.pixelRatio;
+		if (pixelRatio !== undefined) {
+			if (pixelRatio >= 3) {
 				document.body.classList.add('high-dpi-3x');
-			} else if (this.deviceInfo.pixelRatio >= 2) {
+			} else if (pixelRatio >= 2) {
 				document.body.classList.add('high-dpi-2x');
 			}
 		}
@@ -329,15 +329,15 @@ export class DeviceVariationOptimizer {
 	}
 
 	getOptimalHexSize(): number {
-		return this.deviceProfile?.hexSize || 30;
+		return this.deviceProfile?.hexSize ?? 30;
 	}
 
 	getPiecesPerPage(): number {
-		return this.deviceProfile?.piecesPerPage || 3;
+		return this.deviceProfile?.piecesPerPage ?? 3;
 	}
 
 	getCanvasScale(): number {
-		return this.deviceProfile?.canvasScale || 1.0;
+		return this.deviceProfile?.canvasScale ?? 1.0;
 	}
 
 	shouldReduceAnimations(): boolean {

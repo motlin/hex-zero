@@ -2,43 +2,29 @@
  * 🕐 RequestIdleCallback polyfill for better mobile performance
  */
 
-interface IdleDeadline {
-	readonly didTimeout: boolean;
-	timeRemaining(): number;
-}
+function setupIdleCallbackPolyfill(): void {
+	if (typeof Reflect.get(window, 'requestIdleCallback') !== 'function') {
+		Reflect.set(
+			window,
+			'requestIdleCallback',
+			function (callback: IdleRequestCallback, options?: IdleRequestOptions) {
+				const start = Date.now();
+				const timeout = options?.timeout ?? 1;
 
-interface IdleRequestOptions {
-	timeout?: number;
-}
-
-type IdleRequestCallback = (deadline: IdleDeadline) => void;
-
-declare global {
-	interface Window {
-		requestIdleCallback: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-		cancelIdleCallback: (handle: number) => void;
-	}
-}
-
-export function setupIdleCallbackPolyfill(): void {
-	if (!window.requestIdleCallback) {
-		window.requestIdleCallback = function (callback: IdleRequestCallback, options?: IdleRequestOptions): number {
-			const start = Date.now();
-			const timeout = options?.timeout || 1;
-
-			return window.setTimeout(() => {
-				callback({
-					didTimeout: false,
-					timeRemaining: () => Math.max(0, 50 - (Date.now() - start)),
-				});
-			}, timeout) as unknown as number;
-		};
+				return window.setTimeout(() => {
+					callback({
+						didTimeout: false,
+						timeRemaining: () => Math.max(0, 50 - (Date.now() - start)),
+					});
+				}, timeout);
+			},
+		);
 	}
 
-	if (!window.cancelIdleCallback) {
-		window.cancelIdleCallback = function (handle: number): void {
+	if (typeof Reflect.get(window, 'cancelIdleCallback') !== 'function') {
+		Reflect.set(window, 'cancelIdleCallback', function (handle: number): void {
 			clearTimeout(handle);
-		};
+		});
 	}
 }
 
@@ -51,16 +37,7 @@ export function scheduleIdleWork(
 ): number {
 	setupIdleCallbackPolyfill();
 
-	const timeout = options?.priority === 'high' ? 16 : options?.priority === 'low' ? 1000 : options?.timeout || 100;
+	const timeout = options?.priority === 'high' ? 16 : options?.priority === 'low' ? 1000 : (options?.timeout ?? 100);
 
-	return window.requestIdleCallback!(work, {timeout});
-}
-
-/**
- * Cancel scheduled idle work
- */
-export function cancelIdleWork(handle: number): void {
-	if (window.cancelIdleCallback) {
-		window.cancelIdleCallback(handle);
-	}
+	return window.requestIdleCallback(work, {timeout});
 }

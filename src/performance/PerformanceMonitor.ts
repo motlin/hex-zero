@@ -1,6 +1,22 @@
 import {MobilePerformanceOptimizer} from './MobilePerformanceOptimizer';
 import {OptimizedHexRenderer} from './OptimizedHexRenderer';
 
+interface PerformanceMemory {
+	usedJSHeapSize: number;
+	totalJSHeapSize: number;
+	jsHeapSizeLimit: number;
+}
+
+function isPerformanceMemory(value: unknown): value is PerformanceMemory {
+	if (typeof value !== 'object' || value === null) return false;
+
+	return (
+		typeof Reflect.get(value, 'usedJSHeapSize') === 'number' &&
+		typeof Reflect.get(value, 'totalJSHeapSize') === 'number' &&
+		typeof Reflect.get(value, 'jsHeapSizeLimit') === 'number'
+	);
+}
+
 /**
  * 📊 Performance monitor for debugging and optimization
  */
@@ -8,7 +24,7 @@ export class PerformanceMonitor {
 	private container: HTMLElement | null = null;
 	private isVisible: boolean = false;
 	private updateInterval: number | null = null;
-	private optimizer: MobilePerformanceOptimizer;
+	private readonly optimizer: MobilePerformanceOptimizer;
 	private renderer: OptimizedHexRenderer | null = null;
 
 	constructor() {
@@ -69,14 +85,16 @@ export class PerformanceMonitor {
 	}
 
 	private startMonitoring(): void {
-		if (this.updateInterval) return;
+		if (this.updateInterval !== null) return;
 
 		this.update();
-		this.updateInterval = window.setInterval(() => this.update(), 100);
+		this.updateInterval = window.setInterval(() => {
+			this.update();
+		}, 100);
 	}
 
 	private stopMonitoring(): void {
-		if (this.updateInterval) {
+		if (this.updateInterval !== null) {
 			clearInterval(this.updateInterval);
 			this.updateInterval = null;
 		}
@@ -92,13 +110,8 @@ export class PerformanceMonitor {
 			...this.renderer?.getPerformanceStats(),
 		};
 
-		const memory = (performance as unknown as Record<string, unknown>)['memory'] as
-			| {
-					usedJSHeapSize: number;
-					totalJSHeapSize: number;
-					jsHeapSizeLimit: number;
-			  }
-			| undefined;
+		const memoryValue: unknown = Reflect.get(performance, 'memory');
+		const memory = isPerformanceMemory(memoryValue) ? memoryValue : undefined;
 		const memoryInfo = memory
 			? {
 					used: (memory.usedJSHeapSize / 1048576).toFixed(1),
@@ -144,7 +157,7 @@ export class PerformanceMonitor {
 
 	destroy(): void {
 		this.stopMonitoring();
-		if (this.container && this.container.parentNode) {
+		if (this.container?.parentNode) {
 			this.container.parentNode.removeChild(this.container);
 		}
 	}
