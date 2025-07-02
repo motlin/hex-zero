@@ -15,7 +15,9 @@ const config: CapacitorConfig = {
 		contentInset: 'automatic',
 		scrollEnabled: false,
 		scheme: 'App',
+		handleApplicationNotifications: false,
 	},
+	appUrlScheme: 'hexzero',
 	android: {
 		allowMixedContent: false,
 		backgroundColor: '#1a1a1a',

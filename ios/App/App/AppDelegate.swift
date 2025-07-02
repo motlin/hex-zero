@@ -8,6 +8,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+
+        // Donate Siri shortcuts
+        SiriShortcuts.shared.donateAllShortcuts()
+
         return true
     }
 
@@ -43,6 +47,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the app was launched with an activity, including Universal Links.
         // Feel free to add additional processing here, but if you want the App API to support
         // tracking app url opens, make sure to keep this call
+
+        // Handle Siri shortcuts
+        if SiriShortcuts.handleUserActivity(userActivity) {
+            return true
+        }
+
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
 

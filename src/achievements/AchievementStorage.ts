@@ -18,6 +18,10 @@ export interface AchievementStats {
 export interface AchievementSaveData {
 	achievements: Record<AchievementId, AchievementData>;
 	stats: AchievementStats;
+	streak?: {
+		currentStreak: number;
+		lastWinDate: string | null;
+	};
 }
 
 const STORAGE_KEY = 'hexZeroAchievements';

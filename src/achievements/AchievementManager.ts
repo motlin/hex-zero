@@ -3,6 +3,8 @@ import {ACHIEVEMENTS} from './AchievementDefinitions';
 import type {AchievementSaveData} from './AchievementStorage';
 import {AchievementStorage} from './AchievementStorage';
 import {AchievementUI} from './AchievementUI';
+import {WidgetManager} from '../widget/WidgetManager';
+import {VoiceAssistantManager} from '../voice/VoiceAssistantManager';
 
 export interface GameCompletionData {
 	difficulty: DifficultyLevel;
@@ -22,11 +24,26 @@ export class AchievementManager {
 	constructor() {
 		this.data = AchievementStorage.load();
 		this.ui = new AchievementUI();
+
+		// Load streak data into widget manager
+		if (this.data.streak) {
+			const streakData: {currentStreak?: number; lastWinDate?: string} = {};
+			if (this.data.streak.currentStreak !== undefined) {
+				streakData.currentStreak = this.data.streak.currentStreak;
+			}
+			if (this.data.streak.lastWinDate) {
+				streakData.lastWinDate = this.data.streak.lastWinDate;
+			}
+			WidgetManager.getInstance().loadStreakData(streakData);
+		}
 	}
 
 	initialize(): void {
 		this.ui.initialize();
 		this.updateAchievementButton();
+
+		// Initial widget update
+		WidgetManager.getInstance().updateFromStats(this.data.stats);
 	}
 
 	resetInOrderTracking(): void {
@@ -57,6 +74,9 @@ export class AchievementManager {
 		this.data.stats.gamesPlayed++;
 		this.resetInOrderTracking();
 		AchievementStorage.save(this.data);
+
+		// Update widget when game starts
+		WidgetManager.getInstance().updateFromStats(this.data.stats);
 	}
 
 	trackMove(): void {
@@ -71,6 +91,12 @@ export class AchievementManager {
 		this.data.stats.gamesWon++;
 		this.data.stats.winsByDifficulty[completionData.difficulty] =
 			(this.data.stats.winsByDifficulty[completionData.difficulty] || 0) + 1;
+
+		// Update streak
+		WidgetManager.getInstance().updateStreak(true);
+
+		// Donate voice shortcut for the completed difficulty
+		VoiceAssistantManager.getInstance().donateShortcut(completionData.difficulty.toLowerCase());
 
 		const newAchievements: AchievementId[] = [];
 
@@ -95,7 +121,13 @@ export class AchievementManager {
 			}
 		}
 
+		// Save streak data
+		this.data.streak = WidgetManager.getInstance().getStreakData();
+
 		AchievementStorage.save(this.data);
+
+		// Update widget
+		WidgetManager.getInstance().updateFromStats(this.data.stats);
 
 		if (newAchievements.length > 0) {
 			this.ui.showUnlockNotifications(newAchievements);

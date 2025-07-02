@@ -18,6 +18,7 @@ import {SharingService} from './services/sharing';
 import {DeviceVariationOptimizer} from './device-variation-optimizer';
 import {PlatformGestureHandler} from './platform-gesture-handler';
 import {AccessibilityManager} from './accessibility-manager';
+import {VoiceAssistantManager} from './voice/VoiceAssistantManager';
 
 declare global {
 	interface Window {
@@ -27,6 +28,7 @@ declare global {
 		showInstructions: () => void;
 		toggleFullscreen: () => void;
 		game: HexSeptominoGame | null;
+		handleVoiceCommand: (difficulty: string) => void;
 	}
 }
 
@@ -179,6 +181,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	globalAccessibilityManager = AccessibilityManager.getInstance();
 	globalAccessibilityManager.setupGameAccessibility();
 	globalAccessibilityManager.setupFocusManagement();
+
+	// Initialize voice assistant manager
+	const voiceAssistantManager = VoiceAssistantManager.getInstance();
+	voiceAssistantManager.initialize();
 
 	const instructionsModal = document.getElementById('instructionsModal');
 	const instructionsOverlay = instructionsModal?.querySelector('.modal-overlay');
@@ -2211,5 +2217,21 @@ window.showDifficultyScreen = showDifficultyScreen;
 window.showInstructions = showInstructions;
 window.toggleFullscreen = toggleFullscreen;
 window.game = game;
+
+// Voice command handler
+window.handleVoiceCommand = (difficulty: string) => {
+	const difficultyMap: Record<string, {radius: number; pieces: number}> = {
+		easy: {radius: 3, pieces: 5},
+		medium: {radius: 3, pieces: 7},
+		hard: {radius: 4, pieces: 9},
+		extreme: {radius: 5, pieces: 11},
+		impossible: {radius: 5, pieces: 13},
+	};
+
+	const params = difficultyMap[difficulty] || difficultyMap['medium'];
+	if (params) {
+		startGame(params.radius, params.pieces);
+	}
+};
 
 export {};

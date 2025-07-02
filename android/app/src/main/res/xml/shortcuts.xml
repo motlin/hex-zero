@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Easy Game Shortcut -->
+    <shortcut
+        android:shortcutId="start_easy_game"
+        android:enabled="true"
+        android:icon="@drawable/ic_hexagon"
+        android:shortcutShortLabel="@string/shortcut_easy_short"
+        android:shortcutLongLabel="@string/shortcut_easy_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hexzero://play?difficulty=easy"
+            android:targetPackage="com.hexzero.game"
+            android:targetClass="com.hexzero.game.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- Medium Game Shortcut -->
+    <shortcut
+        android:shortcutId="start_medium_game"
+        android:enabled="true"
+        android:icon="@drawable/ic_hexagon"
+        android:shortcutShortLabel="@string/shortcut_medium_short"
+        android:shortcutLongLabel="@string/shortcut_medium_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hexzero://play?difficulty=medium"
+            android:targetPackage="com.hexzero.game"
+            android:targetClass="com.hexzero.game.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- Hard Game Shortcut -->
+    <shortcut
+        android:shortcutId="start_hard_game"
+        android:enabled="true"
+        android:icon="@drawable/ic_hexagon"
+        android:shortcutShortLabel="@string/shortcut_hard_short"
+        android:shortcutLongLabel="@string/shortcut_hard_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hexzero://play?difficulty=hard"
+            android:targetPackage="com.hexzero.game"
+            android:targetClass="com.hexzero.game.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- Extreme Game Shortcut -->
+    <shortcut
+        android:shortcutId="start_extreme_game"
+        android:enabled="true"
+        android:icon="@drawable/ic_hexagon"
+        android:shortcutShortLabel="@string/shortcut_extreme_short"
+        android:shortcutLongLabel="@string/shortcut_extreme_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hexzero://play?difficulty=extreme"
+            android:targetPackage="com.hexzero.game"
+            android:targetClass="com.hexzero.game.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- Impossible Game Shortcut -->
+    <shortcut
+        android:shortcutId="start_impossible_game"
+        android:enabled="true"
+        android:icon="@drawable/ic_hexagon"
+        android:shortcutShortLabel="@string/shortcut_impossible_short"
+        android:shortcutLongLabel="@string/shortcut_impossible_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hexzero://play?difficulty=impossible"
+            android:targetPackage="com.hexzero.game"
+            android:targetClass="com.hexzero.game.MainActivity" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+</shortcuts>

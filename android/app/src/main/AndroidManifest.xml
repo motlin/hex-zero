@@ -29,7 +29,33 @@
                 <category android:name="android.intent.category.GAME" />
             </intent-filter>
 
+            <!-- Deep linking support -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- URL scheme support -->
+                <data android:scheme="hexzero" />
+            </intent-filter>
+
+            <!-- App Actions support -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <!-- App links for Google Assistant -->
+                <data android:scheme="https"
+                      android:host="hexzero.app"
+                      android:pathPrefix="/play" />
+            </intent-filter>
+
         </activity>
+
+        <!-- App Shortcuts for Google Assistant -->
+        <meta-data android:name="android.app.shortcuts"
+                   android:resource="@xml/shortcuts" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -40,6 +66,17 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Widget provider -->
+        <receiver android:name=".HexZeroWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hex_zero_widget_info" />
+        </receiver>
     </application>
 
     <!-- Permissions -->
