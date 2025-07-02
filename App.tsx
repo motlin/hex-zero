@@ -10,9 +10,12 @@ import { PiecePreviewDemo } from './src/screens/PiecePreviewDemo';
 import { HexGridDemo } from './src/screens/HexGridDemo';
 import { GameDemo } from './src/screens/GameDemo';
 import { DifficultySelectionScreen } from './src/screens/DifficultySelectionScreen';
+import { HelpScreen } from './src/screens/HelpScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
+import { SettingsProvider } from './src/contexts/SettingsContext';
 import { useState } from 'react';
 
-type AppScreen = 'menu' | 'difficulty' | 'game';
+type AppScreen = 'menu' | 'difficulty' | 'game' | 'help' | 'settings';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<AppScreen>('menu');
@@ -42,9 +45,26 @@ export default function App() {
     );
   }
 
+  if (currentScreen === 'help') {
+    return (
+      <HelpScreen
+        onBack={() => setCurrentScreen('menu')}
+      />
+    );
+  }
+
+  if (currentScreen === 'settings') {
+    return (
+      <SettingsScreen
+        onBack={() => setCurrentScreen('menu')}
+      />
+    );
+  }
+
   return (
     <ThemeProvider>
-      <GameStateProvider>
+      <SettingsProvider>
+        <GameStateProvider>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.container}>
             <Text style={styles.header}>Hex Zero</Text>
@@ -60,6 +80,20 @@ export default function App() {
               >
                 <Text style={styles.playButtonText}>🎮 Play Full Game</Text>
               </TouchableOpacity>
+              <View style={styles.menuButtons}>
+                <TouchableOpacity
+                  style={styles.menuButton}
+                  onPress={() => setCurrentScreen('help')}
+                >
+                  <Text style={styles.menuButtonText}>❓ How to Play</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.menuButton}
+                  onPress={() => setCurrentScreen('settings')}
+                >
+                  <Text style={styles.menuButtonText}>⚙️ Settings</Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.separator} />
               <HexGridDemo />
               <View style={styles.separator} />
@@ -69,6 +103,7 @@ export default function App() {
           </View>
         </ScrollView>
       </GameStateProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }
@@ -122,5 +157,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  menuButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 15,
+    paddingHorizontal: 20,
+  },
+  menuButton: {
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 20,
+    flex: 0.45,
+    alignItems: 'center',
+  },
+  menuButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   },
 });

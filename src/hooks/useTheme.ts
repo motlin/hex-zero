@@ -12,6 +12,7 @@ const THEME_STORAGE_KEY = '@HexZero:theme';
 export interface UseThemeReturn {
 	theme: SkiaTheme;
 	themeType: ThemeType;
+	isDark: boolean;
 	setTheme: (type: ThemeType) => void;
 	toggleTheme: () => void;
 	isLoading: boolean;
@@ -81,10 +82,12 @@ export function useTheme(): UseThemeReturn {
 	}, [themeType, setTheme]);
 
 	const theme = getTheme(themeType);
+	const isDark = themeType === 'dark';
 
 	return {
 		theme,
 		themeType,
+		isDark,
 		setTheme,
 		toggleTheme,
 		isLoading,

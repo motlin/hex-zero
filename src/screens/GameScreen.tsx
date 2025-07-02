@@ -22,14 +22,18 @@ import {PieceDragOverlay} from '../components/PieceDragOverlay';
 import {useGameState} from '../contexts/GameStateContext';
 import {useThemeContext} from '../context/ThemeContext';
 import {usePiecePlacementFeedback} from '../hooks/usePiecePlacementFeedback';
+import {useSettings} from '../contexts/SettingsContext';
 import type {Piece} from '../state/SeptominoGenerator';
 
 interface GameScreenProps {
 	onBackToMenu?: () => void;
+	onNavigateToHelp?: () => void;
+	onNavigateToSettings?: () => void;
 }
 
 export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 	const {theme} = useThemeContext();
+	const {settings} = useSettings();
 	const {
 		gameState,
 		isLoading,
@@ -170,11 +174,15 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 
 	// Handle restart
 	const handleRestart = useCallback(() => {
-		Alert.alert('Restart Game', 'Are you sure you want to restart the current game?', [
-			{text: 'Cancel', style: 'cancel'},
-			{text: 'Restart', style: 'destructive', onPress: restart},
-		]);
-	}, [restart]);
+		if (settings.confirmRestart) {
+			Alert.alert('Restart Game', 'Are you sure you want to restart the current game?', [
+				{text: 'Cancel', style: 'cancel'},
+				{text: 'Restart', style: 'destructive', onPress: restart},
+			]);
+		} else {
+			restart();
+		}
+	}, [restart, settings.confirmRestart]);
 
 	// Handle new game
 	const handleNewGame = useCallback(() => {
@@ -187,11 +195,15 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 
 	// Handle back to menu
 	const handleBackToMenu = useCallback(() => {
-		Alert.alert('Exit Game', 'Are you sure you want to exit to the menu? Your progress will be lost.', [
-			{text: 'Cancel', style: 'cancel'},
-			{text: 'Exit', style: 'destructive', onPress: onBackToMenu},
-		]);
-	}, [onBackToMenu]);
+		if (settings.confirmExit) {
+			Alert.alert('Exit Game', 'Are you sure you want to exit to the menu? Your progress will be lost.', [
+				{text: 'Cancel', style: 'cancel'},
+				{text: 'Exit', style: 'destructive', onPress: onBackToMenu},
+			]);
+		} else {
+			onBackToMenu?.();
+		}
+	}, [onBackToMenu, settings.confirmExit]);
 
 	// Handle victory modal close
 	const handleVictoryModalClose = useCallback(() => {
@@ -246,12 +258,26 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 					<Text style={[styles.statText, {color: theme.colors.textSecondary}]}>Hints: {hintCount}</Text>
 				</View>
 
-				<TouchableOpacity
-					onPress={handleRestart}
-					style={styles.headerButton}
-				>
-					<Text style={[styles.headerButtonText, {color: theme.colors.text}]}>Restart</Text>
-				</TouchableOpacity>
+				<View style={styles.headerButtons}>
+					<TouchableOpacity
+						onPress={handleRestart}
+						style={styles.headerButton}
+					>
+						<Text style={[styles.headerButtonText, {color: theme.colors.text}]}>Restart</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						onPress={() => {
+							Alert.alert(
+								'How to Play',
+								'Clear all hexagons by placing septomino pieces.\n\n• Tap a piece to select it\n• Drag to place on the board\n• Each piece reduces hex height by 1\n• Clear all hexes to win!\n\nFor detailed instructions, access Help from the main menu.',
+								[{text: 'OK'}],
+							);
+						}}
+						style={styles.headerButton}
+					>
+						<Text style={[styles.headerButtonText, {color: theme.colors.text}]}>❓</Text>
+					</TouchableOpacity>
+				</View>
 			</View>
 
 			{/* Game Board */}
@@ -455,6 +481,10 @@ const styles = StyleSheet.create({
 	},
 	statText: {
 		fontSize: 14,
+	},
+	headerButtons: {
+		flexDirection: 'row',
+		gap: 10,
 	},
 	gameBoard: {
 		flex: 1,

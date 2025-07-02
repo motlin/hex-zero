@@ -24,6 +24,7 @@ interface HexGameBoardWithGesturesProps {
 	hintCells?: HexPoint[];
 	validPlacementCells?: HexPoint[];
 	theme?: 'light' | 'dark';
+	showCoordinates?: boolean;
 	draggedPiece?: Piece | null;
 	dropPosition?: {x: number; y: number} | null;
 	onDropComplete?: () => void;
@@ -49,6 +50,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	hintCells = [],
 	validPlacementCells = [],
 	theme = 'light',
+	showCoordinates = false,
 	draggedPiece,
 	dropPosition,
 	onDropComplete,
@@ -370,6 +372,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 							offsetY={renderTransform.offsetY}
 							scale={renderTransform.scale}
 							theme={theme}
+							showCoordinates={showCoordinates}
 							hoveredHex={hoveredHex}
 							selectedPiece={selectedPiece}
 							hintCells={showHints ? hintCells : []}

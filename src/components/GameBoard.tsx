@@ -8,6 +8,7 @@ import {View, StyleSheet, LayoutChangeEvent} from 'react-native';
 import {HexGameBoardWithGestures} from './HexGameBoardWithGestures';
 import {useGameState} from '../contexts/GameStateContext';
 import {useThemeContext} from '../context/ThemeContext';
+import {useSettings} from '../contexts/SettingsContext';
 import type {HexPoint} from '../utils/hex-calculations';
 import type {Piece} from '../state/SeptominoGenerator';
 
@@ -33,6 +34,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 	validPlacementCells = [],
 }) => {
 	const {themeType} = useThemeContext();
+	const {settings} = useSettings();
 	const {gameState, placePiece, canPlacePiece, getCurrentPiece, getSolutionHint, incrementHintCount} = useGameState();
 
 	const [hintCells, setHintCells] = useState<HexPoint[]>([]);
@@ -146,6 +148,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 				hintCells={hintCells}
 				validPlacementCells={validPlacementCells}
 				theme={themeType}
+				showCoordinates={settings.showCoordinates}
 				draggedPiece={draggedPiece}
 				dropPosition={dropPosition}
 				onDropComplete={onDropComplete}
