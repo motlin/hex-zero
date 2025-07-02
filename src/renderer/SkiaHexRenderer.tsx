@@ -21,6 +21,7 @@ interface SkiaHexRendererProps {
 	offsetY?: number;
 	scale?: number;
 	theme?: ThemeType;
+	showCoordinates?: boolean;
 	hoveredHex?: HexPoint | null;
 	selectedPiece?: Piece | null;
 	hintCells?: HexPoint[];
@@ -44,6 +45,9 @@ const DelayedAnimatedHexCell = ({
 	gridLineColor,
 	font,
 	fontSize,
+	showCoordinates,
+	q,
+	r,
 	onAnimationComplete,
 }: {
 	delay: number;
@@ -56,6 +60,9 @@ const DelayedAnimatedHexCell = ({
 	gridLineColor: string;
 	font: SkFont | null;
 	fontSize: number;
+	showCoordinates: boolean;
+	q: number;
+	r: number;
 	onAnimationComplete: () => void;
 }) => {
 	const [shouldAnimate, setShouldAnimate] = useState(false);
@@ -83,11 +90,11 @@ const DelayedAnimatedHexCell = ({
 					style="stroke"
 					strokeWidth={2}
 				/>
-				{font && height > 0 && (
+				{font && (showCoordinates || height > 0) && (
 					<Text
 						x={center.x}
 						y={center.y + fontSize / 3}
-						text={height.toString()}
+						text={showCoordinates ? `${q},${r}` : height.toString()}
 						font={font}
 						color={getContrastColor(getHeightColorFromTheme(height, skiaTheme))}
 						opacity={0.9}
@@ -122,6 +129,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 	offsetY = 0,
 	scale = 1,
 	theme = 'dark',
+	showCoordinates = false,
 	hoveredHex,
 	selectedPiece,
 	hintCells = [],
@@ -284,6 +292,9 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 									gridLineColor={gridLineColor}
 									font={font}
 									fontSize={fontSize}
+									showCoordinates={showCoordinates}
+									q={q}
+									r={r}
 									onAnimationComplete={() => {
 										setCompletedAnimations((prev) => new Set(prev).add(key));
 									}}
@@ -306,11 +317,11 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 							style="stroke"
 							strokeWidth={2}
 						/>
-						{font && height > 0 && (
+						{font && (showCoordinates || height > 0) && (
 							<Text
 								x={center.x}
 								y={center.y + fontSize / 3}
-								text={height.toString()}
+								text={showCoordinates ? `${q},${r}` : height.toString()}
 								font={font}
 								color={getContrastColor(getHeightColorFromTheme(height, skiaTheme))}
 								opacity={0.9}
