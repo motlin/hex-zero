@@ -11,28 +11,36 @@ import {ThemeProvider} from '../context/ThemeContext';
 import {useGameState} from '../contexts/GameStateContext';
 
 // Inner component that initializes the game
-const GameInitializer: React.FC<{onBackToMenu?: () => void}> = ({onBackToMenu}) => {
+const GameInitializer: React.FC<{
+	radius: number;
+	numPieces: number;
+	onBackToMenu?: () => void;
+}> = ({radius, numPieces, onBackToMenu}) => {
 	const {initializeGame} = useGameState();
 
 	useEffect(() => {
-		// Initialize a medium difficulty game
-		// radius 4 = medium, 7 pieces
-		initializeGame(4, 7);
-	}, [initializeGame]);
+		initializeGame(radius, numPieces);
+	}, [initializeGame, radius, numPieces]);
 
 	return <GameScreen onBackToMenu={onBackToMenu} />;
 };
 
 interface GameDemoProps {
+	radius?: number;
+	numPieces?: number;
 	onBackToMenu?: () => void;
 }
 
-export const GameDemo: React.FC<GameDemoProps> = ({onBackToMenu}) => {
+export const GameDemo: React.FC<GameDemoProps> = ({radius = 3, numPieces = 6, onBackToMenu}) => {
 	return (
 		<ThemeProvider>
 			<GameStateProvider>
 				<View style={styles.container}>
-					<GameInitializer onBackToMenu={onBackToMenu} />
+					<GameInitializer
+						radius={radius}
+						numPieces={numPieces}
+						onBackToMenu={onBackToMenu}
+					/>
 				</View>
 			</GameStateProvider>
 		</ThemeProvider>

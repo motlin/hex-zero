@@ -9,13 +9,37 @@ import { ThemeProvider } from './src/context/ThemeContext';
 import { PiecePreviewDemo } from './src/screens/PiecePreviewDemo';
 import { HexGridDemo } from './src/screens/HexGridDemo';
 import { GameDemo } from './src/screens/GameDemo';
+import { DifficultySelectionScreen } from './src/screens/DifficultySelectionScreen';
 import { useState } from 'react';
 
-export default function App() {
-  const [showGame, setShowGame] = useState(false);
+type AppScreen = 'menu' | 'difficulty' | 'game';
 
-  if (showGame) {
-    return <GameDemo onBackToMenu={() => setShowGame(false)} />;
+export default function App() {
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>('menu');
+  const [gameSettings, setGameSettings] = useState({ radius: 3, numPieces: 6 });
+
+  const handleSelectDifficulty = (radius: number, numPieces: number) => {
+    setGameSettings({ radius, numPieces });
+    setCurrentScreen('game');
+  };
+
+  if (currentScreen === 'difficulty') {
+    return (
+      <DifficultySelectionScreen
+        onSelectDifficulty={handleSelectDifficulty}
+        onBackToMenu={() => setCurrentScreen('menu')}
+      />
+    );
+  }
+
+  if (currentScreen === 'game') {
+    return (
+      <GameDemo
+        radius={gameSettings.radius}
+        numPieces={gameSettings.numPieces}
+        onBackToMenu={() => setCurrentScreen('difficulty')}
+      />
+    );
   }
 
   return (
@@ -32,7 +56,7 @@ export default function App() {
               <Text style={styles.demoHeader}>Interactive Demos</Text>
               <TouchableOpacity
                 style={styles.playButton}
-                onPress={() => setShowGame(true)}
+                onPress={() => setCurrentScreen('difficulty')}
               >
                 <Text style={styles.playButtonText}>🎮 Play Full Game</Text>
               </TouchableOpacity>
