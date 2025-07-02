@@ -10,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
 
         // Donate Siri shortcuts
-        SiriShortcuts.shared.donateAllShortcuts()
+        // SiriShortcuts.shared.donateAllShortcuts()
 
         return true
     }
@@ -49,9 +49,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // tracking app url opens, make sure to keep this call
 
         // Handle Siri shortcuts
-        if SiriShortcuts.handleUserActivity(userActivity) {
-            return true
-        }
+        // if SiriShortcuts.handleUserActivity(userActivity) {
+        //     return true
+        // }
 
         return ApplicationDelegateProxy.shared.application(application, continue: userActivity, restorationHandler: restorationHandler)
     }
