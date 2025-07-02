@@ -3,8 +3,19 @@
  * Includes game board, piece selection, and game controls
  */
 
-import React, {useState, useCallback, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, ActivityIndicator} from 'react-native';
+import React, {useState, useCallback, useEffect, useRef} from 'react';
+import {
+	View,
+	Text,
+	StyleSheet,
+	TouchableOpacity,
+	Alert,
+	SafeAreaView,
+	ActivityIndicator,
+	Modal,
+	Dimensions,
+} from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import {GameBoard} from '../components/GameBoard';
 import {PieceSelectionPanel} from '../components/PieceSelectionPanel';
 import {PieceDragOverlay} from '../components/PieceDragOverlay';
@@ -40,6 +51,10 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 	const [showHints, setShowHints] = useState(false);
 	const [currentPage, setCurrentPage] = useState(0);
 	const [boardReady, setBoardReady] = useState(false);
+	const [showVictoryModal, setShowVictoryModal] = useState(false);
+
+	const confettiRef = useRef<ConfettiCannon>(null);
+	const {width: screenWidth} = Dimensions.get('window');
 
 	// Drag state
 	const [draggedPiece, setDraggedPiece] = useState<Piece | null>(null);
@@ -56,17 +71,11 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 	useEffect(() => {
 		if (gameWon && boardReady) {
 			setTimeout(() => {
-				Alert.alert(
-					'🎉 Congratulations!',
-					`You completed the puzzle!\n\nMoves: ${moveCount}\nHints used: ${hintCount}`,
-					[
-						{text: 'New Game', onPress: handleNewGame},
-						{text: 'OK', style: 'cancel'},
-					],
-				);
+				setShowVictoryModal(true);
+				confettiRef.current?.start();
 			}, 500);
 		}
-	}, [gameWon, boardReady, moveCount, hintCount]);
+	}, [gameWon, boardReady]);
 
 	// Handle piece selection from panel
 	const handlePieceSelect = useCallback(
@@ -183,6 +192,17 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 			{text: 'Exit', style: 'destructive', onPress: onBackToMenu},
 		]);
 	}, [onBackToMenu]);
+
+	// Handle victory modal close
+	const handleVictoryModalClose = useCallback(() => {
+		setShowVictoryModal(false);
+	}, []);
+
+	// Handle victory new game
+	const handleVictoryNewGame = useCallback(() => {
+		setShowVictoryModal(false);
+		handleNewGame();
+	}, [handleNewGame]);
 
 	if (isLoading) {
 		return (
@@ -318,6 +338,73 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 				visible={!!draggedPiece}
 				hexSize={30}
 			/>
+
+			{/* Victory Modal */}
+			<Modal
+				visible={showVictoryModal}
+				animationType="fade"
+				transparent={true}
+				onRequestClose={handleVictoryModalClose}
+			>
+				<View style={styles.victoryModalOverlay}>
+					<View style={[styles.victoryModalContent, {backgroundColor: theme.colors.surface}]}>
+						<Text style={[styles.victoryTitle, {color: theme.colors.text}]}>🎉 Congratulations! 🎉</Text>
+						<Text style={[styles.victoryMessage, {color: theme.colors.textSecondary}]}>
+							You completed the puzzle!
+						</Text>
+
+						<View style={styles.victoryStats}>
+							<View style={styles.victoryStat}>
+								<Text style={[styles.victoryStatValue, {color: theme.colors.text}]}>{moveCount}</Text>
+								<Text style={[styles.victoryStatLabel, {color: theme.colors.textSecondary}]}>
+									Moves
+								</Text>
+							</View>
+							<View style={styles.victoryStat}>
+								<Text style={[styles.victoryStatValue, {color: theme.colors.text}]}>{hintCount}</Text>
+								<Text style={[styles.victoryStatLabel, {color: theme.colors.textSecondary}]}>
+									Hints Used
+								</Text>
+							</View>
+						</View>
+
+						<View style={styles.victoryButtons}>
+							<TouchableOpacity
+								style={[
+									styles.victoryButton,
+									styles.victoryButtonSecondary,
+									{backgroundColor: theme.colors.background},
+								]}
+								onPress={handleVictoryModalClose}
+							>
+								<Text style={[styles.victoryButtonText, {color: theme.colors.text}]}>Continue</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={[
+									styles.victoryButton,
+									styles.victoryButtonPrimary,
+									{backgroundColor: theme.colors.burstColor},
+								]}
+								onPress={handleVictoryNewGame}
+							>
+								<Text style={[styles.victoryButtonText, {color: theme.colors.surface}]}>New Game</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+			</Modal>
+
+			{/* Confetti Animation */}
+			<ConfettiCannon
+				ref={confettiRef}
+				count={200}
+				origin={{x: screenWidth / 2, y: -10}}
+				autoStart={false}
+				fadeOut={true}
+				explosionSpeed={350}
+				fallSpeed={2000}
+				colors={['#f39c12', '#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#f1c40f']}
+			/>
 		</SafeAreaView>
 	);
 };
@@ -409,5 +496,81 @@ const styles = StyleSheet.create({
 	buttonText: {
 		fontSize: 16,
 		fontWeight: '600',
+	},
+	victoryModalOverlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0, 0, 0, 0.8)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		padding: 20,
+	},
+	victoryModalContent: {
+		borderRadius: 20,
+		padding: 30,
+		width: '100%',
+		maxWidth: 400,
+		alignItems: 'center',
+		shadowColor: '#000',
+		shadowOffset: {width: 0, height: 10},
+		shadowOpacity: 0.3,
+		shadowRadius: 20,
+		elevation: 20,
+	},
+	victoryTitle: {
+		fontSize: 32,
+		fontWeight: 'bold',
+		textAlign: 'center',
+		marginBottom: 10,
+	},
+	victoryMessage: {
+		fontSize: 18,
+		textAlign: 'center',
+		marginBottom: 30,
+	},
+	victoryStats: {
+		flexDirection: 'row',
+		justifyContent: 'space-around',
+		width: '100%',
+		marginBottom: 30,
+	},
+	victoryStat: {
+		alignItems: 'center',
+		flex: 1,
+	},
+	victoryStatValue: {
+		fontSize: 36,
+		fontWeight: 'bold',
+		marginBottom: 5,
+	},
+	victoryStatLabel: {
+		fontSize: 16,
+		textAlign: 'center',
+	},
+	victoryButtons: {
+		flexDirection: 'row',
+		gap: 15,
+		width: '100%',
+	},
+	victoryButton: {
+		flex: 1,
+		paddingVertical: 15,
+		paddingHorizontal: 20,
+		borderRadius: 25,
+		alignItems: 'center',
+	},
+	victoryButtonPrimary: {
+		elevation: 3,
+		shadowColor: '#000',
+		shadowOffset: {width: 0, height: 2},
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+	},
+	victoryButtonSecondary: {
+		borderWidth: 2,
+		borderColor: 'rgba(255, 255, 255, 0.3)',
+	},
+	victoryButtonText: {
+		fontSize: 16,
+		fontWeight: 'bold',
 	},
 });
