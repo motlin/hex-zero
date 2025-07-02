@@ -5,6 +5,7 @@ import {AchievementStorage} from './AchievementStorage';
 import {AchievementUI} from './AchievementUI';
 import {WidgetManager} from '../widget/WidgetManager';
 import {VoiceAssistantManager} from '../voice/VoiceAssistantManager';
+import {NotificationManager} from '../notifications/NotificationManager';
 
 export interface GameCompletionData {
 	difficulty: DifficultyLevel;
@@ -143,6 +144,25 @@ export class AchievementManager {
 				unlockedAt: Date.now(),
 			};
 			this.unlockedThisSession.add(id);
+
+			// Show notification for special achievements
+			const achievement = ACHIEVEMENTS[id];
+			// High-value achievements
+			const isMilestone = achievement.points >= 30;
+			const isFirstAchievement = this.getUnlockedCount() === 1;
+			const isAllAchievements = this.getUnlockedCount() === this.getTotalCount();
+
+			if (isMilestone || isFirstAchievement || isAllAchievements) {
+				let message = `${achievement.icon} ${achievement.name}`;
+				if (isAllAchievements) {
+					message = '🎊 All achievements unlocked! You are a Hex Zero master!';
+				} else if (isFirstAchievement) {
+					message = `🎉 First achievement! ${achievement.name}`;
+				}
+
+				NotificationManager.getInstance().showVictoryNotification(message);
+			}
+
 			return true;
 		}
 		return false;

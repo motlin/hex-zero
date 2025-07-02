@@ -19,6 +19,8 @@ import {DeviceVariationOptimizer} from './device-variation-optimizer';
 import {PlatformGestureHandler} from './platform-gesture-handler';
 import {AccessibilityManager} from './accessibility-manager';
 import {VoiceAssistantManager} from './voice/VoiceAssistantManager';
+import {NotificationManager} from './notifications/NotificationManager';
+import {NotificationSettings} from './notifications/NotificationSettings';
 
 declare global {
 	interface Window {
@@ -54,6 +56,9 @@ function startGame(radius: number, numPieces: number): void {
 
 	game = new HexSeptominoGame(radius, numPieces);
 	window.game = game;
+
+	// Update notification manager that a game was played
+	NotificationManager.getInstance().updateLastPlayed();
 }
 
 function startCustomGame(): void {
@@ -167,6 +172,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 	// Initialize platform gesture handler
 	const platformGestureHandler = PlatformGestureHandler.getInstance();
 	await platformGestureHandler.initialize();
+
+	// Initialize notification manager
+	const notificationManager = NotificationManager.getInstance();
+	await notificationManager.initialize();
 
 	// Initialize mobile UI enhancements
 	initializeMobileUIEnhancements();
@@ -293,6 +302,47 @@ window.addEventListener('DOMContentLoaded', async () => {
 		menuAchievementsButton.textContent = `🏆 Achievements (${count}/${total})`;
 	}
 
+	// Notification settings buttons
+	const notificationSettings = new NotificationSettings();
+	const notificationModal = document.getElementById('notificationModal');
+	const notificationSettingsContainer = document.getElementById('notificationSettingsContainer');
+	const closeNotificationModal = document.getElementById('closeNotificationModal');
+
+	// Setup notification settings in both menus
+	const setupNotificationButton = (buttonId: string, menuElement: HTMLElement | null) => {
+		const button = document.getElementById(buttonId);
+		if (button && notificationModal && notificationSettingsContainer) {
+			button.addEventListener('click', () => {
+				HapticFeedback.lightTap();
+				menuElement?.classList.add('hidden');
+				notificationModal.classList.remove('hidden');
+				// Create settings panel if not already created
+				if (!notificationSettingsContainer.hasChildNodes()) {
+					notificationSettingsContainer.appendChild(notificationSettings.createSettingsPanel());
+				}
+			});
+		}
+	};
+
+	setupNotificationButton('menuNotificationSettingsBtn', menuHamburgerMenu);
+	setupNotificationButton('notificationSettingsBtn', hamburgerMenu);
+
+	// Close notification modal handlers
+	if (closeNotificationModal && notificationModal) {
+		closeNotificationModal.addEventListener('click', () => {
+			HapticFeedback.lightTap();
+			notificationModal.classList.add('hidden');
+		});
+
+		// Close on clicking outside modal
+		notificationModal.addEventListener('click', (e) => {
+			if (e.target === notificationModal) {
+				notificationModal.classList.add('hidden');
+			}
+		});
+	}
+
+	// Check if first-time player and if they want to see instructions
 	const isFirstTime = localStorage.getItem('hexZeroFirstTime') === null;
 	const dontShowInstructions = localStorage.getItem('hexZeroDontShowInstructions') === 'true';
 

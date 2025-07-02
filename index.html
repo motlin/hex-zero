@@ -33,6 +33,7 @@
 		<link rel="stylesheet" href="./src/device-variations.css" />
 		<link rel="stylesheet" href="./src/platform-gestures.css" />
 		<link rel="stylesheet" href="./src/accessibility.css" />
+		<link rel="stylesheet" href="./src/notifications.css" />
 		<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-8GSBP3FXDS"></script>
 		<script>
@@ -86,6 +87,7 @@
 					>
 						GitHub
 					</button>
+					<button id="menuNotificationSettingsBtn" role="menuitem">🔔 Notifications</button>
 				</div>
 			</div>
 			<h2 id="difficulty-heading">Select Difficulty</h2>
@@ -201,6 +203,7 @@
 						>
 							GitHub
 						</button>
+						<button id="notificationSettingsBtn" role="menuitem">🔔 Notifications</button>
 					</div>
 				</div>
 			</div>
@@ -423,6 +426,25 @@
 
 		<!-- Accessibility announcements region -->
 		<div id="a11y-announcements" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+		<!-- Notification Settings Modal -->
+		<div
+			id="notificationModal"
+			class="modal hidden"
+			role="dialog"
+			aria-labelledby="notification-modal-heading"
+			aria-modal="true"
+		>
+			<div class="modal-content notification-modal-content">
+				<div class="modal-header">
+					<h2 id="notification-modal-heading">Notification Settings</h2>
+					<button id="closeNotificationModal" class="close-button" aria-label="Close notification settings">
+						&times;
+					</button>
+				</div>
+				<div id="notificationSettingsContainer" class="modal-body"></div>
+			</div>
+		</div>
 
 		<script type="module" src="./src/hex-zero.ts"></script>
 	</body>

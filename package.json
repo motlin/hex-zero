@@ -76,6 +76,7 @@
 		"@capacitor/device": "^7.0.1",
 		"@capacitor/haptics": "^7.0.1",
 		"@capacitor/ios": "^7.3.0",
+		"@capacitor/local-notifications": "^7.0.1",
 		"@capacitor/share": "^7.0.1",
 		"@capacitor/status-bar": "^7.0.1",
 		"canvas-confetti": "^1.9.4"
