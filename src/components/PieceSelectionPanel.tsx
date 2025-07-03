@@ -193,7 +193,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 
 	// Handle swipe gestures for page navigation
 	const handleSwipeGesture = useCallback(
-		(event: any) => {
+		(event: {translationX: number; velocityX: number}) => {
 			if (!isDragging) {
 				const {translationX, velocityX} = event;
 				const threshold = 50;

@@ -1,16 +1,20 @@
 /**
  * Draggable piece component using React Native Gesture Handler
  * Provides drag and drop functionality for game pieces
+ * Optimized for minimal touch latency
  */
 
-import React, {useRef, useCallback, useImperativeHandle, forwardRef} from 'react';
-import {StyleSheet, Animated, View} from 'react-native';
-import {
-	PanGestureHandler,
-	State,
-	type PanGestureHandlerStateChangeEvent,
-	type PanGestureHandlerGestureEvent,
-} from 'react-native-gesture-handler';
+import React, {useCallback, useImperativeHandle, forwardRef} from 'react';
+import {StyleSheet, View} from 'react-native';
+import {Gesture, GestureDetector} from 'react-native-gesture-handler';
+import Animated, {
+	useSharedValue,
+	useAnimatedStyle,
+	withSpring,
+	withTiming,
+	withSequence,
+	runOnJS,
+} from 'react-native-reanimated';
 import type {Piece} from '../state/SeptominoGenerator';
 import {PiecePreview} from './PiecePreview';
 import {useThemeContext} from '../context/ThemeContext';
@@ -52,47 +56,35 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 	) => {
 		const {theme} = useThemeContext();
 		const {settings} = useSettings();
-		const translateX = useRef(new Animated.Value(0)).current;
-		const translateY = useRef(new Animated.Value(0)).current;
-		const opacity = useRef(new Animated.Value(1)).current;
-		const scale = useRef(new Animated.Value(1)).current;
-		const shakeX = useRef(new Animated.Value(0)).current;
-		const startPosition = useRef({x: 0, y: 0});
+
+		// Shared values for animations
+		const translateX = useSharedValue(0);
+		const translateY = useSharedValue(0);
+		const scale = useSharedValue(1);
+		const opacity = useSharedValue(1);
+		const shakeX = useSharedValue(0);
+		const isDragging = useSharedValue(false);
 
 		const triggerShakeAnimation = useCallback(() => {
+			'worklet';
 			const shakeDistance = 10;
-			const shakeSequence = Animated.sequence([
-				Animated.timing(shakeX, {
-					toValue: shakeDistance,
-					duration: 50,
-					useNativeDriver: true,
-				}),
-				Animated.timing(shakeX, {
-					toValue: -shakeDistance,
-					duration: 50,
-					useNativeDriver: true,
-				}),
-				Animated.timing(shakeX, {
-					toValue: shakeDistance,
-					duration: 50,
-					useNativeDriver: true,
-				}),
-				Animated.timing(shakeX, {
-					toValue: 0,
-					duration: 50,
-					useNativeDriver: true,
-				}),
-			]);
 
+			// Run shake animation on UI thread
+			shakeX.value = withSequence(
+				withTiming(shakeDistance, {duration: 50}),
+				withTiming(-shakeDistance, {duration: 50}),
+				withTiming(shakeDistance, {duration: 50}),
+				withTiming(0, {duration: 50}),
+			);
+
+			// Haptic feedback for invalid placement
 			if (settings.hapticEnabled) {
-				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+				runOnJS(Haptics.notificationAsync)(Haptics.NotificationFeedbackType.Error);
 			}
 
-			shakeSequence.start(() => {
-				if (onInvalidPlacement) {
-					onInvalidPlacement(piece);
-				}
-			});
+			if (onInvalidPlacement) {
+				runOnJS(onInvalidPlacement)(piece);
+			}
 		}, [shakeX, onInvalidPlacement, piece, settings.hapticEnabled]);
 
 		useImperativeHandle(
@@ -103,108 +95,84 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 			[triggerShakeAnimation],
 		);
 
-		const handleGestureEvent = useCallback(
-			(event: PanGestureHandlerGestureEvent) => {
-				if (disabled || isPlaced) return;
+		// Optimized pan gesture with immediate feedback
+		const panGesture = Gesture.Pan()
+			.enabled(!disabled && !isPlaced)
+			.shouldCancelWhenOutside(false)
+			// Immediate response
+			.minDistance(0)
+			.onStart((_event) => {
+				'worklet';
+				isDragging.value = true;
 
-				const {translationX, translationY, absoluteX, absoluteY} = event.nativeEvent;
-				translateX.setValue(translationX);
-				translateY.setValue(translationY);
+				// Immediate visual feedback
+				scale.value = withSpring(1.2, {damping: 15, stiffness: 300});
+				opacity.value = withTiming(0.8, {duration: 150});
 
-				if (onDragMove) {
-					onDragMove(piece, absoluteX, absoluteY);
+				// Haptic feedback
+				if (settings.hapticEnabled) {
+					runOnJS(Haptics.impactAsync)(Haptics.ImpactFeedbackStyle.Light);
 				}
-			},
-			[disabled, isPlaced, piece, translateX, translateY, onDragMove],
-		);
 
-		const handleStateChange = useCallback(
-			(event: PanGestureHandlerStateChangeEvent) => {
-				if (disabled || isPlaced) return;
-
-				const {state, absoluteX, absoluteY} = event.nativeEvent;
-
-				if (state === State.BEGAN) {
-					startPosition.current = {x: absoluteX, y: absoluteY};
-
-					if (settings.hapticEnabled) {
-						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-					}
-
-					Animated.parallel([
-						Animated.spring(scale, {
-							toValue: 1.2,
-							useNativeDriver: true,
-						}),
-						Animated.timing(opacity, {
-							toValue: 0.8,
-							duration: 200,
-							useNativeDriver: true,
-						}),
-					]).start();
-
-					if (onDragStart) {
-						onDragStart(piece, index);
-					}
-				} else if (state === State.END || state === State.CANCELLED || state === State.FAILED) {
-					Animated.parallel([
-						Animated.spring(translateX, {
-							toValue: 0,
-							useNativeDriver: true,
-						}),
-						Animated.spring(translateY, {
-							toValue: 0,
-							useNativeDriver: true,
-						}),
-						Animated.spring(scale, {
-							toValue: 1,
-							useNativeDriver: true,
-						}),
-						Animated.timing(opacity, {
-							toValue: 1,
-							duration: 200,
-							useNativeDriver: true,
-						}),
-					]).start();
-
-					if (state === State.END && onDragEnd) {
-						onDragEnd(piece, absoluteX, absoluteY);
-					}
+				if (onDragStart) {
+					runOnJS(onDragStart)(piece, index);
 				}
-			},
-			[
-				disabled,
-				isPlaced,
-				piece,
-				index,
-				translateX,
-				translateY,
-				scale,
-				opacity,
-				onDragStart,
-				onDragEnd,
-				settings.hapticEnabled,
-			],
-		);
+			})
+			.onUpdate((event) => {
+				'worklet';
+				translateX.value = event.translationX;
+				translateY.value = event.translationY;
+
+				// Throttled drag move callback
+				if (onDragMove && event.translationX % 2 === 0) {
+					runOnJS(onDragMove)(piece, event.absoluteX, event.absoluteY);
+				}
+			})
+			.onEnd((event) => {
+				'worklet';
+				isDragging.value = false;
+
+				// Animate back to original position
+				translateX.value = withSpring(0, {damping: 15, stiffness: 300});
+				translateY.value = withSpring(0, {damping: 15, stiffness: 300});
+				scale.value = withSpring(1, {damping: 15, stiffness: 300});
+				opacity.value = withTiming(1, {duration: 150});
+
+				if (onDragEnd) {
+					runOnJS(onDragEnd)(piece, event.absoluteX, event.absoluteY);
+				}
+			})
+			.onFinalize(() => {
+				'worklet';
+				if (isDragging.value) {
+					isDragging.value = false;
+					translateX.value = withSpring(0);
+					translateY.value = withSpring(0);
+					scale.value = withSpring(1);
+					opacity.value = withTiming(1);
+				}
+			});
 
 		const pieceSize = hexSize * 3;
-		const renderOpacity = isPlaced ? 0.3 : 1;
+
+		// Animated styles for better performance
+		const animatedStyle = useAnimatedStyle(() => {
+			const baseOpacity = isPlaced ? 0.3 : 1;
+			return {
+				opacity: opacity.value * baseOpacity,
+				transform: [
+					{translateX: translateX.value + shakeX.value},
+					{translateY: translateY.value},
+					{scale: scale.value},
+				],
+			};
+		});
 
 		return (
-			<PanGestureHandler
-				onGestureEvent={handleGestureEvent}
-				onHandlerStateChange={handleStateChange}
-				enabled={!disabled && !isPlaced}
-			>
+			<GestureDetector gesture={panGesture}>
 				<Animated.View
 					testID={testID}
-					style={[
-						styles.container,
-						{
-							opacity: Animated.multiply(opacity, renderOpacity),
-							transform: [{translateX: Animated.add(translateX, shakeX)}, {translateY}, {scale}],
-						},
-					]}
+					style={[styles.container, animatedStyle]}
 				>
 					<View
 						style={styles.pieceContainer}
@@ -222,10 +190,12 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 						/>
 					</View>
 				</Animated.View>
-			</PanGestureHandler>
+			</GestureDetector>
 		);
 	},
 );
+
+DraggablePiece.displayName = 'DraggablePiece';
 
 const styles = StyleSheet.create({
 	container: {

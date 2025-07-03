@@ -66,7 +66,8 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	const savedTranslateX = useSharedValue(0);
 	const savedTranslateY = useSharedValue(0);
 
-	// State for rendering
+	// State for rendering (using refs for better performance)
+	const hoveredHexRef = useRef<HexPoint | null>(null);
 	const [hoveredHex, setHoveredHex] = React.useState<HexPoint | null>(null);
 	const [invalidPlacementCells, setInvalidPlacementCells] = React.useState<HexPoint[]>([]);
 	const [animatingCells, setAnimatingCells] = React.useState<
@@ -77,6 +78,11 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			endHeight: number;
 		}>
 	>([]);
+
+	// Performance optimization: debounced hover update
+	const lastHoverUpdateTime = useSharedValue(0);
+	// ~30fps for hover updates
+	const hoverDebounceMs = 32;
 
 	// Refs
 	const renderer = useRef<SkiaHexRendererCompat | null>(null);
@@ -211,21 +217,29 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 				translateX.value = savedTranslateX.value + event.translationX / scale.value;
 				translateY.value = savedTranslateY.value + event.translationY / scale.value;
 
-				// Update hovered hex during pan for better user feedback
-				runOnJS(() => {
-					const hex = handlePointerPosition(
-						event.x,
-						event.y,
-						scale.value,
-						translateX.value,
-						translateY.value,
-					);
-					setHoveredHex(hex);
-				})();
+				// Optimized hover update with debouncing
+				const now = Date.now();
+				if (now - lastHoverUpdateTime.value > hoverDebounceMs) {
+					lastHoverUpdateTime.value = now;
+					runOnJS(() => {
+						const hex = handlePointerPosition(
+							event.x,
+							event.y,
+							scale.value,
+							translateX.value,
+							translateY.value,
+						);
+						hoveredHexRef.current = hex;
+						setHoveredHex(hex);
+					})();
+				}
 			})
 			.onEnd(() => {
 				// Clear hover state when pan ends
-				runOnJS(setHoveredHex)(null);
+				runOnJS(() => {
+					hoveredHexRef.current = null;
+					setHoveredHex(null);
+				})();
 
 				// Optional: Add bounds checking to prevent panning too far
 				const maxTranslate = 500 / scale.value;
@@ -257,15 +271,22 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			}),
 	);
 
-	// Tap gesture for hex interaction
-	const tapGesture = Gesture.Tap().onEnd((event) => {
-		runOnJS(() => {
-			const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
-			if (hex) {
-				handleHexInteraction(hex);
-			}
-		})();
-	});
+	// Tap gesture for hex interaction (optimized)
+	const tapGesture = Gesture.Tap()
+		.maxDuration(250)
+		.onStart((event) => {
+			'worklet';
+			// Calculate hex position in worklet for faster response
+			const worldX = (event.x - screenWidth / 2) / scale.value - translateX.value;
+			const worldY = (event.y - screenHeight / 2) / scale.value - translateY.value;
+
+			runOnJS((x: number, y: number) => {
+				const hex = renderer.current?.pixelToHexWithHitTest(x, y);
+				if (hex) {
+					handleHexInteraction(hex);
+				}
+			})(worldX, worldY);
+		});
 
 	// Double tap gesture for reset
 	const doubleTapGesture = Gesture.Tap()
@@ -274,20 +295,28 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			resetView();
 		});
 
-	// Long press gesture for hex info or special actions
+	// Long press gesture for hex info or special actions (optimized)
 	const longPressGesture = Gesture.LongPress()
 		.minDuration(500)
+		.shouldCancelWhenOutside(true)
 		.onStart((event) => {
-			runOnJS(() => {
-				const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
+			'worklet';
+			const worldX = (event.x - screenWidth / 2) / scale.value - translateX.value;
+			const worldY = (event.y - screenHeight / 2) / scale.value - translateY.value;
+
+			runOnJS((x: number, y: number) => {
+				const hex = renderer.current?.pixelToHexWithHitTest(x, y);
 				if (hex) {
-					// Update hovered hex for visual feedback
+					hoveredHexRef.current = hex;
 					setHoveredHex(hex);
 				}
-			})();
+			})(worldX, worldY);
 		})
 		.onEnd(() => {
-			runOnJS(setHoveredHex)(null);
+			runOnJS(() => {
+				hoveredHexRef.current = null;
+				setHoveredHex(null);
+			})();
 		});
 
 	// Combine gestures with advanced composition
@@ -306,7 +335,11 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		scale: 1,
 	});
 
-	// Update render transform when animated values change
+	// Update render transform when animated values change (throttled)
+	const lastRenderUpdateTime = useSharedValue(0);
+	// 60fps max
+	const renderDebounceMs = 16;
+
 	useAnimatedReaction(
 		() => ({
 			x: translateX.value,
@@ -314,11 +347,15 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			s: scale.value,
 		}),
 		(current) => {
-			runOnJS(setRenderTransform)({
-				offsetX: current.x,
-				offsetY: current.y,
-				scale: current.s,
-			});
+			const now = Date.now();
+			if (now - lastRenderUpdateTime.value > renderDebounceMs) {
+				lastRenderUpdateTime.value = now;
+				runOnJS(setRenderTransform)({
+					offsetX: current.x,
+					offsetY: current.y,
+					scale: current.s,
+				});
+			}
 		},
 		[],
 	);
