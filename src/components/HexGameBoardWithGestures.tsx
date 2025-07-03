@@ -13,6 +13,9 @@ import type {HexGrid} from '../state/HexGrid';
 import type {Piece} from '../state/SeptominoGenerator';
 import type {HexPoint} from '../utils/hex-calculations';
 import {calculateHexSize} from '../utils/game-dimensions';
+import {useAdvancedGestures} from '../hooks/useAdvancedGestures';
+import * as Haptics from 'expo-haptics';
+import {useSettings} from '../contexts/SettingsContext';
 
 interface HexGameBoardWithGesturesProps {
 	grid: HexGrid;
@@ -63,7 +66,8 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	const savedTranslateX = useSharedValue(0);
 	const savedTranslateY = useSharedValue(0);
 
-	// State for rendering
+	// State for rendering (using refs for better performance)
+	const hoveredHexRef = useRef<HexPoint | null>(null);
 	const [hoveredHex, setHoveredHex] = React.useState<HexPoint | null>(null);
 	const [invalidPlacementCells, setInvalidPlacementCells] = React.useState<HexPoint[]>([]);
 	const [animatingCells, setAnimatingCells] = React.useState<
@@ -75,9 +79,17 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		}>
 	>([]);
 
+	// Performance optimization: debounced hover update
+	const lastHoverUpdateTime = useSharedValue(0);
+	// ~30fps for hover updates
+	const hoverDebounceMs = 32;
+
 	// Refs
 	const renderer = useRef<SkiaHexRendererCompat | null>(null);
 	const boardRef = useRef<View>(null);
+
+	// Settings
+	const {settings} = useSettings();
 
 	// Calculate optimal hex size based on scale
 	const hexSize = useMemo(() => {
@@ -119,6 +131,11 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 				);
 
 				if (canPlace) {
+					// Haptic feedback for successful placement
+					if (settings.hapticEnabled) {
+						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+					}
+
 					// Animate the placement
 					const affectedCells = worldCoords.map((coord) => ({
 						q: coord.q,
@@ -137,6 +154,11 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 						setAnimatingCells([]);
 					}, 800);
 				} else {
+					// Haptic feedback for invalid placement
+					if (settings.hapticEnabled) {
+						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+					}
+
 					// Show invalid placement feedback
 					setInvalidPlacementCells(worldCoords);
 					setTimeout(() => {
@@ -149,10 +171,14 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 					}
 				}
 			} else if (onHexPress) {
+				// Light haptic for hex selection
+				if (settings.hapticEnabled) {
+					Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+				}
 				onHexPress(hex);
 			}
 		},
-		[selectedPiece, onPiecePlaced, onInvalidPlacement, onHexPress, grid],
+		[selectedPiece, onPiecePlaced, onInvalidPlacement, onHexPress, grid, settings.hapticEnabled],
 	);
 
 	// Reset view to center
@@ -163,62 +189,104 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		translateY.value = withSpring(0, SPRING_CONFIG);
 	}, [scale, translateX, translateY]);
 
-	// Pan gesture
-	const panGesture = Gesture.Pan()
-		.onStart(() => {
-			savedTranslateX.value = translateX.value;
-			savedTranslateY.value = translateY.value;
-		})
-		.onUpdate((event) => {
-			translateX.value = savedTranslateX.value + event.translationX / scale.value;
-			translateY.value = savedTranslateY.value + event.translationY / scale.value;
-
-			// Update hovered hex during pan for better user feedback
-			runOnJS(() => {
-				const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
-				setHoveredHex(hex);
-			})();
-		})
-		.onEnd(() => {
-			// Clear hover state when pan ends
-			runOnJS(setHoveredHex)(null);
-
-			// Optional: Add bounds checking to prevent panning too far
-			const maxTranslate = 500 / scale.value;
-			translateX.value = withSpring(clamp(translateX.value, -maxTranslate, maxTranslate), SPRING_CONFIG);
-			translateY.value = withSpring(clamp(translateY.value, -maxTranslate, maxTranslate), SPRING_CONFIG);
+	// Advanced gestures setup
+	const {createEnhancedPanGesture, createEnhancedPinchGesture, composeAdvancedGestures, setDragState} =
+		useAdvancedGestures({
+			onGestureStart: (gestureType) => {
+				// Optional: Add visual feedback for gesture start
+				if (settings.hapticEnabled && gestureType === 'navigation') {
+					Haptics.selectionAsync();
+				}
+			},
+			enablePanWhileDragging: false,
 		});
 
-	// Pinch gesture for zoom
-	const pinchGesture = Gesture.Pinch()
-		.onStart(() => {
-			savedScale.value = scale.value;
-		})
-		.onUpdate((event) => {
-			// Calculate new scale with limits
-			const newScale = clamp(savedScale.value * event.scale, MIN_SCALE, MAX_SCALE);
-			scale.value = newScale;
+	// Update drag state based on external dragging
+	React.useEffect(() => {
+		setDragState(!!draggedPiece);
+	}, [draggedPiece, setDragState]);
 
-			// Adjust translation to zoom towards focal point
-			if (event.focalX && event.focalY) {
-				const scaleDiff = newScale - savedScale.value;
-				const focalPointX = (event.focalX - screenWidth / 2) / savedScale.value;
-				const focalPointY = (event.focalY - screenHeight / 2) / savedScale.value;
+	// Pan gesture with enhanced conflict resolution
+	const panGesture = createEnhancedPanGesture(
+		Gesture.Pan()
+			.onStart(() => {
+				savedTranslateX.value = translateX.value;
+				savedTranslateY.value = translateY.value;
+			})
+			.onUpdate((event) => {
+				translateX.value = savedTranslateX.value + event.translationX / scale.value;
+				translateY.value = savedTranslateY.value + event.translationY / scale.value;
 
-				translateX.value = savedTranslateX.value - (focalPointX * scaleDiff) / savedScale.value;
-				translateY.value = savedTranslateY.value - (focalPointY * scaleDiff) / savedScale.value;
-			}
+				// Optimized hover update with debouncing
+				const now = Date.now();
+				if (now - lastHoverUpdateTime.value > hoverDebounceMs) {
+					lastHoverUpdateTime.value = now;
+					runOnJS(() => {
+						const hex = handlePointerPosition(
+							event.x,
+							event.y,
+							scale.value,
+							translateX.value,
+							translateY.value,
+						);
+						hoveredHexRef.current = hex;
+						setHoveredHex(hex);
+					})();
+				}
+			})
+			.onEnd(() => {
+				// Clear hover state when pan ends
+				runOnJS(() => {
+					hoveredHexRef.current = null;
+					setHoveredHex(null);
+				})();
+
+				// Optional: Add bounds checking to prevent panning too far
+				const maxTranslate = 500 / scale.value;
+				translateX.value = withSpring(clamp(translateX.value, -maxTranslate, maxTranslate), SPRING_CONFIG);
+				translateY.value = withSpring(clamp(translateY.value, -maxTranslate, maxTranslate), SPRING_CONFIG);
+			}),
+	);
+
+	// Pinch gesture for zoom with enhanced conflict resolution
+	const pinchGesture = createEnhancedPinchGesture(
+		Gesture.Pinch()
+			.onStart(() => {
+				savedScale.value = scale.value;
+			})
+			.onUpdate((event) => {
+				// Calculate new scale with limits
+				const newScale = clamp(savedScale.value * event.scale, MIN_SCALE, MAX_SCALE);
+				scale.value = newScale;
+
+				// Adjust translation to zoom towards focal point
+				if (event.focalX && event.focalY) {
+					const scaleDiff = newScale - savedScale.value;
+					const focalPointX = (event.focalX - screenWidth / 2) / savedScale.value;
+					const focalPointY = (event.focalY - screenHeight / 2) / savedScale.value;
+
+					translateX.value = savedTranslateX.value - (focalPointX * scaleDiff) / savedScale.value;
+					translateY.value = savedTranslateY.value - (focalPointY * scaleDiff) / savedScale.value;
+				}
+			}),
+	);
+
+	// Tap gesture for hex interaction (optimized)
+	const tapGesture = Gesture.Tap()
+		.maxDuration(250)
+		.onStart((event) => {
+			'worklet';
+			// Calculate hex position in worklet for faster response
+			const worldX = (event.x - screenWidth / 2) / scale.value - translateX.value;
+			const worldY = (event.y - screenHeight / 2) / scale.value - translateY.value;
+
+			runOnJS((x: number, y: number) => {
+				const hex = renderer.current?.pixelToHexWithHitTest(x, y);
+				if (hex) {
+					handleHexInteraction(hex);
+				}
+			})(worldX, worldY);
 		});
-
-	// Tap gesture for hex interaction
-	const tapGesture = Gesture.Tap().onEnd((event) => {
-		runOnJS(() => {
-			const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
-			if (hex) {
-				handleHexInteraction(hex);
-			}
-		})();
-	});
 
 	// Double tap gesture for reset
 	const doubleTapGesture = Gesture.Tap()
@@ -227,27 +295,37 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			resetView();
 		});
 
-	// Long press gesture for hex info or special actions
+	// Long press gesture for hex info or special actions (optimized)
 	const longPressGesture = Gesture.LongPress()
 		.minDuration(500)
+		.shouldCancelWhenOutside(true)
 		.onStart((event) => {
-			runOnJS(() => {
-				const hex = handlePointerPosition(event.x, event.y, scale.value, translateX.value, translateY.value);
+			'worklet';
+			const worldX = (event.x - screenWidth / 2) / scale.value - translateX.value;
+			const worldY = (event.y - screenHeight / 2) / scale.value - translateY.value;
+
+			runOnJS((x: number, y: number) => {
+				const hex = renderer.current?.pixelToHexWithHitTest(x, y);
 				if (hex) {
-					// Update hovered hex for visual feedback
+					hoveredHexRef.current = hex;
 					setHoveredHex(hex);
 				}
-			})();
+			})(worldX, worldY);
 		})
 		.onEnd(() => {
-			runOnJS(setHoveredHex)(null);
+			runOnJS(() => {
+				hoveredHexRef.current = null;
+				setHoveredHex(null);
+			})();
 		});
 
-	// Combine gestures
-	const composedGesture = Gesture.Race(
+	// Combine gestures with advanced composition
+	const composedGesture = composeAdvancedGestures(
 		doubleTapGesture,
 		longPressGesture,
-		Gesture.Simultaneous(tapGesture, panGesture, pinchGesture),
+		tapGesture,
+		panGesture,
+		pinchGesture,
 	);
 
 	// State to track animated values for rendering
@@ -257,7 +335,11 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 		scale: 1,
 	});
 
-	// Update render transform when animated values change
+	// Update render transform when animated values change (throttled)
+	const lastRenderUpdateTime = useSharedValue(0);
+	// 60fps max
+	const renderDebounceMs = 16;
+
 	useAnimatedReaction(
 		() => ({
 			x: translateX.value,
@@ -265,11 +347,15 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			s: scale.value,
 		}),
 		(current) => {
-			runOnJS(setRenderTransform)({
-				offsetX: current.x,
-				offsetY: current.y,
-				scale: current.s,
-			});
+			const now = Date.now();
+			if (now - lastRenderUpdateTime.value > renderDebounceMs) {
+				lastRenderUpdateTime.value = now;
+				runOnJS(setRenderTransform)({
+					offsetX: current.x,
+					offsetY: current.y,
+					scale: current.s,
+				});
+			}
 		},
 		[],
 	);
