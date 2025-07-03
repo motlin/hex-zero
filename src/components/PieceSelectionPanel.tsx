@@ -14,12 +14,14 @@ import {
 	LayoutAnimation,
 	Platform,
 	UIManager,
+	Animated,
 } from 'react-native';
-import {PanGestureHandler, State, type PanGestureHandlerStateChangeEvent} from 'react-native-gesture-handler';
+import {GestureDetector, Gesture} from 'react-native-gesture-handler';
 import type {Piece} from '../state/SeptominoGenerator';
 import {DraggablePiece, type DraggablePieceRef} from './DraggablePiece';
 import {useThemeContext} from '../context/ThemeContext';
 import {usePieces} from '../hooks/usePieces';
+import {useAdvancedGestures} from '../hooks/useAdvancedGestures';
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -60,6 +62,8 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 	const [isDragging, setIsDragging] = useState(false);
 	const {isPiecePlaced} = usePieces();
 	const pieceRefs = useRef<Map<number, DraggablePieceRef>>(new Map());
+	const [currentlySelectedIndex, setCurrentlySelectedIndex] = useState<number | null>(selectedPieceIndex ?? null);
+	const longPressProgressBar = useRef(new Animated.Value(0)).current;
 
 	// Calculate page data
 	const totalPages = Math.ceil(pieces.length / piecesPerPage);
@@ -90,6 +94,70 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 			// 1 second delay for user to see completion
 		}
 	}, [allCurrentPiecesPlaced, currentPage, totalPages, onPageChange]);
+
+	const handleNextPage = useCallback(() => {
+		if (currentPage < totalPages - 1 && onPageChange) {
+			LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+			onPageChange(currentPage + 1);
+		}
+	}, [currentPage, totalPages, onPageChange]);
+
+	const handlePrevPage = useCallback(() => {
+		if (currentPage > 0 && onPageChange) {
+			LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+			onPageChange(currentPage - 1);
+		}
+	}, [currentPage, onPageChange]);
+
+	// Cycle through available pieces on long press
+	const cycleThroughPieces = useCallback(() => {
+		const availablePieces = currentPieces
+			.map((_, index) => startIndex + index)
+			.filter((index) => !isPiecePlaced(index));
+
+		if (availablePieces.length === 0) return;
+
+		let nextIndex;
+		if (currentlySelectedIndex === null || !availablePieces.includes(currentlySelectedIndex)) {
+			nextIndex = availablePieces[0];
+		} else {
+			const currentIndexInAvailable = availablePieces.indexOf(currentlySelectedIndex);
+			nextIndex = availablePieces[(currentIndexInAvailable + 1) % availablePieces.length];
+		}
+
+		setCurrentlySelectedIndex(nextIndex);
+		if (onPieceSelect && pieces[nextIndex]) {
+			onPieceSelect(pieces[nextIndex], nextIndex);
+		}
+	}, [currentPieces, startIndex, isPiecePlaced, currentlySelectedIndex, onPieceSelect, pieces]);
+
+	// Advanced gestures setup
+	const {setDragState, twoFingerSwipeGesture, longPressCycleGesture} = useAdvancedGestures({
+		onTwoFingerSwipeLeft: handleNextPage,
+		onTwoFingerSwipeRight: handlePrevPage,
+		onLongPressCycle: cycleThroughPieces,
+		onLongPressHold: (progress) => {
+			// Animate progress bar
+			Animated.timing(longPressProgressBar, {
+				toValue: progress,
+				duration: 50,
+				useNativeDriver: false,
+			}).start();
+		},
+		enablePanWhileDragging: false,
+	});
+
+	// Update drag state when dragging starts/ends
+	useEffect(() => {
+		setDragState(isDragging);
+	}, [isDragging, setDragState]);
+
+	// Sync selected index with parent
+	useEffect(() => {
+		if (selectedPieceIndex !== undefined) {
+			setCurrentlySelectedIndex(selectedPieceIndex);
+		}
+	}, [selectedPieceIndex]);
 
 	const handleDragStart = useCallback(
 		(piece: Piece, index: number) => {
@@ -123,25 +191,11 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 		[onInvalidPlacement, pieces],
 	);
 
-	const handleNextPage = useCallback(() => {
-		if (currentPage < totalPages - 1 && onPageChange) {
-			LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-			onPageChange(currentPage + 1);
-		}
-	}, [currentPage, totalPages, onPageChange]);
-
-	const handlePrevPage = useCallback(() => {
-		if (currentPage > 0 && onPageChange) {
-			LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-			onPageChange(currentPage - 1);
-		}
-	}, [currentPage, onPageChange]);
-
 	// Handle swipe gestures for page navigation
 	const handleSwipeGesture = useCallback(
-		(event: PanGestureHandlerStateChangeEvent) => {
-			if (event.nativeEvent.state === State.END && !isDragging) {
-				const {translationX, velocityX} = event.nativeEvent;
+		(event: any) => {
+			if (!isDragging) {
+				const {translationX, velocityX} = event;
 				const threshold = 50;
 				const velocityThreshold = 500;
 
@@ -173,6 +227,11 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 
 	const pieceSize = Math.min(screenWidth / (piecesPerPage + 1), 80);
 
+	// Combine gestures
+	const singleFingerSwipeGesture = Gesture.Pan().onEnd(handleSwipeGesture).enabled(!isDragging);
+
+	const combinedGesture = Gesture.Race(twoFingerSwipeGesture, longPressCycleGesture, singleFingerSwipeGesture);
+
 	return (
 		<View style={[styles.container, {backgroundColor: theme.colors.surface}]}>
 			{/* Page Navigation */}
@@ -186,12 +245,23 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 				</TouchableOpacity>
 			)}
 
-			{/* Swipeable Pieces Container */}
-			<PanGestureHandler
-				onHandlerStateChange={handleSwipeGesture}
-				enabled={!isDragging}
-			>
+			{/* Swipeable Pieces Container with Advanced Gestures */}
+			<GestureDetector gesture={combinedGesture}>
 				<View style={styles.swipeableContainer}>
+					{/* Long Press Progress Indicator */}
+					<Animated.View
+						style={[
+							styles.longPressProgressBar,
+							{
+								backgroundColor: theme.colors.burstColor,
+								width: longPressProgressBar.interpolate({
+									inputRange: [0, 1],
+									outputRange: ['0%', '100%'],
+								}),
+							},
+						]}
+					/>
+
 					{/* Pieces ScrollView */}
 					<ScrollView
 						ref={scrollViewRef}
@@ -203,7 +273,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 						{currentPieces.map((piece, index) => {
 							const globalIndex = startIndex + index;
 							const isPlaced = isPiecePlaced(globalIndex);
-							const isSelected = selectedPieceIndex === globalIndex;
+							const isSelected = currentlySelectedIndex === globalIndex;
 
 							return (
 								<TouchableOpacity
@@ -263,7 +333,7 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 						</View>
 					)}
 				</View>
-			</PanGestureHandler>
+			</GestureDetector>
 
 			{/* Next Page or More Pieces Button */}
 			{(currentPage < totalPages - 1 || allCurrentPiecesPlaced) && (
@@ -302,6 +372,14 @@ const styles = StyleSheet.create({
 	swipeableContainer: {
 		flex: 1,
 		alignItems: 'center',
+		position: 'relative',
+	},
+	longPressProgressBar: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		height: 2,
+		zIndex: 10,
 	},
 	scrollContent: {
 		alignItems: 'center',

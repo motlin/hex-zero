@@ -14,6 +14,8 @@ import {
 import type {Piece} from '../state/SeptominoGenerator';
 import {PiecePreview} from './PiecePreview';
 import {useThemeContext} from '../context/ThemeContext';
+import * as Haptics from 'expo-haptics';
+import {useSettings} from '../contexts/SettingsContext';
 
 export interface DraggablePieceRef {
 	triggerShakeAnimation: () => void;
@@ -49,6 +51,7 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 		ref,
 	) => {
 		const {theme} = useThemeContext();
+		const {settings} = useSettings();
 		const translateX = useRef(new Animated.Value(0)).current;
 		const translateY = useRef(new Animated.Value(0)).current;
 		const opacity = useRef(new Animated.Value(1)).current;
@@ -81,12 +84,16 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 				}),
 			]);
 
+			if (settings.hapticEnabled) {
+				Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+			}
+
 			shakeSequence.start(() => {
 				if (onInvalidPlacement) {
 					onInvalidPlacement(piece);
 				}
 			});
-		}, [shakeX, onInvalidPlacement, piece]);
+		}, [shakeX, onInvalidPlacement, piece, settings.hapticEnabled]);
 
 		useImperativeHandle(
 			ref,
@@ -120,7 +127,10 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 				if (state === State.BEGAN) {
 					startPosition.current = {x: absoluteX, y: absoluteY};
 
-					// Animate scale up
+					if (settings.hapticEnabled) {
+						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+					}
+
 					Animated.parallel([
 						Animated.spring(scale, {
 							toValue: 1.2,
@@ -137,7 +147,6 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 						onDragStart(piece, index);
 					}
 				} else if (state === State.END || state === State.CANCELLED || state === State.FAILED) {
-					// Animate back to original position
 					Animated.parallel([
 						Animated.spring(translateX, {
 							toValue: 0,
@@ -163,7 +172,19 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 					}
 				}
 			},
-			[disabled, isPlaced, piece, index, translateX, translateY, scale, opacity, onDragStart, onDragEnd],
+			[
+				disabled,
+				isPlaced,
+				piece,
+				index,
+				translateX,
+				translateY,
+				scale,
+				opacity,
+				onDragStart,
+				onDragEnd,
+				settings.hapticEnabled,
+			],
 		);
 
 		const pieceSize = hexSize * 3;

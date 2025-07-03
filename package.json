@@ -62,6 +62,7 @@
 		"expo": "^53.0.12",
 		"expo-constants": "~17.1.6",
 		"expo-device": "~7.1.4",
+		"expo-haptics": "^14.1.4",
 		"expo-status-bar": "~2.2.3",
 		"react": "^19.0.0",
 		"react-native": "^0.79.4",
