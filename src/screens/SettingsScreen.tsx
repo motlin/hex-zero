@@ -30,10 +30,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 		<SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
 			{/* Header */}
 			<View style={[styles.header, {backgroundColor: theme.colors.surface}]}>
-				<TouchableOpacity
-					onPress={onBack}
-					style={styles.backButton}
-				>
+				<TouchableOpacity onPress={onBack} style={styles.backButton}>
 					<Text style={[styles.backButtonText, {color: theme.colors.text}]}>← Back</Text>
 				</TouchableOpacity>
 				<Text style={[styles.headerTitle, {color: theme.colors.text}]}>Settings</Text>
@@ -77,7 +74,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 						</View>
 						<Switch
 							value={settings.showCoordinates}
-							onValueChange={(value) => updateSetting('showCoordinates', value)}
+							onValueChange={(value) => {
+								updateSetting('showCoordinates', value);
+							}}
 							trackColor={{
 								false: theme.colors.textSecondary,
 								true: theme.colors.burstColor,
@@ -100,7 +99,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 						</View>
 						<Switch
 							value={settings.autoAdvancePieces}
-							onValueChange={(value) => updateSetting('autoAdvancePieces', value)}
+							onValueChange={(value) => {
+								updateSetting('autoAdvancePieces', value);
+							}}
 							trackColor={{
 								false: theme.colors.textSecondary,
 								true: theme.colors.burstColor,
@@ -118,7 +119,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 						</View>
 						<Switch
 							value={settings.confirmRestart}
-							onValueChange={(value) => updateSetting('confirmRestart', value)}
+							onValueChange={(value) => {
+								updateSetting('confirmRestart', value);
+							}}
 							trackColor={{
 								false: theme.colors.textSecondary,
 								true: theme.colors.burstColor,
@@ -136,7 +139,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 						</View>
 						<Switch
 							value={settings.confirmExit}
-							onValueChange={(value) => updateSetting('confirmExit', value)}
+							onValueChange={(value) => {
+								updateSetting('confirmExit', value);
+							}}
 							trackColor={{
 								false: theme.colors.textSecondary,
 								true: theme.colors.burstColor,
@@ -159,7 +164,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 						</View>
 						<Switch
 							value={settings.soundEnabled}
-							onValueChange={(value) => updateSetting('soundEnabled', value)}
+							onValueChange={(value) => {
+								updateSetting('soundEnabled', value);
+							}}
 							trackColor={{
 								false: theme.colors.textSecondary,
 								true: theme.colors.burstColor,
@@ -177,7 +184,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({onBack}) => {
 						</View>
 						<Switch
 							value={settings.hapticEnabled}
-							onValueChange={(value) => updateSetting('hapticEnabled', value)}
+							onValueChange={(value) => {
+								updateSetting('hapticEnabled', value);
+							}}
 							trackColor={{
 								false: theme.colors.textSecondary,
 								true: theme.colors.burstColor,

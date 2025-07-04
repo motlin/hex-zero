@@ -3,7 +3,7 @@
  * Includes game board, piece selection, and game controls
  */
 
-import React, {useState, useCallback, useEffect, useRef} from 'react';
+import React, {useState, useCallback, useEffect, useMemo, useRef} from 'react';
 import {
 	View,
 	Text,
@@ -66,7 +66,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 	const [dragPosition, setDragPosition] = useState({x: 0, y: 0});
 	const [dropPosition, setDropPosition] = useState<{x: number; y: number} | null>(null);
 
-	const pieces = gameState?.getPieces() || [];
+	const pieces = useMemo(() => gameState?.getPieces() ?? [], [gameState]);
 	const moveCount = getMoveCount();
 	const hintCount = getHintCount();
 	const gameWon = isGameWon();
@@ -219,10 +219,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 	if (isLoading) {
 		return (
 			<View style={[styles.loadingContainer, {backgroundColor: theme.colors.background}]}>
-				<ActivityIndicator
-					size="large"
-					color={theme.colors.text}
-				/>
+				<ActivityIndicator size="large" color={theme.colors.text} />
 				<Text style={[styles.loadingText, {color: theme.colors.text}]}>Generating puzzle...</Text>
 			</View>
 		);
@@ -246,10 +243,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 		<SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
 			{/* Header */}
 			<View style={[styles.header, {backgroundColor: theme.colors.surface}]}>
-				<TouchableOpacity
-					onPress={handleBackToMenu}
-					style={styles.headerButton}
-				>
+				<TouchableOpacity onPress={handleBackToMenu} style={styles.headerButton}>
 					<Text style={[styles.headerButtonText, {color: theme.colors.text}]}>← Menu</Text>
 				</TouchableOpacity>
 
@@ -259,10 +253,7 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 				</View>
 
 				<View style={styles.headerButtons}>
-					<TouchableOpacity
-						onPress={handleRestart}
-						style={styles.headerButton}
-					>
+					<TouchableOpacity onPress={handleRestart} style={styles.headerButton}>
 						<Text style={[styles.headerButtonText, {color: theme.colors.text}]}>Restart</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
@@ -284,7 +275,9 @@ export const GameScreen: React.FC<GameScreenProps> = ({onBackToMenu}) => {
 			<View style={styles.gameBoard}>
 				<GameBoard
 					showHints={showHints}
-					onBoardReady={() => setBoardReady(true)}
+					onBoardReady={() => {
+						setBoardReady(true);
+					}}
 					draggedPiece={draggedPiece}
 					dropPosition={dropPosition}
 					onDropComplete={handleDropComplete}

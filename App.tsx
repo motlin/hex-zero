@@ -30,7 +30,9 @@ export default function App() {
 		return (
 			<DifficultySelectionScreen
 				onSelectDifficulty={handleSelectDifficulty}
-				onBackToMenu={() => setCurrentScreen('menu')}
+				onBackToMenu={() => {
+					setCurrentScreen('menu');
+				}}
 			/>
 		);
 	}
@@ -40,17 +42,31 @@ export default function App() {
 			<GameDemo
 				radius={gameSettings.radius}
 				numPieces={gameSettings.numPieces}
-				onBackToMenu={() => setCurrentScreen('difficulty')}
+				onBackToMenu={() => {
+					setCurrentScreen('difficulty');
+				}}
 			/>
 		);
 	}
 
 	if (currentScreen === 'help') {
-		return <HelpScreen onBack={() => setCurrentScreen('menu')} />;
+		return (
+			<HelpScreen
+				onBack={() => {
+					setCurrentScreen('menu');
+				}}
+			/>
+		);
 	}
 
 	if (currentScreen === 'settings') {
-		return <SettingsScreen onBack={() => setCurrentScreen('menu')} />;
+		return (
+			<SettingsScreen
+				onBack={() => {
+					setCurrentScreen('menu');
+				}}
+			/>
+		);
 	}
 
 	return (
@@ -68,20 +84,26 @@ export default function App() {
 								<Text style={styles.demoHeader}>Interactive Demos</Text>
 								<TouchableOpacity
 									style={styles.playButton}
-									onPress={() => setCurrentScreen('difficulty')}
+									onPress={() => {
+										setCurrentScreen('difficulty');
+									}}
 								>
 									<Text style={styles.playButtonText}>🎮 Play Full Game</Text>
 								</TouchableOpacity>
 								<View style={styles.menuButtons}>
 									<TouchableOpacity
 										style={styles.menuButton}
-										onPress={() => setCurrentScreen('help')}
+										onPress={() => {
+											setCurrentScreen('help');
+										}}
 									>
 										<Text style={styles.menuButtonText}>❓ How to Play</Text>
 									</TouchableOpacity>
 									<TouchableOpacity
 										style={styles.menuButton}
-										onPress={() => setCurrentScreen('settings')}
+										onPress={() => {
+											setCurrentScreen('settings');
+										}}
 									>
 										<Text style={styles.menuButtonText}>⚙️ Settings</Text>
 									</TouchableOpacity>

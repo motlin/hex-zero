@@ -5,7 +5,13 @@
  */
 
 import {useRef, useCallback} from 'react';
-import {Gesture, GestureType, ComposedGesture} from 'react-native-gesture-handler';
+import {
+	Gesture,
+	type GestureType,
+	type ComposedGesture,
+	type PanGesture,
+	type PinchGesture,
+} from 'react-native-gesture-handler';
 import {runOnJS, useSharedValue, withSpring, withTiming, cancelAnimation, runOnUI} from 'react-native-reanimated';
 
 interface AdvancedGestureOptions {
@@ -187,7 +193,7 @@ export const useAdvancedGestures = (options: AdvancedGestureOptions = {}) => {
 				const animateProgress = () => {
 					'worklet';
 					longPressProgress.value = withTiming(1, {duration: 1000}, (finished) => {
-						if (finished && activeGesture.value === 'longPressCycle') {
+						if (finished === true && activeGesture.value === 'longPressCycle') {
 							if (onLongPressCycle) runOnJS(onLongPressCycle)();
 							longPressProgress.value = 0;
 							// Continue cycling
@@ -241,7 +247,7 @@ export const useAdvancedGestures = (options: AdvancedGestureOptions = {}) => {
 		});
 
 	// Enhanced pan gesture with conflict resolution (optimized)
-	const createEnhancedPanGesture = (originalPan: any) => {
+	const createEnhancedPanGesture = (originalPan: PanGesture): PanGesture => {
 		return originalPan
 			.shouldCancelWhenOutside(false)
 			.onStart(() => {
@@ -267,7 +273,7 @@ export const useAdvancedGestures = (options: AdvancedGestureOptions = {}) => {
 	};
 
 	// Enhanced pinch gesture with conflict resolution (optimized)
-	const createEnhancedPinchGesture = (originalPinch: any) => {
+	const createEnhancedPinchGesture = (originalPinch: PinchGesture): PinchGesture => {
 		return originalPinch
 			.shouldCancelWhenOutside(false)
 			.onStart(() => {

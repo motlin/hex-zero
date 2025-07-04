@@ -95,11 +95,13 @@ export const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps>
 					{DIFFICULTY_OPTIONS.map((option) => (
 						<TouchableOpacity
 							key={option.name}
-							style={[styles.difficultyCard, option.recommended && styles.recommendedCard]}
-							onPress={() => onSelectDifficulty(option.radius, option.numPieces)}
+							style={[styles.difficultyCard, option.recommended === true && styles.recommendedCard]}
+							onPress={() => {
+								onSelectDifficulty(option.radius, option.numPieces);
+							}}
 							activeOpacity={0.8}
 						>
-							{option.recommended && (
+							{option.recommended === true && (
 								<View style={styles.recommendedBadge}>
 									<Text style={styles.recommendedText}>Recommended</Text>
 								</View>
@@ -113,7 +115,9 @@ export const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps>
 				<View style={styles.customSection}>
 					<TouchableOpacity
 						style={styles.customButton}
-						onPress={() => setShowCustom(true)}
+						onPress={() => {
+							setShowCustom(true);
+						}}
 						activeOpacity={0.8}
 					>
 						<Text style={styles.customButtonText}>Custom Game</Text>
@@ -121,11 +125,7 @@ export const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps>
 				</View>
 
 				{onBackToMenu && (
-					<TouchableOpacity
-						style={styles.backButton}
-						onPress={onBackToMenu}
-						activeOpacity={0.8}
-					>
+					<TouchableOpacity style={styles.backButton} onPress={onBackToMenu} activeOpacity={0.8}>
 						<Text style={styles.backButtonText}>Back to Menu</Text>
 					</TouchableOpacity>
 				)}
@@ -135,7 +135,9 @@ export const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps>
 				visible={showCustom}
 				animationType="slide"
 				transparent={true}
-				onRequestClose={() => setShowCustom(false)}
+				onRequestClose={() => {
+					setShowCustom(false);
+				}}
 			>
 				<View style={styles.modalOverlay}>
 					<View style={styles.modalContent}>
@@ -170,7 +172,9 @@ export const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps>
 						<View style={styles.modalButtons}>
 							<TouchableOpacity
 								style={[styles.modalButton, styles.cancelButton]}
-								onPress={() => setShowCustom(false)}
+								onPress={() => {
+									setShowCustom(false);
+								}}
 							>
 								<Text style={styles.cancelButtonText}>Cancel</Text>
 							</TouchableOpacity>

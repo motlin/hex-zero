@@ -137,9 +137,9 @@ export function getTheme(type: ThemeType): SkiaTheme {
  * 🎨 Get height color from theme
  */
 export function getHeightColorFromTheme(height: number, theme: SkiaTheme): string {
-	if (height === 0) return theme.colors.heightMap[0];
+	if (height === 0) return theme.colors.heightMap[0] ?? theme.colors.textSecondary;
 	if (height > 10) return theme.colors.surface;
-	return theme.colors.heightMap[height] || theme.colors.textSecondary;
+	return theme.colors.heightMap[height] ?? theme.colors.textSecondary;
 }
 
 /**
@@ -203,9 +203,9 @@ export function getContrastColor(backgroundColor: string): string {
 	// Simple luminance calculation for hex colors
 	if (backgroundColor.startsWith('#')) {
 		const hex = backgroundColor.slice(1);
-		const r = parseInt(hex.substr(0, 2), 16);
-		const g = parseInt(hex.substr(2, 2), 16);
-		const b = parseInt(hex.substr(4, 2), 16);
+		const r = parseInt(hex.slice(0, 2), 16);
+		const g = parseInt(hex.slice(2, 4), 16);
+		const b = parseInt(hex.slice(4, 6), 16);
 
 		// Calculate relative luminance
 		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
@@ -229,13 +229,13 @@ export function blendColors(color1: string, color2: string, ratio: number): stri
 	const hex1 = color1.slice(1);
 	const hex2 = color2.slice(1);
 
-	const r1 = parseInt(hex1.substr(0, 2), 16);
-	const g1 = parseInt(hex1.substr(2, 2), 16);
-	const b1 = parseInt(hex1.substr(4, 2), 16);
+	const r1 = parseInt(hex1.slice(0, 2), 16);
+	const g1 = parseInt(hex1.slice(2, 4), 16);
+	const b1 = parseInt(hex1.slice(4, 6), 16);
 
-	const r2 = parseInt(hex2.substr(0, 2), 16);
-	const g2 = parseInt(hex2.substr(2, 2), 16);
-	const b2 = parseInt(hex2.substr(4, 2), 16);
+	const r2 = parseInt(hex2.slice(0, 2), 16);
+	const g2 = parseInt(hex2.slice(2, 4), 16);
+	const b2 = parseInt(hex2.slice(4, 6), 16);
 
 	const r = Math.round(r1 * (1 - ratio) + r2 * ratio);
 	const g = Math.round(g1 * (1 - ratio) + g2 * ratio);

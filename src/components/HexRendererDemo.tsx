@@ -7,7 +7,7 @@ import React, {useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch} from 'react-native';
 import {HexGameBoard} from './HexGameBoard';
 import {HexGrid} from '../state/HexGrid';
-import {SeptominoGenerator, type Piece} from '../state/SeptominoGenerator';
+import {generateSet, type Piece} from '../state/SeptominoGenerator';
 import type {HexPoint} from '../utils/hex-calculations';
 
 export const HexRendererDemo: React.FC = () => {
@@ -26,7 +26,7 @@ export const HexRendererDemo: React.FC = () => {
 		return newGrid;
 	});
 
-	const [pieces] = useState(() => SeptominoGenerator.generateSet(6));
+	const [pieces] = useState(() => generateSet(6));
 	const [selectedPieceIndex, setSelectedPieceIndex] = useState(0);
 	const [showHints, setShowHints] = useState(false);
 	const [theme, setTheme] = useState<'light' | 'dark'>('dark');
@@ -88,10 +88,7 @@ export const HexRendererDemo: React.FC = () => {
 			</View>
 
 			<View style={styles.controls}>
-				<ScrollView
-					horizontal
-					showsHorizontalScrollIndicator={false}
-				>
+				<ScrollView horizontal showsHorizontalScrollIndicator={false}>
 					<View style={styles.controlsContent}>
 						<View style={styles.controlSection}>
 							<Text style={styles.sectionTitle}>Theme</Text>
@@ -99,7 +96,9 @@ export const HexRendererDemo: React.FC = () => {
 								<Text style={styles.switchLabel}>Dark</Text>
 								<Switch
 									value={theme === 'dark'}
-									onValueChange={(value) => setTheme(value ? 'dark' : 'light')}
+									onValueChange={(value) => {
+										setTheme(value ? 'dark' : 'light');
+									}}
 								/>
 							</View>
 						</View>
@@ -108,10 +107,7 @@ export const HexRendererDemo: React.FC = () => {
 							<Text style={styles.sectionTitle}>Hints</Text>
 							<View style={styles.switchRow}>
 								<Text style={styles.switchLabel}>Show</Text>
-								<Switch
-									value={showHints}
-									onValueChange={setShowHints}
-								/>
+								<Switch value={showHints} onValueChange={setShowHints} />
 							</View>
 						</View>
 
@@ -125,7 +121,9 @@ export const HexRendererDemo: React.FC = () => {
 											styles.pieceButton,
 											selectedPieceIndex === index && styles.selectedPiece,
 										]}
-										onPress={() => setSelectedPieceIndex(index)}
+										onPress={() => {
+											setSelectedPieceIndex(index);
+										}}
 									>
 										<Text style={styles.pieceButtonText}>{index + 1}</Text>
 									</TouchableOpacity>
@@ -134,10 +132,7 @@ export const HexRendererDemo: React.FC = () => {
 						</View>
 
 						<View style={styles.controlSection}>
-							<TouchableOpacity
-								style={styles.resetButton}
-								onPress={resetGrid}
-							>
+							<TouchableOpacity style={styles.resetButton} onPress={resetGrid}>
 								<Text style={styles.resetButtonText}>Reset Grid</Text>
 							</TouchableOpacity>
 						</View>

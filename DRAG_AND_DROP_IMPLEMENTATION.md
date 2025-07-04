@@ -57,7 +57,7 @@ The drag and drop system for Hex Zero React Native has been fully implemented wi
 
 ## Integration Flow
 
-```
+```text
 PieceSelectionPanel
     ↓ (drag start)
 DraggablePiece

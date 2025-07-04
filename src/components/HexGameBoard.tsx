@@ -59,9 +59,7 @@ export const HexGameBoard: React.FC<HexGameBoardProps> = ({
 	}, [grid.radius, scale]);
 
 	// Initialize renderer
-	if (!renderer.current) {
-		renderer.current = new SkiaHexRendererCompat(grid, hexSize);
-	}
+	renderer.current ??= new SkiaHexRendererCompat(grid, hexSize);
 
 	// Handle touch/mouse position to hex conversion
 	const handlePointerPosition = useCallback(
@@ -147,6 +145,7 @@ export const HexGameBoard: React.FC<HexGameBoardProps> = ({
 					if (evt.nativeEvent.touches.length === 2) {
 						const touch1 = evt.nativeEvent.touches[0];
 						const touch2 = evt.nativeEvent.touches[1];
+						if (touch1 === undefined || touch2 === undefined) return;
 						const distance = Math.sqrt(
 							Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2),
 						);
@@ -183,10 +182,7 @@ export const HexGameBoard: React.FC<HexGameBoardProps> = ({
 	);
 
 	return (
-		<View
-			style={styles.container}
-			{...panResponder.panHandlers}
-		>
+		<View style={styles.container} {...panResponder.panHandlers}>
 			<Canvas style={styles.canvas}>
 				<SkiaHexRenderer
 					grid={grid}
@@ -200,7 +196,9 @@ export const HexGameBoard: React.FC<HexGameBoardProps> = ({
 					hintCells={showHints ? hintCells : []}
 					invalidPlacementCells={invalidPlacementCells}
 					animatingCells={animatingCells}
-					onAnimationComplete={() => setAnimatingCells([])}
+					onAnimationComplete={() => {
+						setAnimatingCells([]);
+					}}
 				/>
 			</Canvas>
 		</View>

@@ -119,15 +119,18 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 
 		let nextIndex;
 		if (currentlySelectedIndex === null || !availablePieces.includes(currentlySelectedIndex)) {
-			nextIndex = availablePieces[0];
+			nextIndex = availablePieces.at(0);
 		} else {
 			const currentIndexInAvailable = availablePieces.indexOf(currentlySelectedIndex);
-			nextIndex = availablePieces[(currentIndexInAvailable + 1) % availablePieces.length];
+			nextIndex = availablePieces.at((currentIndexInAvailable + 1) % availablePieces.length);
 		}
 
+		if (nextIndex === undefined) return;
+
 		setCurrentlySelectedIndex(nextIndex);
-		if (onPieceSelect && pieces[nextIndex]) {
-			onPieceSelect(pieces[nextIndex], nextIndex);
+		const nextPiece = pieces.at(nextIndex);
+		if (onPieceSelect !== undefined && nextPiece !== undefined) {
+			onPieceSelect(nextPiece, nextIndex);
 		}
 	}, [currentPieces, startIndex, isPiecePlaced, currentlySelectedIndex, onPieceSelect, pieces]);
 
@@ -288,7 +291,9 @@ export const PieceSelectionPanel: React.FC<PieceSelectionPanelProps> = ({
 											borderColor: isSelected ? theme.colors.selectionColor : 'transparent',
 										},
 									]}
-									onPress={() => handlePiecePress(piece, index)}
+									onPress={() => {
+										handlePiecePress(piece, index);
+									}}
 									activeOpacity={0.8}
 									disabled={isPlaced}
 								>

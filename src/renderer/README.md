@@ -10,14 +10,14 @@ The main React component that renders a hexagonal grid using React Native Skia.
 
 Features:
 
--   🔷 Hexagonal grid rendering with height values
--   📐 Coordinate conversion (hex to pixel, pixel to hex)
--   👆 Piece preview on hover/touch
--   ✅ Valid/invalid placement indicators
--   💡 Hint system with dashed outlines
--   💥 Smooth burst animations when placing pieces
--   🔍 Pan and zoom support
--   🎨 Light and dark theme support
+- 🔷 Hexagonal grid rendering with height values
+- 📐 Coordinate conversion (hex to pixel, pixel to hex)
+- 👆 Piece preview on hover/touch
+- ✅ Valid/invalid placement indicators
+- 💡 Hint system with dashed outlines
+- 💥 Smooth burst animations when placing pieces
+- 🔍 Pan and zoom support
+- 🎨 Light and dark theme support
 
 ### SkiaHexRendererCompat
 

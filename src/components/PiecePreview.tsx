@@ -92,12 +92,12 @@ export const PiecePreview: React.FC<PiecePreviewProps> = ({
 
 	// Determine colors based on state
 	const fillColor = useMemo(() => {
-		if (color) return withAlpha(color, opacity);
+		if (color !== undefined) return withAlpha(color, opacity);
 		if (isInvalid) return withAlpha(theme.colors.invalidFill, opacity);
 		return withAlpha(theme.colors.previewFill, opacity);
 	}, [color, isInvalid, theme, opacity]);
 
-	const borderColor = strokeColor || theme.colors.gridLines;
+	const borderColor = strokeColor ?? theme.colors.gridLines;
 
 	return (
 		<View style={[styles.container, {width, height}]}>
@@ -117,17 +117,8 @@ export const PiecePreview: React.FC<PiecePreviewProps> = ({
 					)}
 					{paths.map((path, index) => (
 						<React.Fragment key={index}>
-							<Path
-								path={path}
-								color={fillColor}
-								style="fill"
-							/>
-							<Path
-								path={path}
-								color={borderColor}
-								style="stroke"
-								strokeWidth={strokeWidth}
-							/>
+							<Path path={path} color={fillColor} style="fill" />
+							<Path path={path} color={borderColor} style="stroke" strokeWidth={strokeWidth} />
 						</React.Fragment>
 					))}
 				</Group>

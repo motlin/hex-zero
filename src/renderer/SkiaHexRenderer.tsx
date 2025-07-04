@@ -72,24 +72,17 @@ const DelayedAnimatedHexCell = ({
 			setShouldAnimate(true);
 		}, delay);
 
-		return () => clearTimeout(timer);
+		return () => {
+			clearTimeout(timer);
+		};
 	}, [delay]);
 
 	if (!shouldAnimate) {
 		// Render static hex until animation starts
 		return (
 			<Group>
-				<Path
-					path={path}
-					color={getHeightColorFromTheme(height, skiaTheme)}
-					style="fill"
-				/>
-				<Path
-					path={path}
-					color={gridLineColor}
-					style="stroke"
-					strokeWidth={2}
-				/>
+				<Path path={path} color={getHeightColorFromTheme(height, skiaTheme)} style="fill" />
+				<Path path={path} color={gridLineColor} style="stroke" strokeWidth={2} />
 				{font && (showCoordinates || height > 0) && (
 					<Text
 						x={center.x}
@@ -147,12 +140,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 		android: 'Roboto',
 		default: 'Arial',
 	});
-	const fontStyle = {
-		fontFamily,
-		fontSize,
-		fontWeight: 'bold' as const,
-	};
-	const font = useMemo(() => matchFont(fontStyle), [fontSize, fontFamily]);
+	const font = useMemo(() => matchFont({fontFamily, fontSize, fontWeight: 'bold'}), [fontFamily, fontSize]);
 
 	const devicePixelRatio = PixelRatio.get();
 
@@ -251,13 +239,18 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 		<Group transform={[{translateX: actualOffsetX}, {translateY: actualOffsetY}]}>
 			{/* Render hex grid */}
 			{Array.from(hexPaths.entries()).map(([key, {path, center, height}]) => {
-				const [q, r] = key.split(',').map(Number);
+				const coordinates = key.split(',');
+				const qText = coordinates.at(0);
+				const rText = coordinates.at(1);
+				if (qText === undefined || rText === undefined) throw new Error(`Invalid hex key: ${key}`);
+				const q = Number(qText);
+				const r = Number(rText);
 				const animatingCell = animatingCells.find((cell) => cell.q === q && cell.r === r);
 
 				if (animatingCell) {
 					// Find the stagger delay for this cell
 					const staggerData = staggeredAnimations.find((item) => item.cell.q === q && item.cell.r === r);
-					const delay = staggerData?.delay || 0;
+					const delay = staggerData?.delay ?? 0;
 
 					return (
 						<Group key={key}>
@@ -306,18 +299,9 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 
 				return (
 					<Group key={key}>
-						<Path
-							path={path}
-							color={getHeightColorFromTheme(height, skiaTheme)}
-							style="fill"
-						/>
-						<Path
-							path={path}
-							color={gridLineColor}
-							style="stroke"
-							strokeWidth={2}
-						/>
-						{font && (showCoordinates || height > 0) && (
+						<Path path={path} color={getHeightColorFromTheme(height, skiaTheme)} style="fill" />
+						<Path path={path} color={gridLineColor} style="stroke" strokeWidth={2} />
+						{(showCoordinates || height > 0) && (
 							<Text
 								x={center.x}
 								y={center.y + fontSize / 3}
@@ -367,12 +351,7 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 
 			{/* Render invalid placements */}
 			{invalidPaths.map((path, index) => (
-				<Path
-					key={`invalid-${index}`}
-					path={path}
-					color={skiaTheme.colors.invalidFill}
-					style="fill"
-				/>
+				<Path key={`invalid-${index}`} path={path} color={skiaTheme.colors.invalidFill} style="fill" />
 			))}
 
 			{/* Render piece preview */}
@@ -381,7 +360,8 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 				if (!hoveredHex || !selectedPiece) return null;
 
 				const tileIndex = index;
-				const tile = selectedPiece.tiles[tileIndex];
+				const tile = selectedPiece.tiles.at(tileIndex);
+				if (tile === undefined) throw new Error(`Missing preview tile at index ${tileIndex}`);
 				const worldQ = hoveredHex.q + tile.q - selectedPiece.center.q;
 				const worldR = hoveredHex.r + tile.r - selectedPiece.center.r;
 				const isValid = grid.isValidCoordinate(worldQ, worldR) && grid.getHeight(worldQ, worldR) > 0;
@@ -409,9 +389,10 @@ export const SkiaHexRenderer: React.FC<SkiaHexRendererProps> = ({
 /**
  * Compatibility class that matches the original HexRenderer interface
  */
+// oxlint-disable-next-line react/only-export-components
 export class SkiaHexRendererCompat {
-	private grid: HexGrid;
-	private hexSize: number;
+	private readonly grid: HexGrid;
+	private readonly hexSize: number;
 	private offsetX: number = 0;
 	private offsetY: number = 0;
 	private scale: number = 1;

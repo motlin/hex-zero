@@ -23,6 +23,25 @@ const DEFAULT_SETTINGS: GameSettings = {
 	confirmExit: true,
 };
 
+function isGameSettings(value: unknown): value is GameSettings {
+	return (
+		typeof value === 'object' &&
+		value !== null &&
+		'soundEnabled' in value &&
+		typeof value.soundEnabled === 'boolean' &&
+		'hapticEnabled' in value &&
+		typeof value.hapticEnabled === 'boolean' &&
+		'showCoordinates' in value &&
+		typeof value.showCoordinates === 'boolean' &&
+		'autoAdvancePieces' in value &&
+		typeof value.autoAdvancePieces === 'boolean' &&
+		'confirmRestart' in value &&
+		typeof value.confirmRestart === 'boolean' &&
+		'confirmExit' in value &&
+		typeof value.confirmExit === 'boolean'
+	);
+}
+
 interface SettingsContextType {
 	settings: GameSettings;
 	updateSetting: <K extends keyof GameSettings>(key: K, value: GameSettings[K]) => void;
@@ -42,14 +61,16 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({children}) =>
 
 	// Load settings on mount
 	useEffect(() => {
-		loadSettings();
+		void loadSettings();
 	}, []);
 
 	const loadSettings = async () => {
 		try {
 			const savedSettings = await AsyncStorage.getItem(SETTINGS_KEY);
-			if (savedSettings) {
-				setSettings(JSON.parse(savedSettings));
+			if (savedSettings !== null) {
+				const parsedSettings: unknown = JSON.parse(savedSettings);
+				if (!isGameSettings(parsedSettings)) throw new Error('Stored settings have an invalid shape');
+				setSettings(parsedSettings);
 			}
 		} catch (error) {
 			console.error('Failed to load settings:', error);
@@ -67,12 +88,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({children}) =>
 	const updateSetting = <K extends keyof GameSettings>(key: K, value: GameSettings[K]) => {
 		const newSettings = {...settings, [key]: value};
 		setSettings(newSettings);
-		saveSettings(newSettings);
+		void saveSettings(newSettings);
 	};
 
 	const resetSettings = () => {
 		setSettings(DEFAULT_SETTINGS);
-		saveSettings(DEFAULT_SETTINGS);
+		void saveSettings(DEFAULT_SETTINGS);
 	};
 
 	return (

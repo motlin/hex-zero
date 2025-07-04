@@ -27,27 +27,29 @@ export function useTheme(): UseThemeReturn {
 
 	// Load saved theme on mount
 	useEffect(() => {
-		loadSavedTheme();
+		void loadSavedTheme();
 	}, []);
 
 	// Listen for system theme changes
 	useEffect(() => {
 		const subscription = Appearance.addChangeListener(({colorScheme}) => {
-			if (colorScheme) {
+			if (colorScheme !== null) {
 				const systemTheme: ThemeType = colorScheme === 'dark' ? 'dark' : 'light';
 				setThemeType(systemTheme);
-				saveTheme(systemTheme);
+				void saveTheme(systemTheme);
 			}
 		});
 
-		return () => subscription?.remove();
+		return () => {
+			subscription.remove();
+		};
 	}, []);
 
 	const loadSavedTheme = async () => {
 		try {
 			const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-			if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-				setThemeType(savedTheme as ThemeType);
+			if (savedTheme === 'light' || savedTheme === 'dark') {
+				setThemeType(savedTheme);
 			} else {
 				// Use system theme as fallback
 				const systemTheme = Appearance.getColorScheme();
@@ -73,7 +75,7 @@ export function useTheme(): UseThemeReturn {
 
 	const setTheme = useCallback((type: ThemeType) => {
 		setThemeType(type);
-		saveTheme(type);
+		void saveTheme(type);
 	}, []);
 
 	const toggleTheme = useCallback(() => {

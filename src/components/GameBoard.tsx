@@ -66,7 +66,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 				});
 
 				// If we have a specific hint, highlight it differently
-				if (hint && validPositions.some((pos) => pos.q === hint.q && pos.r === hint.r)) {
+				if (validPositions.some((pos) => pos.q === hint.q && pos.r === hint.r)) {
 					setHintCells([hint]);
 				} else {
 					// Show up to 3 hints
@@ -134,10 +134,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 	const grid = gameState.getGrid();
 
 	return (
-		<View
-			style={styles.container}
-			onLayout={handleLayout}
-		>
+		<View style={styles.container} onLayout={handleLayout}>
 			<HexGameBoardWithGestures
 				grid={grid}
 				selectedPiece={currentPiece}

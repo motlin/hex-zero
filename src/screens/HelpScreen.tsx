@@ -17,10 +17,7 @@ export const HelpScreen: React.FC<HelpScreenProps> = ({onBack}) => {
 		<SafeAreaView style={[styles.container, {backgroundColor: theme.colors.background}]}>
 			{/* Header */}
 			<View style={[styles.header, {backgroundColor: theme.colors.surface}]}>
-				<TouchableOpacity
-					onPress={onBack}
-					style={styles.backButton}
-				>
+				<TouchableOpacity onPress={onBack} style={styles.backButton}>
 					<Text style={[styles.backButtonText, {color: theme.colors.text}]}>← Back</Text>
 				</TouchableOpacity>
 				<Text style={[styles.headerTitle, {color: theme.colors.text}]}>How to Play</Text>

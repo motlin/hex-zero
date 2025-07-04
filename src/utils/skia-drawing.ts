@@ -12,11 +12,12 @@ import {getHexCorners, type Point} from './hex-calculations';
 export function createHexPath(centerX: number, centerY: number, size: number): SkPath {
 	const path = Skia.Path.Make();
 	const corners = getHexCorners(centerX, centerY, size);
+	const [firstCorner, ...remainingCorners] = corners;
 
-	if (corners.length > 0) {
-		path.moveTo(corners[0].x, corners[0].y);
-		for (let i = 1; i < corners.length; i++) {
-			path.lineTo(corners[i].x, corners[i].y);
+	if (firstCorner !== undefined) {
+		path.moveTo(firstCorner.x, firstCorner.y);
+		for (const corner of remainingCorners) {
+			path.lineTo(corner.x, corner.y);
 		}
 		path.close();
 	}
@@ -65,7 +66,7 @@ export function colorWithAlpha(color: string, alpha: number): string {
 export function getHeightColor(height: number, colorMap: Record<number, string>): string {
 	if (height === 0) return '#000000';
 	if (height > 10) return '#1a1a1a';
-	return colorMap[height] || '#333333';
+	return colorMap[height] ?? '#333333';
 }
 
 /**
@@ -119,7 +120,7 @@ export function createHeightGradientStops(maxHeight: number): Array<[number, str
 	for (let i = 0; i <= maxHeight; i++) {
 		const colorIndex = Math.min(i - 1, colors.length - 1);
 		const position = i / maxHeight;
-		stops.push([position, colors[colorIndex] || '#1a1a1a']);
+		stops.push([position, colors[colorIndex] ?? '#1a1a1a']);
 	}
 
 	return stops;

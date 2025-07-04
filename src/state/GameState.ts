@@ -20,7 +20,7 @@ interface SolutionMove {
 	r: number;
 }
 
-interface GameSettings {
+export interface GameSettings {
 	radius: number;
 	numPieces: number;
 }
@@ -77,8 +77,8 @@ export class GameState {
 				throw new Error(`Cannot place piece ${index} during level generation - no valid positions available`);
 			}
 
-			const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
-			if (!pos) throw new Error('No position selected');
+			const pos = validPositions.at(Math.floor(Math.random() * validPositions.length));
+			if (pos === undefined) throw new Error('No position selected');
 			this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
 
 			piece.tiles.forEach((tile) => {
@@ -109,8 +109,8 @@ export class GameState {
 	}
 
 	placePiece(centerQ: number, centerR: number): boolean {
-		const piece = this.pieces[this.currentPieceIndex];
-		if (!piece) return false;
+		const piece = this.pieces.at(this.currentPieceIndex);
+		if (piece === undefined) return false;
 		if (!this.canPlacePiece(piece, centerQ, centerR)) return false;
 		if (this.placedPieces.has(this.currentPieceIndex)) return false;
 
@@ -294,8 +294,8 @@ export class GameState {
 	}
 
 	getCurrentPiece(): Piece {
-		const piece = this.pieces[this.currentPieceIndex];
-		if (!piece) throw new Error('No current piece found');
+		const piece = this.pieces.at(this.currentPieceIndex);
+		if (piece === undefined) throw new Error('No current piece found');
 		return {
 			tiles: [...piece.tiles],
 			center: {...piece.center},
@@ -304,8 +304,8 @@ export class GameState {
 
 	getPieceByIndex(index: number): Piece | null {
 		if (index < 0 || index >= this.pieces.length) return null;
-		const piece = this.pieces[index];
-		if (!piece) return null;
+		const piece = this.pieces.at(index);
+		if (piece === undefined) return null;
 		return {
 			tiles: [...piece.tiles],
 			center: {...piece.center},

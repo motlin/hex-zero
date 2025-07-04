@@ -17,11 +17,11 @@ export function useHexGrid() {
 		getHexHeight: (q: number, r: number) => {
 			if (!grid) return 0;
 			const hex = grid.getHex(q, r);
-			return hex?.height || 0;
+			return hex?.height ?? 0;
 		},
 		isValidHex: (q: number, r: number) => {
 			if (!grid) return false;
-			return grid.getHex(q, r) !== null;
+			return grid.getHex(q, r) !== undefined;
 		},
 		getAllHexes: () => {
 			if (!grid) return [];

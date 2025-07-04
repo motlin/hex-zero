@@ -97,9 +97,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	}, [grid.radius]);
 
 	// Initialize renderer
-	if (!renderer.current) {
-		renderer.current = new SkiaHexRendererCompat(grid, hexSize);
-	}
+	renderer.current ??= new SkiaHexRendererCompat(grid, hexSize);
 
 	// Handle touch/mouse position to hex conversion with proper hit testing
 	const handlePointerPosition = useCallback(
@@ -114,7 +112,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			// Use enhanced hit detection with proper hexagonal boundary testing
 			return renderer.current.pixelToHexWithHitTest(worldX, worldY);
 		},
-		[grid, hexSize],
+		[],
 	);
 
 	// Handle hex selection/piece placement
@@ -133,7 +131,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 				if (canPlace) {
 					// Haptic feedback for successful placement
 					if (settings.hapticEnabled) {
-						Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+						void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 					}
 
 					// Animate the placement
@@ -156,7 +154,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 				} else {
 					// Haptic feedback for invalid placement
 					if (settings.hapticEnabled) {
-						Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+						void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 					}
 
 					// Show invalid placement feedback
@@ -173,7 +171,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			} else if (onHexPress) {
 				// Light haptic for hex selection
 				if (settings.hapticEnabled) {
-					Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+					void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 				}
 				onHexPress(hex);
 			}
@@ -195,7 +193,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 			onGestureStart: (gestureType) => {
 				// Optional: Add visual feedback for gesture start
 				if (settings.hapticEnabled && gestureType === 'navigation') {
-					Haptics.selectionAsync();
+					void Haptics.selectionAsync();
 				}
 			},
 			enablePanWhileDragging: false,
@@ -446,10 +444,7 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 	return (
 		<GestureHandlerRootView style={styles.container}>
 			<GestureDetector gesture={composedGesture}>
-				<View
-					ref={boardRef}
-					style={styles.container}
-				>
+				<View ref={boardRef} style={styles.container}>
 					<Canvas style={styles.canvas}>
 						<SkiaHexRenderer
 							grid={grid}
@@ -465,7 +460,9 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 							validPlacementCells={validPlacementCells}
 							invalidPlacementCells={invalidPlacementCells}
 							animatingCells={animatingCells}
-							onAnimationComplete={() => setAnimatingCells([])}
+							onAnimationComplete={() => {
+								setAnimatingCells([]);
+							}}
 						/>
 					</Canvas>
 					{!isViewCentered && (
@@ -474,7 +471,9 @@ export const HexGameBoardWithGestures: React.FC<HexGameBoardWithGesturesProps> =
 								styles.resetButton,
 								theme === 'dark' ? styles.resetButtonDark : styles.resetButtonLight,
 							]}
-							onPress={() => runOnJS(resetView)()}
+							onPress={() => {
+								runOnJS(resetView)();
+							}}
 						>
 							<Text
 								style={[

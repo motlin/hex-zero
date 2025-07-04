@@ -170,14 +170,8 @@ export const DraggablePiece = forwardRef<DraggablePieceRef, DraggablePieceProps>
 
 		return (
 			<GestureDetector gesture={panGesture}>
-				<Animated.View
-					testID={testID}
-					style={[styles.container, animatedStyle]}
-				>
-					<View
-						style={styles.pieceContainer}
-						pointerEvents="none"
-					>
+				<Animated.View testID={testID} style={[styles.container, animatedStyle]}>
+					<View style={styles.pieceContainer} pointerEvents="none">
 						<PiecePreview
 							piece={piece}
 							hexSize={hexSize * 0.7}

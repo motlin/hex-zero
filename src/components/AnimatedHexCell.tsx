@@ -84,7 +84,7 @@ export const AnimatedHexCell: React.FC<AnimatedHexCellProps> = ({
 				easing: Easing.out(Easing.cubic),
 			},
 			(finished) => {
-				if (finished && onAnimationComplete) {
+				if (finished === true && onAnimationComplete !== undefined) {
 					runOnJS(onAnimationComplete)();
 				}
 			},
@@ -97,7 +97,7 @@ export const AnimatedHexCell: React.FC<AnimatedHexCellProps> = ({
 				easing: Easing.in(Easing.quad),
 			});
 		}
-	}, []);
+	}, [animationDuration, burstProgress, endHeight, heightProgress, hexScale, onAnimationComplete, textOpacity]);
 
 	// Animated props for hex fill color
 	const animatedHexProps = useAnimatedProps(() => {
@@ -155,19 +155,10 @@ export const AnimatedHexCell: React.FC<AnimatedHexCellProps> = ({
 	return (
 		<Group>
 			{/* Animated hex fill */}
-			<AnimatedPath
-				path={path}
-				style="fill"
-				animatedProps={animatedHexProps}
-			/>
+			<AnimatedPath path={path} style="fill" animatedProps={animatedHexProps} />
 
 			{/* Static hex border */}
-			<Path
-				path={path}
-				color={gridLineColor}
-				style="stroke"
-				strokeWidth={2}
-			/>
+			<Path path={path} color={gridLineColor} style="stroke" strokeWidth={2} />
 
 			{/* Animated height text */}
 			{font && endHeight > 0 && (

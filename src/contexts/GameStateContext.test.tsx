@@ -29,9 +29,10 @@ describe('GameStateContext and Hooks', () => {
 			});
 
 			await waitFor(() => {
-				expect(result.current.gameState).not.toBeNull();
-				expect(result.current.gameState?.grid.radius).toBe(4);
-				expect(result.current.gameState?.pieces).toHaveLength(5);
+				expect({
+					radius: result.current.gameState?.getGrid().radius,
+					pieceCount: result.current.gameState?.getPieces().length,
+				}).toStrictEqual({radius: 4, pieceCount: 5});
 			});
 		});
 
@@ -74,12 +75,12 @@ describe('GameStateContext and Hooks', () => {
 			});
 
 			await waitFor(() => {
-				// After restart, we should have a fresh game state
-				expect(result.current.gameState).not.toBeNull();
-				expect(result.current.gameState?.getMoveCount()).toBe(0);
-				expect(result.current.gameState?.getHintCount()).toBe(0);
-				expect(result.current.gameState?.grid.radius).toBe(4);
-				expect(result.current.gameState?.pieces).toHaveLength(5);
+				expect({
+					moveCount: result.current.gameState?.getMoveCount(),
+					hintCount: result.current.gameState?.getHintCount(),
+					radius: result.current.gameState?.getGrid().radius,
+					pieceCount: result.current.gameState?.getPieces().length,
+				}).toStrictEqual({moveCount: 0, hintCount: 0, radius: 4, pieceCount: 5});
 			});
 		});
 	});
@@ -109,25 +110,24 @@ describe('GameStateContext and Hooks', () => {
 				expect(result.current.game.gameState).not.toBeNull();
 			});
 
-			// Verify basic game state
-			expect(result.current.game.gameState?.grid.radius).toBe(4);
-			expect(result.current.game.gameState?.pieces).toHaveLength(5);
-			expect(result.current.game.gameState?.getMoveCount()).toBe(0);
-			expect(result.current.game.gameState?.getHintCount()).toBe(0);
+			expect({
+				radius: result.current.game.gameState?.getGrid().radius,
+				pieceCount: result.current.game.gameState?.getPieces().length,
+				moveCount: result.current.game.gameState?.getMoveCount(),
+				hintCount: result.current.game.gameState?.getHintCount(),
+			}).toStrictEqual({radius: 4, pieceCount: 5, moveCount: 0, hintCount: 0});
 		});
 	});
 
 	describe('Context error handling', () => {
 		it('throws error when hooks are used outside provider', () => {
-			// Mock console.error to avoid test output noise
-			const originalError = console.error;
-			console.error = vi.fn();
+			const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
 			expect(() => {
 				renderHook(() => useGame());
 			}).toThrow('useGameState must be used within a GameStateProvider');
 
-			console.error = originalError;
+			consoleError.mockRestore();
 		});
 	});
 });

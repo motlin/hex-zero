@@ -74,7 +74,7 @@ describe('SkiaHexRendererCompat', () => {
 
 	describe('render state management', () => {
 		it('triggers render on offset change', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			renderer.setOffset(10, 20);
@@ -88,7 +88,7 @@ describe('SkiaHexRendererCompat', () => {
 		});
 
 		it('triggers render on scale change', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			renderer.setScale(1.5);
@@ -101,7 +101,7 @@ describe('SkiaHexRendererCompat', () => {
 		});
 
 		it('triggers render on theme change', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			renderer.setTheme('dark');
@@ -114,7 +114,7 @@ describe('SkiaHexRendererCompat', () => {
 		});
 
 		it('manages hovered hex state', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			const hex = {q: 1, r: 2};
@@ -128,7 +128,7 @@ describe('SkiaHexRendererCompat', () => {
 		});
 
 		it('manages selected piece state', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			const piece: Piece = {tiles: [{q: 0, r: 0}], center: {q: 0, r: 0}};
@@ -142,7 +142,7 @@ describe('SkiaHexRendererCompat', () => {
 		});
 
 		it('manages hint cells', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			const hints = [
@@ -159,7 +159,7 @@ describe('SkiaHexRendererCompat', () => {
 		});
 
 		it('manages invalid placement cells', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			const invalidCells = [
@@ -178,7 +178,7 @@ describe('SkiaHexRendererCompat', () => {
 
 	describe('animation', () => {
 		it('triggers animation for cell placements', () => {
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			const animatingCells = [
@@ -195,9 +195,9 @@ describe('SkiaHexRendererCompat', () => {
 			);
 		});
 
-		it('clears animation after timeout', async () => {
+		it('clears animation after timeout', () => {
 			vi.useFakeTimers();
-			const renderCallback = vi.fn();
+			const renderCallback = vi.fn<() => void>();
 			renderer.setRenderCallback(renderCallback);
 
 			renderer.animatePlacement([{q: 0, r: 0, startHeight: 5, endHeight: 4}]);

@@ -15,14 +15,14 @@ interface HexBounds {
 }
 
 export class OptimizedHexHitDetector {
-	private hexBoundsCache: Map<string, HexBounds> = new Map();
-	private spatialIndex: Map<string, HexPoint[]> = new Map();
+	private readonly hexBoundsCache: Map<string, HexBounds> = new Map();
+	private readonly spatialIndex: Map<string, HexPoint[]> = new Map();
 	// Size of spatial grid cells
-	private gridSize = 100;
+	private readonly gridSize = 100;
 
 	constructor(
 		private hexSize: number,
-		private hexes: HexPoint[],
+		private readonly hexes: HexPoint[],
 	) {
 		this.buildCaches();
 	}
@@ -60,10 +60,9 @@ export class OptimizedHexHitDetector {
 			for (let dx = -1; dx <= 1; dx++) {
 				for (let dy = -1; dy <= 1; dy++) {
 					const gridKey = `${gridX + dx},${gridY + dy}`;
-					if (!this.spatialIndex.has(gridKey)) {
-						this.spatialIndex.set(gridKey, []);
-					}
-					this.spatialIndex.get(gridKey)!.push(hex);
+					const bucket = this.spatialIndex.get(gridKey) ?? [];
+					bucket.push(hex);
+					this.spatialIndex.set(gridKey, bucket);
 				}
 			}
 		}
@@ -78,7 +77,7 @@ export class OptimizedHexHitDetector {
 		const gridY = Math.floor(y / this.gridSize);
 		const gridKey = `${gridX},${gridY}`;
 
-		const candidates = this.spatialIndex.get(gridKey) || [];
+		const candidates = this.spatialIndex.get(gridKey) ?? [];
 
 		// Check candidates using cached bounds
 		for (const hex of candidates) {

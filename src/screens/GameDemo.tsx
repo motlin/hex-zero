@@ -6,9 +6,8 @@
 import React, {useEffect} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {GameScreen} from './GameScreen';
-import {GameStateProvider} from '../contexts/GameStateContext';
+import {GameStateProvider, useGameState} from '../contexts/GameStateContext';
 import {ThemeProvider} from '../context/ThemeContext';
-import {useGameState} from '../contexts/GameStateContext';
 
 // Inner component that initializes the game
 const GameInitializer: React.FC<{
@@ -36,11 +35,7 @@ export const GameDemo: React.FC<GameDemoProps> = ({radius = 3, numPieces = 6, on
 		<ThemeProvider>
 			<GameStateProvider>
 				<View style={styles.container}>
-					<GameInitializer
-						radius={radius}
-						numPieces={numPieces}
-						onBackToMenu={onBackToMenu}
-					/>
+					<GameInitializer radius={radius} numPieces={numPieces} onBackToMenu={onBackToMenu} />
 				</View>
 			</GameStateProvider>
 		</ThemeProvider>

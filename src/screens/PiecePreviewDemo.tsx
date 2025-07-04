@@ -9,7 +9,7 @@ import {PiecePreview} from '../components/PiecePreview';
 import {PieceSelectionPanel} from '../components/PieceSelectionPanel';
 import {PieceDragOverlay} from '../components/PieceDragOverlay';
 import {DraggablePiece} from '../components/DraggablePiece';
-import {SeptominoGenerator, type Piece} from '../state/SeptominoGenerator';
+import {generateSet, type Piece} from '../state/SeptominoGenerator';
 import {useThemeContext} from '../context/ThemeContext';
 import {HexGrid} from '../state/HexGrid';
 import {SkiaHexRenderer} from '../renderer/SkiaHexRenderer';
@@ -18,7 +18,7 @@ import {SkiaHexRenderer} from '../renderer/SkiaHexRenderer';
 
 export const PiecePreviewDemo: React.FC = () => {
 	const {theme, themeType, toggleTheme} = useThemeContext();
-	const [pieces] = useState<Piece[]>(() => SeptominoGenerator.generateSet(12));
+	const [pieces] = useState<Piece[]>(() => generateSet(12));
 	const [selectedPieceIndex, setSelectedPieceIndex] = useState<number | null>(0);
 	const [currentPage, setCurrentPage] = useState(0);
 	const [showInvalid, setShowInvalid] = useState(false);
@@ -29,7 +29,7 @@ export const PiecePreviewDemo: React.FC = () => {
 
 	// Create a small grid for preview
 	const [grid] = useState(() => new HexGrid(3));
-	const selectedPiece = selectedPieceIndex !== null ? pieces[selectedPieceIndex] : null;
+	const selectedPiece = selectedPieceIndex === null ? null : pieces[selectedPieceIndex];
 
 	const handlePieceSelect = useCallback((_piece: Piece, index: number) => {
 		setSelectedPieceIndex(index);
@@ -97,13 +97,17 @@ export const PiecePreviewDemo: React.FC = () => {
 					<View style={styles.buttonGroup}>
 						<TouchableOpacity
 							style={[styles.button, {backgroundColor: theme.colors.surface}]}
-							onPress={() => setHexSize(Math.max(10, hexSize - 5))}
+							onPress={() => {
+								setHexSize(Math.max(10, hexSize - 5));
+							}}
 						>
 							<Text style={{color: theme.colors.text}}>-</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={[styles.button, {backgroundColor: theme.colors.surface}]}
-							onPress={() => setHexSize(Math.min(50, hexSize + 5))}
+							onPress={() => {
+								setHexSize(Math.min(50, hexSize + 5));
+							}}
 						>
 							<Text style={{color: theme.colors.text}}>+</Text>
 						</TouchableOpacity>
@@ -135,7 +139,7 @@ export const PiecePreviewDemo: React.FC = () => {
 					{selectedPiece && (
 						<DraggablePiece
 							piece={selectedPiece}
-							index={selectedPieceIndex || 0}
+							index={selectedPieceIndex ?? 0}
 							hexSize={hexSize}
 							onDragStart={handleDragStart}
 							onDragMove={handleDragMove}

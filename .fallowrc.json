@@ -1,8 +1,25 @@
 {
 	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
-	"entry": ["src/hex-zero.ts"],
+	"entry": [
+		"src/hex-zero.ts",
+		"App.tsx",
+		"babel.config.cjs",
+		"metro.config.cjs",
+		"vite.config.ts",
+		"vitest.config.ts"
+	],
 	"ignorePatterns": [],
 	"ignoreDependencies": ["babel-preset-expo", "expo-constants", "expo-device"],
+	"ignoreExports": [
+		{"file": "src/components/HexGameBoard.tsx", "exports": ["HexGameBoard"]},
+		{"file": "src/context/ThemeContext.tsx", "exports": ["withTheme"]},
+		{"file": "src/hooks/index.ts", "exports": ["useHexGrid", "usePiecePlacement"]},
+		{"file": "src/hooks/useHexGrid.ts", "exports": ["useHexGrid"]},
+		{"file": "src/hooks/usePiecePlacement.ts", "exports": ["usePiecePlacement"]},
+		{"file": "src/hooks/useTheme.ts", "exports": ["getSystemTheme"]},
+		{"file": "src/ui/SkiaColorTheme.ts", "exports": ["THEMES", "DEFAULT_THEME"]},
+		{"file": "src/utils/hex-calculations.ts", "exports": ["calculatePieceCenterOffset"]}
+	],
 	"duplicates": {
 		"minOccurrences": 3
 	},

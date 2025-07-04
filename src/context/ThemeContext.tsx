@@ -37,14 +37,9 @@ export const useThemeContext = (): UseThemeReturn => {
 export function withTheme<P extends object>(Component: React.ComponentType<P & {theme: UseThemeReturn}>) {
 	const ThemedComponent = (props: P) => {
 		const theme = useThemeContext();
-		return (
-			<Component
-				{...props}
-				theme={theme}
-			/>
-		);
+		return <Component {...props} theme={theme} />;
 	};
 
-	ThemedComponent.displayName = `withTheme(${Component.displayName || Component.name})`;
+	ThemedComponent.displayName = `withTheme(${Component.displayName ?? Component.name})`;
 	return ThemedComponent;
 }

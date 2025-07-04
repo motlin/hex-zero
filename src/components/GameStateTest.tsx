@@ -26,7 +26,7 @@ export function GameStateTest() {
 					<View style={styles.infoSection}>
 						<Text style={styles.label}>Difficulty: {getDifficulty()}</Text>
 						<Text style={styles.label}>Current Piece: {selectedPieceIndex}</Text>
-						<Text style={styles.label}>Piece Tiles: {selectedPiece?.tiles.length || 0}</Text>
+						<Text style={styles.label}>Piece Tiles: {selectedPiece?.tiles.length ?? 0}</Text>
 						<Text style={styles.label}>All Placed: {getAllPiecesPlaced() ? 'Yes' : 'No'}</Text>
 						<Text style={styles.label}>Game Won: {isGameWon() ? 'Yes' : 'No'}</Text>
 					</View>
@@ -51,26 +51,22 @@ export function GameStateTest() {
 					</View>
 
 					<View style={styles.buttonRow}>
-						<Button
-							title="Undo"
-							onPress={() => undo()}
-							disabled={!canUndo()}
-						/>
-						<Button
-							title="Redo"
-							onPress={() => redo()}
-							disabled={!canRedo()}
-						/>
+						<Button title="Undo" onPress={() => undo()} disabled={!canUndo()} />
+						<Button title="Redo" onPress={() => redo()} disabled={!canRedo()} />
 					</View>
 
 					<View style={styles.buttonRow}>
 						<Button
 							title="Restart"
-							onPress={() => restart()}
+							onPress={() => {
+								restart();
+							}}
 						/>
 						<Button
 							title="New Game"
-							onPress={() => initializeGame(3, 6)}
+							onPress={() => {
+								initializeGame(3, 6);
+							}}
 						/>
 					</View>
 

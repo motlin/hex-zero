@@ -4,12 +4,12 @@ import {
 	pixelToHex,
 	roundHex,
 	getHexCorners,
-	calculateOptimalHexSize,
 	hexDistance,
 	isPointInHex,
 	getHexBoundingBox,
 	getHexNeighbors,
 } from './hex-calculations';
+import {calculateHexSize} from './game-dimensions';
 
 describe('hex-calculations', () => {
 	describe('hexToPixel', () => {
@@ -66,20 +66,20 @@ describe('hex-calculations', () => {
 		});
 	});
 
-	describe('calculateOptimalHexSize', () => {
+	describe('calculateHexSize', () => {
 		it('returns positive hex size', () => {
-			const result = calculateOptimalHexSize(800, 600, 4);
+			const result = calculateHexSize(800, 600, 4);
 			expect(result).toBeGreaterThan(0);
 		});
 
 		it('respects minimum size constraint', () => {
-			const result = calculateOptimalHexSize(100, 100, 10);
+			const result = calculateHexSize(100, 100, 10);
 			expect(result).toBeGreaterThanOrEqual(10);
 		});
 
 		it('applies zoom factor correctly', () => {
-			const normal = calculateOptimalHexSize(800, 600, 4, 1.0);
-			const zoomed = calculateOptimalHexSize(800, 600, 4, 2.0);
+			const normal = calculateHexSize(800, 600, 4, 1.0);
+			const zoomed = calculateHexSize(800, 600, 4, 2.0);
 			expect(zoomed).toBeCloseTo(normal * 2, 1);
 		});
 	});

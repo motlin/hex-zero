@@ -1,39 +1,70 @@
-import {vi} from 'vitest';
+type EasingFunction = (value: number) => number;
 
-export const useSharedValue = vi.fn((initialValue) => ({
-	value: initialValue,
-}));
+export function useSharedValue<Value>(initialValue: Value): {value: Value} {
+	return {value: initialValue};
+}
 
-export const useAnimatedProps = vi.fn(() => ({}));
-export const useAnimatedStyle = vi.fn(() => ({}));
-export const useDerivedValue = vi.fn((fn) => ({value: fn()}));
+export function useAnimatedProps(): Record<string, never> {
+	return {};
+}
 
-export const withTiming = vi.fn((value) => value);
-export const withSpring = vi.fn((value) => value);
-export const withSequence = vi.fn((...values) => values[values.length - 1]);
-export const withDelay = vi.fn((_, value) => value);
-export const withRepeat = vi.fn((value) => value);
+export function useAnimatedStyle(): Record<string, never> {
+	return {};
+}
+
+export function useDerivedValue<Value>(derive: () => Value): {value: Value} {
+	return {value: derive()};
+}
+
+export function withTiming<Value>(value: Value): Value {
+	return value;
+}
+
+export function withSpring<Value>(value: Value): Value {
+	return value;
+}
+
+export function withSequence<Value>(...values: Value[]): Value {
+	const value = values.at(-1);
+	if (value === undefined) throw new Error('withSequence requires at least one value');
+	return value;
+}
+
+export function withDelay<Value>(_delay: number, value: Value): Value {
+	return value;
+}
+
+export function withRepeat<Value>(value: Value): Value {
+	return value;
+}
+
+const identity: EasingFunction = (value) => value;
 
 export const Easing = {
-	linear: vi.fn((t) => t),
-	ease: vi.fn((t) => t),
-	quad: vi.fn((t) => t),
-	cubic: vi.fn((t) => t),
-	bezier: vi.fn(() => (t: number) => t),
-	in: vi.fn((fn) => fn),
-	out: vi.fn((fn) => fn),
-	inOut: vi.fn((fn) => fn),
+	linear: identity,
+	ease: identity,
+	quad: identity,
+	cubic: identity,
+	bezier: (): EasingFunction => identity,
+	in: (easing: EasingFunction): EasingFunction => easing,
+	out: (easing: EasingFunction): EasingFunction => easing,
+	inOut: (easing: EasingFunction): EasingFunction => easing,
 };
 
-export const runOnJS = vi.fn((fn) => fn);
-export const runOnUI = vi.fn((fn) => fn);
+export function runOnJS<Arguments extends unknown[], ReturnValue>(
+	callback: (...arguments_: Arguments) => ReturnValue,
+): (...arguments_: Arguments) => ReturnValue {
+	return callback;
+}
 
-export const interpolate = vi.fn((value, inputRange, outputRange) => {
-	const idx = inputRange.findIndex((v: number) => v >= value);
-	if (idx === -1) return outputRange[outputRange.length - 1];
-	if (idx === 0) return outputRange[0];
-	return outputRange[idx];
-});
+export const runOnUI = runOnJS;
+
+export function interpolate(value: number, inputRange: readonly number[], outputRange: readonly number[]): number {
+	const index = inputRange.findIndex((candidate) => candidate >= value);
+	const output = outputRange.at(index < 0 ? -1 : index);
+	if (output === undefined) throw new Error('interpolate requires a matching output range');
+	return output;
+}
 
 export const Extrapolation = {
 	CLAMP: 'clamp',
@@ -41,7 +72,9 @@ export const Extrapolation = {
 	IDENTITY: 'identity',
 };
 
-export const createAnimatedComponent = vi.fn((component) => component);
+export function createAnimatedComponent<Component>(component: Component): Component {
+	return component;
+}
 
 const Animated = {
 	View: 'AnimatedView',

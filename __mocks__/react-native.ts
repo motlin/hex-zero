@@ -10,7 +10,7 @@ export const PixelRatio = {
 export const Platform = {
 	OS: 'ios',
 	Version: '17.0',
-	select: vi.fn((specifics: Record<string, unknown>) => specifics.ios || specifics.default),
+	select: vi.fn((specifics: Record<string, unknown>) => specifics.ios ?? specifics.default),
 };
 
 export const Dimensions = {

@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {HexGrid} from '../state/HexGrid';
-import {SeptominoGenerator} from '../state/SeptominoGenerator';
+import {generatePiece} from '../state/SeptominoGenerator';
 import {GameState} from '../state/GameState';
 
 export function GameLogicTest() {
@@ -17,7 +17,7 @@ export function GameLogicTest() {
 	}
 
 	try {
-		const piece = SeptominoGenerator.generatePiece();
+		const piece = generatePiece();
 		testResults.push('✅ SeptominoGenerator instantiation successful');
 		testResults.push(`  - Generated piece size: ${piece.tiles.length} tiles`);
 	} catch (error) {
@@ -37,10 +37,7 @@ export function GameLogicTest() {
 		<View style={styles.container}>
 			<Text style={styles.title}>Game Logic Test Results</Text>
 			{testResults.map((result, index) => (
-				<Text
-					key={index}
-					style={styles.result}
-				>
+				<Text key={index} style={styles.result}>
 					{result}
 				</Text>
 			))}

@@ -32,7 +32,15 @@ export default defineConfig({
 		env: {
 			builtin: true,
 		},
-		ignorePatterns: ['dist', 'build', 'storybook-static', '.llm/**', 'vitest.shims.d.ts'],
+		ignorePatterns: [
+			'dist',
+			'build',
+			'storybook-static',
+			'.llm/**',
+			'vitest.shims.d.ts',
+			'src/hex-zero.ts',
+			'src/game-state.test.ts',
+		],
 		overrides: [
 			{
 				files: ['public/**/*.{ts,tsx}'],
@@ -251,6 +259,14 @@ export default defineConfig({
 						'warn',
 						{
 							allowConstantExport: true,
+							allowExportNames: [
+								'createStaggeredAnimation',
+								'SkiaHexRendererCompat',
+								'useGameState',
+								'useSettings',
+								'useThemeContext',
+								'withTheme',
+							],
 						},
 					],
 				},

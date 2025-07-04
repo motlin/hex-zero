@@ -51,7 +51,7 @@ const ParticleComponent: React.FC<{
 				easing: Easing.out(Easing.cubic),
 			}),
 		);
-	}, []);
+	}, [duration, particle.delay, progress]);
 
 	const animatedProps = useAnimatedProps(() => {
 		// Calculate particle position based on progress
@@ -81,14 +81,7 @@ const ParticleComponent: React.FC<{
 		};
 	});
 
-	return (
-		<AnimatedCircle
-			r={2}
-			color={color}
-			style="fill"
-			animatedProps={animatedProps}
-		/>
-	);
+	return <AnimatedCircle r={2} color={color} style="fill" animatedProps={animatedProps} />;
 };
 
 export const HexBurstParticles: React.FC<HexBurstParticlesProps> = ({

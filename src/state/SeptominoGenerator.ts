@@ -7,7 +7,7 @@ interface PieceData {
 
 type Piece = PieceData;
 
-function generatePiece(): Piece {
+export function generatePiece(): Piece {
 	const tiles: HexCoordinate[] = [{q: 0, r: 0}];
 	// The starting tile is our center
 	const center: HexCoordinate = {q: 0, r: 0};
@@ -27,8 +27,8 @@ function generatePiece(): Piece {
 		const available = neighbors.filter((n) => !tiles.some((t) => t.q === n.q && t.r === n.r));
 
 		if (available.length > 0) {
-			const next = available[Math.floor(Math.random() * available.length)];
-			if (next) {
+			const next = available.at(Math.floor(Math.random() * available.length));
+			if (next !== undefined) {
 				tiles.push(next);
 			}
 		}

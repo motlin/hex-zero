@@ -54,13 +54,17 @@ export const HexGridDemo: React.FC = () => {
 					<View style={styles.buttonRow}>
 						<TouchableOpacity
 							style={styles.button}
-							onPress={() => setHexSize(Math.max(10, hexSize - 5))}
+							onPress={() => {
+								setHexSize(Math.max(10, hexSize - 5));
+							}}
 						>
 							<Text style={styles.buttonText}>-</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.button}
-							onPress={() => setHexSize(Math.min(50, hexSize + 5))}
+							onPress={() => {
+								setHexSize(Math.min(50, hexSize + 5));
+							}}
 						>
 							<Text style={styles.buttonText}>+</Text>
 						</TouchableOpacity>
@@ -74,13 +78,17 @@ export const HexGridDemo: React.FC = () => {
 					<View style={styles.buttonRow}>
 						<TouchableOpacity
 							style={styles.button}
-							onPress={() => setScale(Math.max(0.5, scale - 0.1))}
+							onPress={() => {
+								setScale(Math.max(0.5, scale - 0.1));
+							}}
 						>
 							<Text style={styles.buttonText}>-</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={styles.button}
-							onPress={() => setScale(Math.min(2, scale + 0.1))}
+							onPress={() => {
+								setScale(Math.min(2, scale + 0.1));
+							}}
 						>
 							<Text style={styles.buttonText}>+</Text>
 						</TouchableOpacity>
@@ -92,13 +100,17 @@ export const HexGridDemo: React.FC = () => {
 					<View style={styles.buttonRow}>
 						<TouchableOpacity
 							style={[styles.button, themeType === 'light' && styles.activeButton]}
-							onPress={() => setTheme('light')}
+							onPress={() => {
+								setTheme('light');
+							}}
 						>
 							<Text style={styles.buttonText}>Light</Text>
 						</TouchableOpacity>
 						<TouchableOpacity
 							style={[styles.button, themeType === 'dark' && styles.activeButton]}
-							onPress={() => setTheme('dark')}
+							onPress={() => {
+								setTheme('dark');
+							}}
 						>
 							<Text style={styles.buttonText}>Dark</Text>
 						</TouchableOpacity>

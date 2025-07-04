@@ -21,9 +21,9 @@ vi.mock('@shopify/react-native-skia', () => ({
 	Skia: {
 		Path: {
 			Make: () => ({
-				moveTo: vi.fn(),
-				lineTo: vi.fn(),
-				close: vi.fn(),
+				moveTo: vi.fn<() => void>(),
+				lineTo: vi.fn<() => void>(),
+				close: vi.fn<() => void>(),
 			}),
 		},
 	},
