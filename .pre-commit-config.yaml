@@ -36,7 +36,7 @@ repos:
 
           - id: eslint
             name: eslint
-            entry: sh -c 'npm install >/dev/null 2>&1 && npx eslint --fix "$@"' --
+            entry: npx eslint --fix
             language: system
             files: \.(js|jsx|ts|tsx|mjs|cjs)$
             types: [file]
