@@ -2,17 +2,37 @@
 default:
     @just --list --unsorted
 
-# `npm run ci:typecheck`
-typecheck: install
-    npm run ci:typecheck
+# `npm install`
+install:
+    npm install
+
+# `npm ci` for CI
+install-ci:
+    npm ci
+
+# `npm run dev`
+dev: install
+    npm run dev
+
+# `npm run lint`
+lint: install
+    npm run lint:fix
+
+# ESLint with JSON output for CI annotations
+ci-lint: install-ci
+    npm run ci:eslint
+
+# `npm run test:run`
+test: install
+    npm run test:run
 
 # `npm run ci:prettier`
 prettier: install
     npm run ci:prettier
 
-# `npm run ci:eslint`
-eslint: install
-    npm run ci:eslint
+# `npm run ci:typecheck`
+typecheck: install
+    npm run ci:typecheck
 
 # `npm run build`
 build: install
@@ -21,22 +41,6 @@ build: install
 # `npm run lint:fix`
 fix: install
     npm run lint:fix
-
-# `npm run test:run`
-test: install
-    npm run test:run
-
-# Run development server
-dev: install
-    npm run dev
-
-# Install dependencies
-install:
-    npm install
-
-# Preview production build
-preview: install
-    npm run preview
 
 # Run all pre-commit checks
 precommit: typecheck fix build test

@@ -1,0 +1,73 @@
+# Jobs that run on pull_request, but not on merge_group. This is useful for jobs that post comments on Pull Requests, like ESLint annotations.
+
+on:
+    pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    pre-commit:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-python@v5
+              with:
+                  python-version: "3.x"
+            - uses: pre-commit/action@v3.0.1
+
+    lint:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            checks: write
+            pull-requests: write
+        steps:
+            - uses: actions/checkout@v4
+            - uses: jdx/mise-action@v2
+
+            - run: just ci-lint
+              continue-on-error: true
+
+            - uses: ataylorme/eslint-annotate-action@2.2.0
+              if: always()
+
+    format:
+        name: Format (Biome)
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: jdx/mise-action@v2
+
+            - run: just format-ci
+
+    typecheck:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: jdx/mise-action@v2
+            - run: just typecheck-ci
+
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: just build-ci
+
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: jdx/mise-action@v2
+
+            - run: just test-ci
+
+    all-checks:
+        name: All checks
+        needs: [pre-commit, lint, format, typecheck, build, test]
+        runs-on: ubuntu-latest
+        steps:
+            - name: All checks passed
+              run: echo "All checks passed!"

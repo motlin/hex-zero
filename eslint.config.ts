@@ -1,8 +1,9 @@
 import js from '@eslint/js';
 import typescript from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import type { Linter } from 'eslint';
 
-export default [
+const config: Linter.Config[] = [
     { ignores: ['dist/', 'node_modules/', '.llm/'] },
 
     js.configs.recommended,
@@ -41,3 +42,5 @@ export default [
         },
     },
 ];
+
+export default config;

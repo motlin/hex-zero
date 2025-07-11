@@ -523,7 +523,7 @@ button:disabled {
 }
 
 /* Landscape/wide screens - side panel layout */
-@media (min-aspect-ratio: 1/1) {
+@media (min-aspect-ratio: 1 / 1) {
 	.game-container {
 		flex-direction: row;
 		height: 100vh;
@@ -597,7 +597,7 @@ button:disabled {
 }
 
 /* Portrait/tall screens - bottom panel layout */
-@media (max-aspect-ratio: 1/1) {
+@media (max-aspect-ratio: 1 / 1) {
 	body {
 		min-height: 100vh;
 		min-height: 100dvh;
