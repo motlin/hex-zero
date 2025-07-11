@@ -1,3 +1,5 @@
+# Jobs that run on pull_request, but not on merge_group. This is useful for jobs that post comments on Pull Requests, like ESLint annotations.
+
 on:
     pull_request:
 
@@ -6,84 +8,6 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
-    eslint:
-        permissions:
-            pull-requests: read
-            checks: write
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: '22.x'
-                  cache: 'npm'
-
-            - run: npm ci
-
-            - run: npm run ci:eslint
-              continue-on-error: true
-
-            - uses: ataylorme/eslint-annotate-action@v3
-
-    prettier:
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: '22.x'
-                  cache: 'npm'
-
-            - run: npm ci
-
-            - run: npm run ci:prettier
-
-    typecheck:
-        name: Type Check
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: '22.x'
-                  cache: 'npm'
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Type Check
-              run: npm run ci:typecheck
-
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: '22.x'
-                  cache: 'npm'
-
-            - run: npm ci
-
-            - run: npm run build
-
-            - name: Upload build artifacts
-              if: success()
-              uses: actions/upload-artifact@v4
-              with:
-                  name: dist
-                  path: dist/
-                  retention-days: 1
-
-    all-checks:
-        name: All checks
-        needs: [eslint, prettier, typecheck, build]
-        runs-on: ubuntu-latest
-        steps:
-            - name: All checks passed
-              run: echo "All checks passed!"
-
     automerge-dependabot:
         if: github.event.pull_request.user.login == 'dependabot[bot]'
         runs-on: ubuntu-latest

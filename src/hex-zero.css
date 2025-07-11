@@ -458,25 +458,25 @@ button:disabled {
 	margin-top: -5px;
 }
 
-.error-message[data-for='customRadius'] {
+.error-message[data-for="customRadius"] {
 	grid-row: 2;
 }
 
-.error-message[data-for='customPieces'] {
+.error-message[data-for="customPieces"] {
 	grid-row: 3;
 }
 
-.custom-form:has(#customRadius:invalid:focus) .error-message[data-for='customRadius'],
-.custom-form:has(#customRadius:invalid:not(:placeholder-shown)) .error-message[data-for='customRadius'] {
+.custom-form:has(#customRadius:invalid:focus) .error-message[data-for="customRadius"],
+.custom-form:has(#customRadius:invalid:not(:placeholder-shown)) .error-message[data-for="customRadius"] {
 	display: block;
 }
 
-.custom-form:has(#customPieces:invalid:focus) .error-message[data-for='customPieces'],
-.custom-form:has(#customPieces:invalid:not(:placeholder-shown)) .error-message[data-for='customPieces'] {
+.custom-form:has(#customPieces:invalid:focus) .error-message[data-for="customPieces"],
+.custom-form:has(#customPieces:invalid:not(:placeholder-shown)) .error-message[data-for="customPieces"] {
 	display: block;
 }
 
-.custom-form button[type='submit'] {
+.custom-form button[type="submit"] {
 	background-color: #e94560;
 	color: white;
 	border: none;
@@ -487,7 +487,7 @@ button:disabled {
 	transition: opacity 0.2s;
 }
 
-.custom-form:invalid button[type='submit'] {
+.custom-form:invalid button[type="submit"] {
 	opacity: 0.5;
 	cursor: not-allowed;
 	pointer-events: none;
@@ -523,7 +523,7 @@ button:disabled {
 }
 
 /* Landscape/wide screens - side panel layout */
-@media (min-aspect-ratio: 1/1) {
+@media (min-aspect-ratio: 1 / 1) {
 	.game-container {
 		flex-direction: row;
 		height: 100vh;
@@ -597,7 +597,7 @@ button:disabled {
 }
 
 /* Portrait/tall screens - bottom panel layout */
-@media (max-aspect-ratio: 1/1) {
+@media (max-aspect-ratio: 1 / 1) {
 	body {
 		min-height: 100vh;
 		min-height: 100dvh;
@@ -830,7 +830,7 @@ button:disabled {
 	cursor: pointer;
 }
 
-.dont-show-again input[type='checkbox'] {
+.dont-show-again input[type="checkbox"] {
 	cursor: pointer;
 }
 
