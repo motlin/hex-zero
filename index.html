@@ -1,312 +1,335 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hex Zero</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Hex Zero</title>
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Hex Zero">
-    <meta property="og:description" content="A challenging puzzle game where you strategically place pieces to reduce all hexes to zero.">
-    <meta property="og:image" content="/src/hex-zero-card.png">
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="Hex Zero" />
+		<meta
+			property="og:description"
+			content="A challenging puzzle game where you strategically place pieces to reduce all hexes to zero."
+		/>
+		<meta property="og:image" content="/src/hex-zero-card.png" />
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="Hex Zero">
-    <meta property="twitter:description" content="A challenging puzzle game where you strategically place pieces to reduce all hexes to zero.">
-    <meta property="twitter:image" content="/src/hex-zero-card.png">
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:title" content="Hex Zero" />
+		<meta
+			property="twitter:description"
+			content="A challenging puzzle game where you strategically place pieces to reduce all hexes to zero."
+		/>
+		<meta property="twitter:image" content="/src/hex-zero-card.png" />
 
-    <link rel="stylesheet" href="/src/hex-zero.css">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8GSBP3FXDS"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+		<link rel="stylesheet" href="/src/hex-zero.css" />
+		<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-8GSBP3FXDS"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag() {
+				dataLayer.push(arguments);
+			}
+			gtag('js', new Date());
 
-      gtag('config', 'G-8GSBP3FXDS');
-    </script>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3146575260211386"
-         crossorigin="anonymous"></script>
-</head>
-<body>
-    <h1 class="game-title">Hex Zero</h1>
+			gtag('config', 'G-8GSBP3FXDS');
+		</script>
+		<!-- Google AdSense -->
+		<script
+			async
+			src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3146575260211386"
+			crossorigin="anonymous"
+		></script>
+	</head>
+	<body>
+		<h1 class="game-title">Hex Zero</h1>
 
-    <!-- Difficulty Selection Screen -->
-    <div id="difficultyScreen" class="difficulty-screen">
-        <div class="hamburger-menu-container">
-            <button id="menuHamburgerBtn" class="hamburger-button">☰</button>
-            <div id="menuHamburgerMenu" class="hamburger-dropdown hidden">
-                <button id="howToPlayMenuBtn">How to Play</button>
-                <button id="menuAchievementsButton">🏆 Achievements (0/15)</button>
-                <button id="githubLinkMenuBtn" onclick="window.open('https://github.com/motlin/hex-zero', '_blank')">GitHub</button>
-            </div>
-        </div>
-        <h2>Select Difficulty</h2>
-        <div class="difficulty-options">
-            <div class="difficulty-card" onclick="startGame(3, 4)">
-                <h3>Easy</h3>
-                <p>Small board (radius 3) with 4 pieces</p>
-            </div>
-            <div class="difficulty-card recommended" onclick="startGame(3, 6)">
-                <h3>Medium</h3>
-                <p>Standard board (radius 3) with 6 pieces</p>
-                <span class="recommended-badge">Recommended</span>
-            </div>
-            <div class="difficulty-card" onclick="startGame(3, 8)">
-                <h3>Hard</h3>
-                <p>Standard board (radius 3) with 8 pieces</p>
-            </div>
-            <div class="difficulty-card" onclick="startGame(4, 10)">
-                <h3>Extreme</h3>
-                <p>Large board (radius 4) with 10 pieces</p>
-            </div>
-            <div class="difficulty-card" onclick="startGame(4, 14)">
-                <h3>Impossible</h3>
-                <p>Large board (radius 4) with 14 pieces</p>
-            </div>
-        </div>
+		<!-- Difficulty Selection Screen -->
+		<div id="difficultyScreen" class="difficulty-screen">
+			<div class="hamburger-menu-container">
+				<button id="menuHamburgerBtn" class="hamburger-button">☰</button>
+				<div id="menuHamburgerMenu" class="hamburger-dropdown hidden">
+					<button id="howToPlayMenuBtn">How to Play</button>
+					<button id="menuAchievementsButton">🏆 Achievements (0/15)</button>
+					<button
+						id="githubLinkMenuBtn"
+						onclick="window.open('https://github.com/motlin/hex-zero', '_blank')"
+					>
+						GitHub
+					</button>
+				</div>
+			</div>
+			<h2>Select Difficulty</h2>
+			<div class="difficulty-options">
+				<div class="difficulty-card" onclick="startGame(3, 4)">
+					<h3>Easy</h3>
+					<p>Small board (radius 3) with 4 pieces</p>
+				</div>
+				<div class="difficulty-card recommended" onclick="startGame(3, 6)">
+					<h3>Medium</h3>
+					<p>Standard board (radius 3) with 6 pieces</p>
+					<span class="recommended-badge">Recommended</span>
+				</div>
+				<div class="difficulty-card" onclick="startGame(3, 8)">
+					<h3>Hard</h3>
+					<p>Standard board (radius 3) with 8 pieces</p>
+				</div>
+				<div class="difficulty-card" onclick="startGame(4, 10)">
+					<h3>Extreme</h3>
+					<p>Large board (radius 4) with 10 pieces</p>
+				</div>
+				<div class="difficulty-card" onclick="startGame(4, 14)">
+					<h3>Impossible</h3>
+					<p>Large board (radius 4) with 14 pieces</p>
+				</div>
+			</div>
 
-        <div style="border-top: 1px solid #2a5080; padding-top: 20px;">
-            <h3 style="color: #f39c12; margin-bottom: 15px;">Custom Game</h3>
-            <form class="custom-form" onsubmit="event.preventDefault(); startCustomGame();">
-                <label>Radius:</label>
-                <input type="number" id="customRadius" min="2" max="8" value="4" required>
-                <label>Pieces:</label>
-                <input type="number" id="customPieces" min="3" max="15" value="8" required>
-                <button type="submit" id="customStartBtn">Start</button>
-                <span class="error-message" data-for="customRadius">Radius must be between 2 and 8</span>
-                <span class="error-message" data-for="customPieces">Pieces must be between 3 and 15</span>
-            </form>
-        </div>
-    </div>
+			<div style="border-top: 1px solid #2a5080; padding-top: 20px">
+				<h3 style="color: #f39c12; margin-bottom: 15px">Custom Game</h3>
+				<form class="custom-form" onsubmit="event.preventDefault(); startCustomGame();">
+					<label>Radius:</label>
+					<input type="number" id="customRadius" min="2" max="8" value="4" required />
+					<label>Pieces:</label>
+					<input type="number" id="customPieces" min="3" max="15" value="8" required />
+					<button type="submit" id="customStartBtn">Start</button>
+					<span class="error-message" data-for="customRadius">Radius must be between 2 and 8</span>
+					<span class="error-message" data-for="customPieces">Pieces must be between 3 and 15</span>
+				</form>
+			</div>
+		</div>
 
-    <!-- Game Screen -->
-    <div id="gameScreen" class="game-container hidden">
-        <div class="canvas-container">
-            <canvas id="gameCanvas"></canvas>
-            <!-- Hamburger menu in canvas top right -->
-            <div class="hamburger-menu-container">
-                <button id="hamburgerBtn" class="hamburger-button">☰</button>
-                <div id="hamburgerMenu" class="hamburger-dropdown hidden">
-                    <button id="newGameBtn">New Game</button>
-                    <button id="restartBtn">Restart</button>
-                    <button id="howToPlayBtn" onclick="showInstructions()">How to Play</button>
-                    <button id="achievementsButton">🏆 Achievements (0/15)</button>
-                    <button id="githubLinkBtn" onclick="window.open('https://github.com/motlin/hex-zero', '_blank')">GitHub</button>
-                </div>
-            </div>
-        </div>
+		<!-- Game Screen -->
+		<div id="gameScreen" class="game-container hidden">
+			<div class="canvas-container">
+				<canvas id="gameCanvas"></canvas>
+				<!-- Hamburger menu in canvas top right -->
+				<div class="hamburger-menu-container">
+					<button id="hamburgerBtn" class="hamburger-button">☰</button>
+					<div id="hamburgerMenu" class="hamburger-dropdown hidden">
+						<button id="newGameBtn">New Game</button>
+						<button id="restartBtn">Restart</button>
+						<button id="howToPlayBtn" onclick="showInstructions()">How to Play</button>
+						<button id="achievementsButton">🏆 Achievements (0/15)</button>
+						<button
+							id="githubLinkBtn"
+							onclick="window.open('https://github.com/motlin/hex-zero', '_blank')"
+						>
+							GitHub
+						</button>
+					</div>
+				</div>
+			</div>
 
-        <!-- Control Panel for 1010-style piece drag/drop -->
-        <div id="controlPanel" class="control-panel">
-            <div class="piece-panel">
-                <div id="piecesContainer" class="pieces-container">
-                    <!-- Pieces will be dynamically added here -->
-                </div>
-                <button id="morePiecesBtn" class="more-pieces-button">More Pieces</button>
-            </div>
+			<!-- Control Panel for 1010-style piece drag/drop -->
+			<div id="controlPanel" class="control-panel">
+				<div class="piece-panel">
+					<div id="piecesContainer" class="pieces-container">
+						<!-- Pieces will be dynamically added here -->
+					</div>
+					<button id="morePiecesBtn" class="more-pieces-button">More Pieces</button>
+				</div>
 
-            <div class="bottom-controls">
-                <button id="undoBtn">Undo</button>
-                <button id="hintBtn">Hint</button>
-                <button id="redoBtn">Redo</button>
-                <div class="solution-status" id="solutionStatus"></div>
-            </div>
-        </div>
+				<div class="bottom-controls">
+					<button id="undoBtn">Undo</button>
+					<button id="hintBtn">Hint</button>
+					<button id="redoBtn">Redo</button>
+					<div class="solution-status" id="solutionStatus"></div>
+				</div>
+			</div>
 
-        <!-- Old controls - hidden for now, will be removed later -->
-        <div class="controls hidden">
-            <h3 style="margin: 0;">Current Piece</h3>
-            <div class="piece-navigation">
-                <div class="piece-nav-button" onclick="game.cyclePiece(-1)">
-                    <canvas id="prevPiece" width="42" height="42"></canvas>
-                </div>
-                <canvas id="piecePreview" width="130" height="130"></canvas>
-                <div class="piece-nav-button" onclick="game.cyclePiece(1)">
-                    <canvas id="nextPiece" width="42" height="42"></canvas>
-                </div>
-            </div>
-            <div class="piece-info">
-                <div id="pieceNumber">Piece 1 of 8</div>
-                <div id="piecePlaced" style="color: #666; display: none;">Already Placed</div>
-            </div>
+			<!-- Old controls - hidden for now, will be removed later -->
+			<div class="controls hidden">
+				<h3 style="margin: 0">Current Piece</h3>
+				<div class="piece-navigation">
+					<div class="piece-nav-button" onclick="game.cyclePiece(-1)">
+						<canvas id="prevPiece" width="42" height="42"></canvas>
+					</div>
+					<canvas id="piecePreview" width="130" height="130"></canvas>
+					<div class="piece-nav-button" onclick="game.cyclePiece(1)">
+						<canvas id="nextPiece" width="42" height="42"></canvas>
+					</div>
+				</div>
+				<div class="piece-info">
+					<div id="pieceNumber">Piece 1 of 8</div>
+					<div id="piecePlaced" style="color: #666; display: none">Already Placed</div>
+				</div>
 
-            <button id="hintBtnOld">Show Hint</button>
-            <button id="newGameBtnOld">New Game</button>
-            <button id="restartBtnOld">Restart Level</button>
+				<button id="hintBtnOld">Show Hint</button>
+				<button id="newGameBtnOld">New Game</button>
+				<button id="restartBtnOld">Restart Level</button>
 
-            <div class="solution-status" id="solutionStatusOld"></div>
+				<div class="solution-status" id="solutionStatusOld"></div>
 
-            <div class="instructions">
-                <strong>Controls:</strong><br>
-                ↑/↓ - Cycle pieces<br>
-                ← - Undo<br>
-                → - Redo<br>
-                Click - Place piece
-            </div>
-        </div>
-    </div>
+				<div class="instructions">
+					<strong>Controls:</strong><br />
+					↑/↓ - Cycle pieces<br />
+					← - Undo<br />
+					→ - Redo<br />
+					Click - Place piece
+				</div>
+			</div>
+		</div>
 
-    <!-- Instructions Modal -->
-    <div id="instructionsModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <h2>How to Play Hex Zero</h2>
-            <div class="instructions-content">
-                <section class="instruction-section">
-                    <h3>🎯 Objective</h3>
-                    <p>Reduce all hexes to height zero by strategically placing every piece on the board.</p>
-                </section>
+		<!-- Instructions Modal -->
+		<div id="instructionsModal" class="modal hidden">
+			<div class="modal-overlay"></div>
+			<div class="modal-content">
+				<h2>How to Play Hex Zero</h2>
+				<div class="instructions-content">
+					<section class="instruction-section">
+						<h3>🎯 Objective</h3>
+						<p>Reduce all hexes to height zero by strategically placing every piece on the board.</p>
+					</section>
 
-                <section class="instruction-section">
-                    <h3>🧩 Game Mechanics</h3>
-                    <ul>
-                        <li><strong>Pieces:</strong> Multi-hex shapes that must all be placed to win</li>
-                        <li><strong>Heights:</strong> Each hex displays its current height as a number</li>
-                        <li><strong>Placement:</strong> Placing a piece reduces the height by 1 for each covered hex</li>
-                        <li><strong>Winning:</strong> The puzzle is solved when all hexes reach height 0</li>
-                    </ul>
-                </section>
+					<section class="instruction-section">
+						<h3>🧩 Game Mechanics</h3>
+						<ul>
+							<li><strong>Pieces:</strong> Multi-hex shapes that must all be placed to win</li>
+							<li><strong>Heights:</strong> Each hex displays its current height as a number</li>
+							<li>
+								<strong>Placement:</strong> Placing a piece reduces the height by 1 for each covered hex
+							</li>
+							<li><strong>Winning:</strong> The puzzle is solved when all hexes reach height 0</li>
+						</ul>
+					</section>
 
-                <section class="instruction-section">
-                    <h3>💡 Tips</h3>
-                    <ul>
-                        <li>Start with pieces that can only fit in specific locations</li>
-                        <li>Use a hint if you are *really* stuck</li>
-                        <li>Use undo if you get stuck</li>
-                    </ul>
-                </section>
+					<section class="instruction-section">
+						<h3>💡 Tips</h3>
+						<ul>
+							<li>Start with pieces that can only fit in specific locations</li>
+							<li>Use a hint if you are *really* stuck</li>
+							<li>Use undo if you get stuck</li>
+						</ul>
+					</section>
 
-                <section class="instruction-section">
-                    <h3>🎮 Controls</h3>
-                    <ul>
-                        <li><strong>Mouse:</strong> Click to place the current piece</li>
-                        <li><strong>Arrows:</strong> ↑/↓ cycle pieces, ←/→ undo/redo</li>
-                        <li><strong>Scroll:</strong> Mouse wheel or trackpad to cycle pieces</li>
-                        <li><strong>Zoom:</strong> +/- keys or pinch gestures</li>
-                        <li><strong>Pan:</strong> Drag with mouse or two-finger drag on mobile</li>
-                        <li><strong>Hint:</strong> H key or Hint button for placement suggestions</li>
-                    </ul>
-                </section>
-            </div>
-            <div class="modal-footer">
-                <label class="dont-show-again">
-                    <input type="checkbox" id="dontShowAgain">
-                    Don't show this automatically again
-                </label>
-                <button id="closeInstructionsBtn">Close</button>
-            </div>
-        </div>
-    </div>
+					<section class="instruction-section">
+						<h3>🎮 Controls</h3>
+						<ul>
+							<li><strong>Mouse:</strong> Click to place the current piece</li>
+							<li><strong>Arrows:</strong> ↑/↓ cycle pieces, ←/→ undo/redo</li>
+							<li><strong>Scroll:</strong> Mouse wheel or trackpad to cycle pieces</li>
+							<li><strong>Zoom:</strong> +/- keys or pinch gestures</li>
+							<li><strong>Pan:</strong> Drag with mouse or two-finger drag on mobile</li>
+							<li><strong>Hint:</strong> H key or Hint button for placement suggestions</li>
+						</ul>
+					</section>
+				</div>
+				<div class="modal-footer">
+					<label class="dont-show-again">
+						<input type="checkbox" id="dontShowAgain" />
+						Don't show this automatically again
+					</label>
+					<button id="closeInstructionsBtn">Close</button>
+				</div>
+			</div>
+		</div>
 
-    <!-- Keyboard Shortcuts Modal -->
-    <div id="keyboardShortcutsModal" class="modal hidden">
-        <div class="modal-overlay"></div>
-        <div class="modal-content">
-            <h2>Keyboard Shortcuts</h2>
-            <div class="shortcuts-grid">
-                <div class="shortcut-item">
-                    <span class="key">?</span>
-                    <span class="description">Show keyboard shortcuts</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">I</span>
-                    <span class="description">Show instructions</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">H</span>
-                    <span class="description">Show hint</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">↑</span>
-                    <span class="description">Previous piece</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">↓</span>
-                    <span class="description">Next piece</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">←</span>
-                    <span class="description">Undo</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">→</span>
-                    <span class="description">Redo</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">+</span>
-                    <span class="description">Zoom in</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">-</span>
-                    <span class="description">Zoom out</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">🖱️</span>
-                    <span class="description">Scroll to cycle pieces</span>
-                </div>
-                <div class="shortcut-item">
-                    <span class="key">R</span>
-                    <span class="description">Reset view</span>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="closeShortcutsBtn">Close</button>
-                <button id="showInstructionsFromShortcuts">Instructions</button>
-            </div>
-        </div>
-    </div>
+		<!-- Keyboard Shortcuts Modal -->
+		<div id="keyboardShortcutsModal" class="modal hidden">
+			<div class="modal-overlay"></div>
+			<div class="modal-content">
+				<h2>Keyboard Shortcuts</h2>
+				<div class="shortcuts-grid">
+					<div class="shortcut-item">
+						<span class="key">?</span>
+						<span class="description">Show keyboard shortcuts</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">I</span>
+						<span class="description">Show instructions</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">H</span>
+						<span class="description">Show hint</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">↑</span>
+						<span class="description">Previous piece</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">↓</span>
+						<span class="description">Next piece</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">←</span>
+						<span class="description">Undo</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">→</span>
+						<span class="description">Redo</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">+</span>
+						<span class="description">Zoom in</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">-</span>
+						<span class="description">Zoom out</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">🖱️</span>
+						<span class="description">Scroll to cycle pieces</span>
+					</div>
+					<div class="shortcut-item">
+						<span class="key">R</span>
+						<span class="description">Reset view</span>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button id="closeShortcutsBtn">Close</button>
+					<button id="showInstructionsFromShortcuts">Instructions</button>
+				</div>
+			</div>
+		</div>
 
-    <!-- Victory Screen -->
-    <div id="victoryScreen" class="victory-screen hidden">
-        <div class="victory-content">
-            <h1 class="victory-title">🎉 Victory! 🎉</h1>
-            <p class="victory-message">Congratulations! You solved the puzzle!</p>
-            <div class="victory-stats">
-                <div class="stat-item">
-                    <span class="stat-label">Difficulty:</span>
-                    <span id="victoryDifficulty" class="stat-value">Medium</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Undos:</span>
-                    <span id="victoryUndos" class="stat-value">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Hints:</span>
-                    <span id="victoryHints" class="stat-value">0</span>
-                </div>
-            </div>
-            <div class="victory-buttons">
-                <button onclick="window.game?.startNewGame()" class="victory-button primary">New Game</button>
-                <button onclick="window.game?.restartAndHideVictory()" class="victory-button">Play Again</button>
-            </div>
-        </div>
-    </div>
+		<!-- Victory Screen -->
+		<div id="victoryScreen" class="victory-screen hidden">
+			<div class="victory-content">
+				<h1 class="victory-title">🎉 Victory! 🎉</h1>
+				<p class="victory-message">Congratulations! You solved the puzzle!</p>
+				<div class="victory-stats">
+					<div class="stat-item">
+						<span class="stat-label">Difficulty:</span>
+						<span id="victoryDifficulty" class="stat-value">Medium</span>
+					</div>
+					<div class="stat-item">
+						<span class="stat-label">Undos:</span>
+						<span id="victoryUndos" class="stat-value">0</span>
+					</div>
+					<div class="stat-item">
+						<span class="stat-label">Hints:</span>
+						<span id="victoryHints" class="stat-value">0</span>
+					</div>
+				</div>
+				<div class="victory-buttons">
+					<button onclick="window.game?.startNewGame()" class="victory-button primary">New Game</button>
+					<button onclick="window.game?.restartAndHideVictory()" class="victory-button">Play Again</button>
+				</div>
+			</div>
+		</div>
 
-    <!-- Mobile Controls - replaced by bottom panel -->
-    <div id="mobileControls" class="mobile-controls hidden">
-        <div class="mobile-controls-grid">
-            <div class="piece-nav-button" onclick="game.cyclePiece(-1)">
-                <canvas id="mobilePrevPiece" width="50" height="50"></canvas>
-            </div>
-            <button onclick="game.toggleHint()">Hint</button>
-            <div class="piece-nav-button" onclick="game.cyclePiece(1)">
-                <canvas id="mobileNextPiece" width="50" height="50"></canvas>
-            </div>
-            <button onclick="game.undo()">Undo</button>
-            <button onclick="game.resetGame()">Reset</button>
-            <button onclick="game.redo()">Redo</button>
-        </div>
-        <div style="text-align: center; margin-top: 10px; font-size: 12px;">
-            <span id="mobilePieceInfo">Piece 1 of 8</span>
-            <span id="mobileSolutionStatus" class="solution-status"></span>
-        </div>
-    </div>
+		<!-- Mobile Controls - replaced by bottom panel -->
+		<div id="mobileControls" class="mobile-controls hidden">
+			<div class="mobile-controls-grid">
+				<div class="piece-nav-button" onclick="game.cyclePiece(-1)">
+					<canvas id="mobilePrevPiece" width="50" height="50"></canvas>
+				</div>
+				<button onclick="game.toggleHint()">Hint</button>
+				<div class="piece-nav-button" onclick="game.cyclePiece(1)">
+					<canvas id="mobileNextPiece" width="50" height="50"></canvas>
+				</div>
+				<button onclick="game.undo()">Undo</button>
+				<button onclick="game.resetGame()">Reset</button>
+				<button onclick="game.redo()">Redo</button>
+			</div>
+			<div style="text-align: center; margin-top: 10px; font-size: 12px">
+				<span id="mobilePieceInfo">Piece 1 of 8</span>
+				<span id="mobileSolutionStatus" class="solution-status"></span>
+			</div>
+		</div>
 
-    <script type="module" src="/src/hex-zero.ts"></script>
-</body>
+		<script type="module" src="/src/hex-zero.ts"></script>
+	</body>
 </html>

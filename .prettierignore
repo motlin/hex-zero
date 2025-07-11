@@ -1,3 +1,6 @@
 .llm/
 package.json
 package-lock.json
+*.css
+*.json5
+*.json
