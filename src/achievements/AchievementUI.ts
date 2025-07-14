@@ -1,5 +1,6 @@
-import {AchievementId, ACHIEVEMENTS, getAchievementsByCategory} from './AchievementDefinitions';
-import {AchievementData, AchievementStats} from './AchievementStorage';
+import type {AchievementId} from './AchievementDefinitions';
+import {ACHIEVEMENTS, getAchievementsByCategory} from './AchievementDefinitions';
+import type {AchievementData, AchievementStats} from './AchievementStorage';
 
 export class AchievementUI {
 	private activeNotifications: HTMLElement[] = [];

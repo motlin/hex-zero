@@ -4,6 +4,8 @@ repos:
       hooks:
           - id: check-yaml
           - id: check-json
+            # Exclude JSONC files (JSON with Comments) as they need comment support
+            exclude: "tsconfig.*\\.json"
           - id: check-toml
           - id: check-xml
           - id: end-of-file-fixer
@@ -38,15 +40,3 @@ repos:
             language: system
             files: \.(js|jsx|ts|tsx|mjs|cjs)$
             types: [file]
-
-ci:
-    autofix_commit_msg: |
-        [pre-commit.ci] auto fixes from pre-commit.com hooks
-
-        for more information, see https://pre-commit.ci
-    autofix_prs: true
-    autoupdate_branch: ''
-    autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
-    autoupdate_schedule: weekly
-    skip: []
-    submodules: false

@@ -1,5 +1,7 @@
-import {AchievementId, ACHIEVEMENTS, DifficultyLevel} from './AchievementDefinitions';
-import {AchievementStorage, AchievementSaveData} from './AchievementStorage';
+import type {AchievementId, DifficultyLevel} from './AchievementDefinitions';
+import {ACHIEVEMENTS} from './AchievementDefinitions';
+import type {AchievementSaveData} from './AchievementStorage';
+import {AchievementStorage} from './AchievementStorage';
 import {AchievementUI} from './AchievementUI';
 
 export interface GameCompletionData {

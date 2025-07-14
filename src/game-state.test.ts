@@ -147,12 +147,16 @@ describe('GameState', () => {
 			expect(validPosition).toBeDefined();
 
 			// Get the hex that will be affected by the first tile of the piece
-			const affectedHex = grid.getHex(validPosition!.q + piece.tiles[0].q, validPosition!.r + piece.tiles[0].r);
-			const initialHeight = affectedHex!.height;
+			if (!validPosition) throw new Error('No valid position found');
+			const firstTile = piece.tiles[0];
+			if (!firstTile) throw new Error('No tiles in piece');
+			const affectedHex = grid.getHex(validPosition.q + firstTile.q, validPosition.r + firstTile.r);
+			if (!affectedHex) throw new Error('Affected hex not found');
+			const initialHeight = affectedHex.height;
 
-			gameState.placePiece(validPosition!.q, validPosition!.r);
+			gameState.placePiece(validPosition.q, validPosition.r);
 
-			expect(affectedHex!.height).toBe(initialHeight - 1);
+			expect(affectedHex.height).toBe(initialHeight - 1);
 		});
 	});
 
@@ -236,16 +240,20 @@ describe('GameState', () => {
 			expect(validPosition).toBeDefined();
 
 			// Get the hex that will be affected by the first tile of the piece
-			const affectedHex = grid.getHex(validPosition!.q + piece.tiles[0].q, validPosition!.r + piece.tiles[0].r);
-			const initialHeight = affectedHex!.height;
+			if (!validPosition) throw new Error('No valid position found');
+			const firstTile = piece.tiles[0];
+			if (!firstTile) throw new Error('No tiles in piece');
+			const affectedHex = grid.getHex(validPosition.q + firstTile.q, validPosition.r + firstTile.r);
+			if (!affectedHex) throw new Error('Affected hex not found');
+			const initialHeight = affectedHex.height;
 
-			gameState.placePiece(validPosition!.q, validPosition!.r);
-			expect(affectedHex!.height).toBe(initialHeight - 1);
+			gameState.placePiece(validPosition.q, validPosition.r);
+			expect(affectedHex.height).toBe(initialHeight - 1);
 			expect(gameState.isPiecePlaced(initialPieceIndex)).toBe(true);
 
 			const undone = gameState.undo();
 			expect(undone).toBe(true);
-			expect(affectedHex!.height).toBe(initialHeight);
+			expect(affectedHex.height).toBe(initialHeight);
 			expect(gameState.isPiecePlaced(initialPieceIndex)).toBe(false);
 			expect(gameState.getCurrentPieceIndex()).toBe(initialPieceIndex);
 		});
@@ -260,15 +268,19 @@ describe('GameState', () => {
 			expect(validPosition).toBeDefined();
 
 			// Get the hex that will be affected by the first tile of the piece
-			const affectedHex = grid.getHex(validPosition!.q + piece.tiles[0].q, validPosition!.r + piece.tiles[0].r);
-			const initialHeight = affectedHex!.height;
+			if (!validPosition) throw new Error('No valid position found');
+			const firstTile = piece.tiles[0];
+			if (!firstTile) throw new Error('No tiles in piece');
+			const affectedHex = grid.getHex(validPosition.q + firstTile.q, validPosition.r + firstTile.r);
+			if (!affectedHex) throw new Error('Affected hex not found');
+			const initialHeight = affectedHex.height;
 
-			gameState.placePiece(validPosition!.q, validPosition!.r);
+			gameState.placePiece(validPosition.q, validPosition.r);
 			gameState.undo();
 
 			const redone = gameState.redo();
 			expect(redone).toBe(true);
-			expect(affectedHex!.height).toBe(initialHeight - 1);
+			expect(affectedHex.height).toBe(initialHeight - 1);
 		});
 
 		it('clears redo stack when making new move', () => {
@@ -280,7 +292,8 @@ describe('GameState', () => {
 			const firstValidPosition = positions.find((pos) => gameState.canPlacePiece(firstPiece, pos.q, pos.r));
 			expect(firstValidPosition).toBeDefined();
 
-			gameState.placePiece(firstValidPosition!.q, firstValidPosition!.r);
+			if (!firstValidPosition) throw new Error('No valid position found');
+			gameState.placePiece(firstValidPosition.q, firstValidPosition.r);
 			gameState.undo();
 			expect(gameState.canRedo()).toBe(true);
 
@@ -302,7 +315,8 @@ describe('GameState', () => {
 			const validPosition = positions.find((pos) => gameState.canPlacePiece(piece, pos.q, pos.r));
 			expect(validPosition).toBeDefined();
 
-			gameState.placePiece(validPosition!.q, validPosition!.r);
+			if (!validPosition) throw new Error('No valid position found');
+			gameState.placePiece(validPosition.q, validPosition.r);
 			const initialUndoCount = gameState.getUndoCount();
 
 			gameState.undo();
@@ -637,7 +651,8 @@ describe('GameState', () => {
 			});
 
 			const targetHex = Array.from(grid.hexes.values()).find((hex) => hex.height > 0);
-			gameState.placePiece(targetHex!.q, targetHex!.r);
+			if (!targetHex) throw new Error('No targetHex found');
+			gameState.placePiece(targetHex.q, targetHex.r);
 
 			gameState.restart();
 
@@ -650,10 +665,14 @@ describe('GameState', () => {
 	describe('getters', () => {
 		it('returns immutable copies of pieces', () => {
 			const pieces = gameState.getPieces();
-			const originalLength = pieces[0].tiles.length;
+			const firstPiece = pieces[0];
+			if (!firstPiece) throw new Error('No pieces found');
+			const originalLength = firstPiece.tiles.length;
 
-			pieces[0].tiles.push({q: 99, r: 99});
-			expect(gameState.getPieces()[0].tiles).toHaveLength(originalLength);
+			firstPiece.tiles.push({q: 99, r: 99});
+			const newFirstPiece = gameState.getPieces()[0];
+			if (!newFirstPiece) throw new Error('No pieces found after modification');
+			expect(newFirstPiece.tiles).toHaveLength(originalLength);
 		});
 
 		it('returns copy of current piece', () => {

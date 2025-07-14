@@ -1,4 +1,4 @@
-import {AchievementId} from './AchievementDefinitions';
+import type {AchievementId} from './AchievementDefinitions';
 
 export interface AchievementData {
 	unlocked: boolean;

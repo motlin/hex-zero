@@ -74,6 +74,7 @@ export class GameState {
 			}
 
 			const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
+			if (!pos) throw new Error('No position selected');
 			this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
 
 			piece.tiles.forEach((tile) => {
@@ -105,6 +106,7 @@ export class GameState {
 
 	placePiece(centerQ: number, centerR: number): boolean {
 		const piece = this.pieces[this.currentPieceIndex];
+		if (!piece) return false;
 		if (!this.canPlacePiece(piece, centerQ, centerR)) return false;
 		if (this.placedPieces.has(this.currentPieceIndex)) return false;
 
@@ -289,6 +291,7 @@ export class GameState {
 
 	getCurrentPiece(): Piece {
 		const piece = this.pieces[this.currentPieceIndex];
+		if (!piece) throw new Error('No current piece found');
 		return {
 			tiles: [...piece.tiles],
 			center: {...piece.center},
@@ -298,6 +301,7 @@ export class GameState {
 	getPieceByIndex(index: number): Piece | null {
 		if (index < 0 || index >= this.pieces.length) return null;
 		const piece = this.pieces[index];
+		if (!piece) return null;
 		return {
 			tiles: [...piece.tiles],
 			center: {...piece.center},
