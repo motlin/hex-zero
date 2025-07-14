@@ -5,6 +5,7 @@
 		"lib": ["ES2022", "DOM", "DOM.Iterable"],
 		"strict": true,
 		"esModuleInterop": true,
+		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true,
@@ -15,7 +16,13 @@
 		"noImplicitAny": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"noImplicitReturns": true
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noImplicitOverride": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"verbatimModuleSyntax": true
 	},
 	"include": ["src/**/*", "tests/**/*", "vite.config.ts", "vitest.config.ts"],
 	"exclude": ["node_modules", "dist", "build", "coverage"]
