@@ -8,11 +8,11 @@
 		"preview": "vite preview",
 		"build": "vite build",
 		"lint": "eslint . --fix",
-		"format": "biome format --write . && prettier --write \"src/**/*.{js,ts,css,md,json}\"",
+		"format": "biome format --write . && prettier --write .",
 		"ci:eslint": "eslint . --format json --output-file eslint_report.json",
 		"ci:prettier": "prettier --check \"src/**/*.{js,ts,css,md,json}\"",
 		"ci:biome": "biome format .",
-		"typecheck": "tsc --noEmit",
+		"ci:typecheck": "tsc --noEmit",
 		"test": "vitest",
 		"test:ui": "vitest --ui",
 		"test:run": "vitest run"
@@ -30,19 +30,22 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.1.2",
 		"@eslint/js": "^9.30.1",
+		"eslint-plugin-react-hooks": "^5.2.0",
+		"eslint-plugin-react-refresh": "^0.4.20",
 		"@testing-library/dom": "^10.4.0",
 		"@types/canvas-confetti": "^1.9.0",
 		"@types/node": "^24.1.0",
 		"@vitest/ui": "^3.2.4",
 		"eslint": "^9.31.0",
 		"eslint-config-prettier": "^10.1.8",
+		"globals": "^16.3.0",
 		"jiti": "^2.4.2",
 		"jsdom": "^26.1.0",
 		"prettier": "^3.6.2",
 		"typescript": "^5.8.3",
 		"typescript-eslint": "^8.37.0",
 		"vite": "^7.0.5",
-		"vitest": "^3.1.4"
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"canvas-confetti": "^1.9.3"

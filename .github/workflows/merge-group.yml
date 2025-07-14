@@ -1,7 +1,8 @@
-# Jobs that run on pull_request, but not on merge_group. This is useful for jobs that post comments on Pull Requests, like ESLint annotations.
+# Jobs that run on merge_group, meaning they must pass before changes land. They also run on pull_request.
 
 on:
     pull_request:
+    merge_group:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -15,6 +16,8 @@ jobs:
             - uses: actions/setup-python@v5
               with:
                   python-version: '3.x'
+            - uses: jdx/mise-action@v2
+            - run: npm ci
             - uses: pre-commit/action@v3.0.1
 
     eslint:
@@ -27,7 +30,7 @@ jobs:
             - uses: actions/checkout@v4
             - uses: jdx/mise-action@v2
 
-            - run: just ci-eslint
+            - run: just eslint-ci
               continue-on-error: true
 
             - uses: ataylorme/eslint-annotate-action@2.2.0
@@ -39,7 +42,7 @@ jobs:
             - uses: actions/checkout@v4
             - uses: jdx/mise-action@v2
 
-            - run: just ci-biome
+            - run: just biome-ci
 
     prettier:
         runs-on: ubuntu-latest
@@ -47,21 +50,21 @@ jobs:
             - uses: actions/checkout@v4
             - uses: jdx/mise-action@v2
 
-            - run: just ci-prettier
+            - run: just prettier-ci
 
     typecheck:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
             - uses: jdx/mise-action@v2
-            - run: just ci-typecheck
+            - run: just typecheck-ci
 
     build:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
             - uses: jdx/mise-action@v2
-            - run: just ci-build
+            - run: just build-ci
 
     test:
         runs-on: ubuntu-latest
@@ -69,7 +72,7 @@ jobs:
             - uses: actions/checkout@v4
             - uses: jdx/mise-action@v2
 
-            - run: just ci-test
+            - run: just test-ci
 
     all-checks:
         name: All checks

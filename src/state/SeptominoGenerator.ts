@@ -29,7 +29,9 @@ export class SeptominoGenerator {
 
 			if (available.length > 0) {
 				const next = available[Math.floor(Math.random() * available.length)];
-				tiles.push(next);
+				if (next) {
+					tiles.push(next);
+				}
 			}
 		}
 

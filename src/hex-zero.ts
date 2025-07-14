@@ -4,7 +4,7 @@ import {HexRenderer} from './renderer/HexRenderer';
 import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
 import {CanvasManager} from './canvas/CanvasManager';
 import {AchievementManager} from './achievements/AchievementManager';
-import {DifficultyLevel} from './achievements/AchievementDefinitions';
+import type {DifficultyLevel} from './achievements/AchievementDefinitions';
 
 declare global {
 	interface Window {
@@ -392,8 +392,10 @@ class HexSeptominoGame {
 			(e) => {
 				// Only track if multiple fingers are touching
 				if (e.touches.length >= 2) {
-					this.swipeStartX = e.touches[0].clientX;
-					this.swipeStartY = e.touches[0].clientY;
+					const firstTouch = e.touches[0];
+					if (!firstTouch) return;
+					this.swipeStartX = firstTouch.clientX;
+					this.swipeStartY = firstTouch.clientY;
 					this.isSwipingPanel = true;
 					// Clear any existing touch hex to prevent preview interference
 					this.touchHex = null;
@@ -422,6 +424,7 @@ class HexSeptominoGame {
 				if (this.isSwipingPanel && this.swipeStartX !== null && this.swipeStartY !== null) {
 					// Get the last touch position before release
 					const touch = e.changedTouches[0];
+					if (!touch) return;
 					const deltaX = touch.clientX - this.swipeStartX;
 					const deltaY = touch.clientY - this.swipeStartY;
 
@@ -847,6 +850,7 @@ class HexSeptominoGame {
 		if (event.touches.length === 1) {
 			// Single touch - show piece preview and track position
 			const touch = event.touches[0];
+			if (!touch) return;
 			const canvas = this.canvasManager.getCanvas();
 			const rect = canvas.getBoundingClientRect();
 			const x = touch.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
@@ -866,6 +870,7 @@ class HexSeptominoGame {
 
 			const touch1 = event.touches[0];
 			const touch2 = event.touches[1];
+			if (!touch1 || !touch2) return;
 			const dx = touch2.clientX - touch1.clientX;
 			const dy = touch2.clientY - touch1.clientY;
 			this.lastPinchDistance = Math.sqrt(dx * dx + dy * dy);
@@ -882,6 +887,7 @@ class HexSeptominoGame {
 		if (event.touches.length === 1 && this.isTouching) {
 			// Single touch - update position
 			const touch = event.touches[0];
+			if (!touch) return;
 			const canvas = this.canvasManager.getCanvas();
 			const rect = canvas.getBoundingClientRect();
 			const x = touch.clientX - rect.left - canvas.width / 2 - this.panOffsetX;
@@ -899,6 +905,7 @@ class HexSeptominoGame {
 			// Two touches - handle pan and zoom
 			const touch1 = event.touches[0];
 			const touch2 = event.touches[1];
+			if (!touch1 || !touch2) return;
 
 			const dx = touch2.clientX - touch1.clientX;
 			const dy = touch2.clientY - touch1.clientY;
@@ -1277,9 +1284,10 @@ class HexSeptominoGame {
 			// Create piece container
 			const pieceContainer = document.createElement('div');
 			pieceContainer.className = `draggable-piece ${isPlaced ? 'empty-slot' : ''}`;
-			pieceContainer.dataset.pieceIndex = i.toString();
+			pieceContainer.dataset['pieceIndex'] = i.toString();
 
 			// Create SVG for the piece
+			if (!piece) continue;
 			const svg = this.createPieceSVG(piece, isPlaced);
 			pieceContainer.appendChild(svg);
 
@@ -1476,6 +1484,7 @@ class HexSeptominoGame {
 		event.preventDefault();
 		if (event.touches.length === 1) {
 			const touch = event.touches[0];
+			if (!touch) return;
 			this.startDrag(pieceIndex, touch.clientX, touch.clientY, event.target as HTMLElement);
 		}
 	}
@@ -1513,6 +1522,7 @@ class HexSeptominoGame {
 		event.preventDefault();
 		if (event.touches.length === 1) {
 			const touch = event.touches[0];
+			if (!touch) return;
 			this.updateDragPosition(touch.clientX, touch.clientY);
 		}
 	};

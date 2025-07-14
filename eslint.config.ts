@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import globals from 'globals';
 import typescript from 'typescript-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import type {Linter} from 'eslint';
@@ -15,12 +16,7 @@ const config: Linter.Config[] = [
 			ecmaVersion: 'latest',
 			sourceType: 'module',
 			globals: {
-				window: 'readonly',
-				document: 'readonly',
-				console: 'readonly',
-				setTimeout: 'readonly',
-				clearTimeout: 'readonly',
-				requestAnimationFrame: 'readonly',
+				...globals.browser,
 			},
 		},
 		rules: {
@@ -35,12 +31,12 @@ const config: Linter.Config[] = [
 			],
 			'@typescript-eslint/no-explicit-any': 'warn',
 			'no-console': ['warn', {allow: ['warn', 'error']}],
-			semi: ['error', 'always'],
-			quotes: ['error', 'single', {avoidEscape: true}],
-			'no-multiple-empty-lines': ['error', {max: 1, maxEOF: 0}],
-			'eol-last': ['error', 'always'],
-			'no-trailing-spaces': 'error',
-			'comma-dangle': ['error', 'always-multiline'],
+			semi: 'off',
+			quotes: 'off',
+			'no-multiple-empty-lines': 'off',
+			'eol-last': 'off',
+			'no-trailing-spaces': 'off',
+			'comma-dangle': 'off',
 			'line-comment-position': ['error', {position: 'above'}],
 		},
 	},
