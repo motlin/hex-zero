@@ -7,6 +7,8 @@ updates:
           time: '07:00'
           timezone: 'America/New_York'
       open-pull-requests-limit: 25
+      labels:
+          - 'dependencies'
       groups:
           typescript-ecosystem:
               patterns:
@@ -27,7 +29,6 @@ updates:
                   - '@tanstack/*'
       commit-message:
           prefix: 'dependabot'
-          prefix-development: 'dependabot'
           include: 'scope'
 
     - package-ecosystem: 'github-actions'
@@ -37,6 +38,8 @@ updates:
           time: '07:00'
           timezone: 'America/New_York'
       open-pull-requests-limit: 25
+      labels:
+          - 'dependencies'
       commit-message:
           prefix: 'dependabot'
           include: 'scope'
