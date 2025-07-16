@@ -105,11 +105,11 @@ The game board consists of a hexagonal grid arranged in a pointy-topped orientat
     - "New Game" button
     - "Restart Level" button
     - Controls preview:
-      Controls:
-      ↑/↓ - Cycle pieces
-      ← - Undo
-      → - Redo
-      Click - Place piece
+        - Controls:
+        - ↑/↓ - Cycle pieces
+        - ← - Undo
+        - → - Redo
+        - Click - Place piece
 
 #### Mobile Layout
 
