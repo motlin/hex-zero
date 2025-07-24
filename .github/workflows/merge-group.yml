@@ -33,7 +33,7 @@ jobs:
             - run: just eslint-ci
               continue-on-error: true
 
-            - uses: ataylorme/eslint-annotate-action@2.2.0
+            - uses: ataylorme/eslint-annotate-action@3.0.0
               if: always()
 
     biome:
