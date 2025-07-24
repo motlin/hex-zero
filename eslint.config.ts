@@ -7,9 +7,9 @@ import type {Linter} from 'eslint';
 const config: Linter.Config[] = [
 	{ignores: ['dist/', 'node_modules/', '.llm/']},
 
-	js.configs.recommended,
-	...typescript.configs.recommended,
-	eslintConfigPrettier,
+	js.configs.recommended as Linter.Config,
+	...(typescript.configs.recommended as Linter.Config[]),
+	eslintConfigPrettier as Linter.Config,
 
 	{
 		languageOptions: {

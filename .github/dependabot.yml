@@ -40,6 +40,8 @@ updates:
       open-pull-requests-limit: 25
       labels:
           - 'dependencies'
+      ignore:
+        - dependency-name: 'ataylorme/eslint-annotate-action'
       commit-message:
           prefix: 'dependabot'
           include: 'scope'
