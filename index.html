@@ -4,7 +4,7 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Hex Zero</title>
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/svg+xml" href="./favicon.svg" />
 
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
@@ -13,7 +13,7 @@
 			property="og:description"
 			content="A challenging puzzle game where you strategically place pieces to reduce all hexes to zero."
 		/>
-		<meta property="og:image" content="/src/hex-zero-card.png" />
+		<meta property="og:image" content="./src/hex-zero-card.png" />
 
 		<!-- Twitter -->
 		<meta property="twitter:card" content="summary_large_image" />
@@ -22,9 +22,9 @@
 			property="twitter:description"
 			content="A challenging puzzle game where you strategically place pieces to reduce all hexes to zero."
 		/>
-		<meta property="twitter:image" content="/src/hex-zero-card.png" />
+		<meta property="twitter:image" content="./src/hex-zero-card.png" />
 
-		<link rel="stylesheet" href="/src/hex-zero.css" />
+		<link rel="stylesheet" href="./src/hex-zero.css" />
 		<!-- Google tag (gtag.js) -->
 		<script async src="https://www.googletagmanager.com/gtag/js?id=G-8GSBP3FXDS"></script>
 		<script>
@@ -104,7 +104,6 @@
 		<div id="gameScreen" class="game-container hidden">
 			<div class="canvas-container">
 				<canvas id="gameCanvas"></canvas>
-				<!-- Hamburger menu in canvas top right -->
 				<div class="hamburger-menu-container">
 					<button id="hamburgerBtn" class="hamburger-button">☰</button>
 					<div id="hamburgerMenu" class="hamburger-dropdown hidden">
@@ -125,9 +124,7 @@
 			<!-- Control Panel for 1010-style piece drag/drop -->
 			<div id="controlPanel" class="control-panel">
 				<div class="piece-panel">
-					<div id="piecesContainer" class="pieces-container">
-						<!-- Pieces will be dynamically added here -->
-					</div>
+					<div id="piecesContainer" class="pieces-container"></div>
 					<button id="morePiecesBtn" class="more-pieces-button">More Pieces</button>
 				</div>
 
@@ -139,7 +136,6 @@
 				</div>
 			</div>
 
-			<!-- Old controls - hidden for now, will be removed later -->
 			<div class="controls hidden">
 				<h3 style="margin: 0">Current Piece</h3>
 				<div class="piece-navigation">
@@ -310,7 +306,6 @@
 			</div>
 		</div>
 
-		<!-- Mobile Controls - replaced by bottom panel -->
 		<div id="mobileControls" class="mobile-controls hidden">
 			<div class="mobile-controls-grid">
 				<div class="piece-nav-button" onclick="game.cyclePiece(-1)">
@@ -330,6 +325,6 @@
 			</div>
 		</div>
 
-		<script type="module" src="/src/hex-zero.ts"></script>
+		<script type="module" src="./src/hex-zero.ts"></script>
 	</body>
 </html>

@@ -34,10 +34,6 @@ function startGame(radius: number, numPieces: number): void {
 	document.getElementById('difficultyScreen')!.classList.add('hidden');
 	document.getElementById('gameScreen')!.classList.remove('hidden');
 
-	if (game) {
-		// Game instance exists, will be replaced
-	}
-
 	game = new HexSeptominoGame(radius, numPieces);
 	window.game = game;
 }
@@ -68,15 +64,12 @@ function hideInstructions(): void {
 		modal.classList.add('hidden');
 	}
 
-	// Update the preference if checkbox is checked
 	if (dontShowAgain?.checked) {
 		localStorage.setItem('hexZeroDontShowInstructions', 'true');
 	}
 }
 
-// Set up global instructions modal event listeners
 window.addEventListener('DOMContentLoaded', () => {
-	// Initialize global achievement manager
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 
@@ -92,7 +85,6 @@ window.addEventListener('DOMContentLoaded', () => {
 		instructionsOverlay.addEventListener('click', hideInstructions);
 	}
 
-	// Set up in-game hamburger menu (global, not per-game)
 	const hamburgerBtn = document.getElementById('hamburgerBtn') as HTMLElement;
 	const hamburgerMenu = document.getElementById('hamburgerMenu') as HTMLElement;
 
@@ -102,20 +94,17 @@ window.addEventListener('DOMContentLoaded', () => {
 			hamburgerMenu.classList.toggle('hidden');
 		});
 
-		// Close hamburger menu when clicking outside
 		document.addEventListener('click', (e) => {
 			if (!hamburgerBtn.contains(e.target as Node) && !hamburgerMenu.contains(e.target as Node)) {
 				hamburgerMenu.classList.add('hidden');
 			}
 		});
 
-		// Close hamburger menu after clicking a menu item
 		hamburgerMenu.addEventListener('click', () => {
 			setTimeout(() => hamburgerMenu.classList.add('hidden'), 100);
 		});
 	}
 
-	// Set up in-game menu buttons (global handlers)
 	const newGameBtn = document.getElementById('newGameBtn');
 	if (newGameBtn) {
 		newGameBtn.addEventListener('click', () => showDifficultyScreen());
@@ -142,7 +131,6 @@ window.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Menu hamburger button on difficulty screen
 	const menuHamburgerBtn = document.getElementById('menuHamburgerBtn');
 	const menuHamburgerMenu = document.getElementById('menuHamburgerMenu');
 	const howToPlayMenuBtn = document.getElementById('howToPlayMenuBtn');
@@ -153,7 +141,6 @@ window.addEventListener('DOMContentLoaded', () => {
 			menuHamburgerMenu.classList.toggle('hidden');
 		});
 
-		// Close menu when clicking outside
 		document.addEventListener('click', (e) => {
 			if (!menuHamburgerBtn.contains(e.target as Node) && !menuHamburgerMenu.contains(e.target as Node)) {
 				menuHamburgerMenu.classList.add('hidden');
@@ -168,30 +155,25 @@ window.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// Menu achievements button
 	const menuAchievementsButton = document.getElementById('menuAchievementsButton');
 	if (menuAchievementsButton && globalAchievementManager) {
 		menuAchievementsButton.addEventListener('click', () => {
 			menuHamburgerMenu?.classList.add('hidden');
 			globalAchievementManager?.showAchievements();
 		});
-		// Update the button text with achievement count
 		const count = globalAchievementManager.getUnlockedCount();
 		const total = globalAchievementManager.getTotalCount();
 		menuAchievementsButton.textContent = `🏆 Achievements (${count}/${total})`;
 	}
 
-	// Check if first-time player and if they want to see instructions
 	const isFirstTime = localStorage.getItem('hexZeroFirstTime') === null;
 	const dontShowInstructions = localStorage.getItem('hexZeroDontShowInstructions') === 'true';
 
 	if (isFirstTime && !dontShowInstructions) {
-		// Show instructions automatically for first-time players
 		showInstructions();
 		localStorage.setItem('hexZeroFirstTime', 'false');
 	}
 
-	// Handle ESC key for instructions modal
 	document.addEventListener('keydown', (e) => {
 		if (e.key === 'Escape' && instructionsModal && !instructionsModal.classList.contains('hidden')) {
 			hideInstructions();
@@ -227,7 +209,6 @@ class HexSeptominoGame {
 	} | null;
 	private achievementManager: AchievementManager;
 
-	// Bottom panel drag and drop state
 	private currentPage: number;
 	private piecesPerPage: number;
 	private isDragging: boolean;
@@ -236,7 +217,6 @@ class HexSeptominoGame {
 	private dragPreviewElement: HTMLElement | null;
 	private dragHoverHex: HexCoordinate | null;
 
-	// Swipe state for pieces panel
 	private swipeStartX: number | null;
 	private swipeStartY: number | null;
 	private isSwipingPanel: boolean;
@@ -266,9 +246,7 @@ class HexSeptominoGame {
 		this.lastPinchDistance = null;
 		this.invalidPlacementAnimation = null;
 
-		// Initialize bottom panel state
 		this.currentPage = 0;
-		// Start with 3 pieces per page as suggested
 		this.piecesPerPage = 3;
 		this.isDragging = false;
 		this.draggedPieceIndex = null;
@@ -276,12 +254,10 @@ class HexSeptominoGame {
 		this.dragPreviewElement = null;
 		this.dragHoverHex = null;
 
-		// Initialize swipe state
 		this.swipeStartX = null;
 		this.swipeStartY = null;
 		this.isSwipingPanel = false;
 
-		// Use global achievement manager
 		this.achievementManager = globalAchievementManager!;
 		this.achievementManager.trackGameStart();
 
@@ -320,7 +296,6 @@ class HexSeptominoGame {
 			(e) => {
 				e.preventDefault();
 
-				// Only handle vertical scrolling
 				if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
 					this.handleWheelEvent(e);
 				}
@@ -340,14 +315,11 @@ class HexSeptominoGame {
 		document.addEventListener('keydown', (e) => this.handleKeyPress(e));
 		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.toggleHint());
 
-		// Undo/Redo buttons
 		(document.getElementById('undoBtn') as HTMLElement).addEventListener('click', () => this.undo());
 		(document.getElementById('redoBtn') as HTMLElement).addEventListener('click', () => this.redo());
 
-		// More pieces button
 		(document.getElementById('morePiecesBtn') as HTMLElement).addEventListener('click', () => this.morePieces());
 
-		// Keyboard shortcuts modal event listeners
 		const closeBtn = document.getElementById('closeShortcutsBtn');
 		const modal = document.getElementById('keyboardShortcutsModal');
 		const modalOverlay = modal?.querySelector('.modal-overlay');
@@ -360,7 +332,6 @@ class HexSeptominoGame {
 			modalOverlay.addEventListener('click', () => this.toggleKeyboardShortcuts());
 		}
 
-		// Instructions navigation from shortcuts modal
 		const showInstructionsFromShortcuts = document.getElementById('showInstructionsFromShortcuts');
 		if (showInstructionsFromShortcuts) {
 			showInstructionsFromShortcuts.addEventListener('click', () => {
@@ -369,7 +340,6 @@ class HexSeptominoGame {
 			});
 		}
 
-		// Close modals on ESC key
 		document.addEventListener('keydown', (e) => {
 			if (e.key === 'Escape') {
 				if (modal && !modal.classList.contains('hidden')) {
@@ -378,7 +348,6 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Setup swipe handlers for pieces panel
 		this.setupPanelSwipeHandlers();
 	}
 
@@ -386,18 +355,15 @@ class HexSeptominoGame {
 		const piecesContainer = document.getElementById('piecesContainer');
 		if (!piecesContainer) return;
 
-		// Track multi-touch swipe gestures
 		piecesContainer.addEventListener(
 			'touchstart',
 			(e) => {
-				// Only track if multiple fingers are touching
 				if (e.touches.length >= 2) {
 					const firstTouch = e.touches[0];
 					if (!firstTouch) return;
 					this.swipeStartX = firstTouch.clientX;
 					this.swipeStartY = firstTouch.clientY;
 					this.isSwipingPanel = true;
-					// Clear any existing touch hex to prevent preview interference
 					this.touchHex = null;
 					this.isTouching = false;
 				}
@@ -408,9 +374,7 @@ class HexSeptominoGame {
 		piecesContainer.addEventListener(
 			'touchmove',
 			(e) => {
-				// Only process swipe if we started with 2+ fingers
 				if (this.isSwipingPanel && e.touches.length >= 2 && this.swipeStartX !== null) {
-					// Prevent any default behavior during multi-touch swipe
 					e.preventDefault();
 				}
 			},
@@ -420,28 +384,21 @@ class HexSeptominoGame {
 		piecesContainer.addEventListener(
 			'touchend',
 			(e) => {
-				// Complete the swipe if we were tracking one
 				if (this.isSwipingPanel && this.swipeStartX !== null && this.swipeStartY !== null) {
-					// Get the last touch position before release
 					const touch = e.changedTouches[0];
 					if (!touch) return;
 					const deltaX = touch.clientX - this.swipeStartX;
 					const deltaY = touch.clientY - this.swipeStartY;
 
-					// Check if horizontal swipe is dominant and exceeds threshold
-					// Threshold in pixels
 					const swipeThreshold = 50;
 					if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
 						if (deltaX > 0) {
-							// Swipe right - go to previous page
 							this.previousPage();
 						} else {
-							// Swipe left - go to next page
 							this.nextPage();
 						}
 					}
 
-					// Reset swipe state
 					this.swipeStartX = null;
 					this.swipeStartY = null;
 					this.isSwipingPanel = false;
@@ -450,7 +407,6 @@ class HexSeptominoGame {
 			{passive: true},
 		);
 
-		// Cancel swipe on touch cancel
 		piecesContainer.addEventListener(
 			'touchcancel',
 			() => {
@@ -467,7 +423,6 @@ class HexSeptominoGame {
 	}
 
 	private placePiece(centerQ: number, centerR: number): void {
-		// Clear any active hint when placing a piece
 		this.clearHint();
 
 		const piece = this.gameState.getCurrentPiece();
@@ -475,21 +430,16 @@ class HexSeptominoGame {
 
 		this.animatingHexes = [];
 
-		// Sort pieces by position for clockwise animation
 		const sortedPieces = piece.tiles.slice().sort((a, b) => {
-			// Center hex goes first
 			if (a.q === 0 && a.r === 0) return -1;
 			if (b.q === 0 && b.r === 0) return 1;
 
-			// Top hex (0, -1) goes second
 			if (a.q === 0 && a.r === -1) return -1;
 			if (b.q === 0 && b.r === -1) return 1;
 
-			// Rest go clockwise - calculate angle from center
 			const angleA = Math.atan2(a.r, a.q);
 			const angleB = Math.atan2(b.r, b.q);
 
-			// Adjust angles to start from top and go clockwise
 			const adjustedA = (angleA + Math.PI * 2.5) % (Math.PI * 2);
 			const adjustedB = (angleB + Math.PI * 2.5) % (Math.PI * 2);
 
@@ -501,7 +451,6 @@ class HexSeptominoGame {
 			const adjustedR = centerR + tile.r - piece.center.r;
 			const hex = grid.getHex(adjustedQ, adjustedR);
 			if (hex && hex.height > 0) {
-				// Stagger the animations - 100ms between each hex
 				const delay = index * 100;
 
 				this.animatingHexes.push({
@@ -517,7 +466,6 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Track piece placement for achievements BEFORE placing (since index will change)
 		const currentPieceIndex = this.gameState.getCurrentPieceIndex();
 
 		const placed = this.gameState.placePiece(centerQ, centerR);
@@ -536,7 +484,6 @@ class HexSeptominoGame {
 			this.render();
 			this.renderPieceNavigation();
 
-			// Check if all pieces on current page are placed
 			this.checkAndAdvancePage();
 		}, this.animationDuration);
 	}
@@ -554,10 +501,8 @@ class HexSeptominoGame {
 		const pieces = this.gameState.getPieces();
 		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
 
-		// If only one page total, nothing to cycle
 		if (maxPages <= 1) return;
 
-		// Find the next page with unplaced pieces
 		let nextPage = this.currentPage;
 		let attempts = 0;
 
@@ -565,7 +510,6 @@ class HexSeptominoGame {
 			nextPage = (nextPage + 1) % maxPages;
 			attempts++;
 
-			// Check if this page has any unplaced pieces
 			const startIndex = nextPage * this.piecesPerPage;
 			const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
 			let hasUnplaced = false;
@@ -590,10 +534,8 @@ class HexSeptominoGame {
 		const pieces = this.gameState.getPieces();
 		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
 
-		// If only one page total, nothing to change
 		if (maxPages <= 1) return;
 
-		// Calculate the previous page (with wraparound)
 		this.currentPage = (this.currentPage - 1 + maxPages) % maxPages;
 		this.renderBottomPanel();
 	}
@@ -602,10 +544,8 @@ class HexSeptominoGame {
 		const pieces = this.gameState.getPieces();
 		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
 
-		// If only one page total, nothing to change
 		if (maxPages <= 1) return;
 
-		// Calculate the next page (with wraparound)
 		this.currentPage = (this.currentPage + 1) % maxPages;
 		this.renderBottomPanel();
 	}
@@ -614,8 +554,6 @@ class HexSeptominoGame {
 		const pieces = this.gameState.getPieces();
 		const startIndex = this.currentPage * this.piecesPerPage;
 		const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
-
-		// Check if all pieces on current page are placed
 		let allPlacedOnCurrentPage = true;
 		for (let i = startIndex; i < endIndex; i++) {
 			if (!this.gameState.isPiecePlaced(i)) {
@@ -624,9 +562,7 @@ class HexSeptominoGame {
 			}
 		}
 
-		// If all pieces on current page are placed, automatically advance to next page with unplaced pieces
 		if (allPlacedOnCurrentPage) {
-			// Use morePieces() which already has the logic to find the next page with unplaced pieces
 			this.morePieces();
 		}
 	}
@@ -659,7 +595,6 @@ class HexSeptominoGame {
 	}
 
 	toggleHint(): void {
-		// If hint is already showing, hide it
 		if (this.hintPos) {
 			this.clearHint();
 			this.render();
@@ -708,7 +643,6 @@ class HexSeptominoGame {
 			const victoryScreen = document.getElementById('victoryScreen')!;
 			victoryScreen.classList.remove('hidden');
 
-			// Update stats
 			const difficulty = this.gameState.getDifficulty();
 			(document.getElementById('victoryDifficulty') as HTMLElement).textContent = difficulty;
 			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.gameState
@@ -718,7 +652,6 @@ class HexSeptominoGame {
 				.getHintCount()
 				.toString();
 
-			// Trigger achievements
 			this.achievementManager.onGameComplete({
 				difficulty: difficulty as DifficultyLevel,
 				undoCount: this.gameState.getUndoCount(),
@@ -742,7 +675,6 @@ class HexSeptominoGame {
 				}
 
 				const particleCount = 50 * (timeLeft / duration);
-				// Since particles fall down, start a bit higher than random
 				confetti({
 					...defaults,
 					particleCount,
@@ -803,15 +735,11 @@ class HexSeptominoGame {
 	private lastWheelTime: number = 0;
 	private consecutiveSmallDeltas: number = 0;
 	private handleWheelEvent(event: WheelEvent): void {
-		// Normalize the delta based on deltaMode
 		let normalizedDelta = event.deltaY;
 
-		// deltaMode: 0 = pixels, 1 = lines, 2 = pages
 		if (event.deltaMode === 1) {
-			// Line mode - multiply by standard line height
 			normalizedDelta *= 40;
 		} else if (event.deltaMode === 2) {
-			// Page mode - multiply by standard page height
 			normalizedDelta *= 800;
 		}
 
@@ -819,25 +747,19 @@ class HexSeptominoGame {
 		const timeSinceLastWheel = now - this.lastWheelTime;
 		const absDelta = Math.abs(normalizedDelta);
 
-		// Simple approach: any scroll in a direction changes the piece
-		// but with rate limiting to prevent too fast scrolling
 		const direction = Math.sign(normalizedDelta);
 
 		if (direction === 0) return;
 
-		// Track consecutive small deltas to detect trackpad
 		if (absDelta < 4) {
 			this.consecutiveSmallDeltas++;
 		} else {
 			this.consecutiveSmallDeltas = 0;
 		}
 
-		// Determine rate limit based on input type
 		const isTrackpad = this.consecutiveSmallDeltas > 2;
-		// Slower for trackpad
 		const minDelay = isTrackpad ? 200 : 120;
 
-		// Rate limiting: don't cycle too fast
 		if (timeSinceLastWheel >= minDelay || this.lastWheelTime === 0) {
 			this.cyclePiece(direction);
 			this.lastWheelTime = now;
@@ -848,7 +770,6 @@ class HexSeptominoGame {
 		event.preventDefault();
 
 		if (event.touches.length === 1) {
-			// Single touch - show piece preview and track position
 			const touch = event.touches[0];
 			if (!touch) return;
 			const canvas = this.canvasManager.getCanvas();
@@ -864,7 +785,6 @@ class HexSeptominoGame {
 				this.render();
 			}
 		} else if (event.touches.length === 2) {
-			// Two touches - start pan/zoom
 			this.touchHex = null;
 			this.isTouching = false;
 
@@ -885,7 +805,6 @@ class HexSeptominoGame {
 		event.preventDefault();
 
 		if (event.touches.length === 1 && this.isTouching) {
-			// Single touch - update position
 			const touch = event.touches[0];
 			if (!touch) return;
 			const canvas = this.canvasManager.getCanvas();
@@ -902,7 +821,6 @@ class HexSeptominoGame {
 			}
 			this.render();
 		} else if (event.touches.length === 2) {
-			// Two touches - handle pan and zoom
 			const touch1 = event.touches[0];
 			const touch2 = event.touches[1];
 			if (!touch1 || !touch2) return;
@@ -929,7 +847,6 @@ class HexSeptominoGame {
 		event.preventDefault();
 
 		if (event.touches.length === 0) {
-			// All touches ended
 			if (
 				this.isTouching &&
 				this.touchHex &&
@@ -948,7 +865,6 @@ class HexSeptominoGame {
 			this.lastPinchDistance = null;
 			this.render();
 		} else if (event.touches.length === 1) {
-			// Going from two touches to one
 			this.lastPinchDistance = null;
 		}
 	}
@@ -961,7 +877,6 @@ class HexSeptominoGame {
 	}
 
 	private handleClick(event: MouseEvent): void {
-		// Don't place piece if we were panning
 		if (this.isPanning) return;
 
 		const canvas = this.canvasManager.getCanvas();
@@ -1001,7 +916,6 @@ class HexSeptominoGame {
 				break;
 			case '+':
 			case '=':
-				// Handle both + and = keys for zoom in
 				this.zoom(1.1);
 				break;
 			case '-':
@@ -1059,7 +973,6 @@ class HexSeptominoGame {
 			isActive: true,
 			startTime: performance.now(),
 			position: position,
-			// 1/3 second
 			duration: 333,
 		};
 		this.requestAnimationFrame();
@@ -1077,7 +990,6 @@ class HexSeptominoGame {
 			(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
 		}
 
-		// Update undo/redo button states
 		const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
 		const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
 
@@ -1104,19 +1016,15 @@ class HexSeptominoGame {
 		const fontSize = Math.max(12, Math.floor(this.renderer.hexSize * 0.5));
 		const grid = this.gameState.getGrid();
 
-		// First pass: Draw all hexes in their target state (background)
 		grid.hexes.forEach((hex) => {
 			const pos = this.renderer.hexToPixel(hex.q, hex.r);
 			let displayHeight = hex.height;
 
-			// Check if this hex is being animated
 			const animatingHex = this.animatingHexes.find((h) => h.q === hex.q && h.r === hex.r);
 			if (animatingHex) {
-				// Show the target state as background
 				displayHeight = animatingHex.targetHeight;
 			}
 
-			// For heights > 10, cycle through darker grays
 			const color = this.colors[displayHeight] || (displayHeight > 10 ? '#1a1a1a' : '#000');
 			this.drawHex(ctx, pos.x, pos.y, color, '#0f3460', 2);
 
@@ -1129,26 +1037,21 @@ class HexSeptominoGame {
 			}
 		});
 
-		// Second pass: Draw animating hexes on top
 		this.animatingHexes.forEach((animatingHex) => {
 			const hex = grid.getHex(animatingHex.q, animatingHex.r);
 			if (!hex) return;
 
 			const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
-			// Burst animation for all hexes
 			ctx.save();
 			ctx.translate(pos.x, pos.y);
 
-			// Scale up and fade out for burst effect
-			// Scale up to 150%
 			const burstScale = 1 + animatingHex.progress * 0.5;
 			const opacity = 1 - animatingHex.progress;
 
 			ctx.globalAlpha = opacity;
 			ctx.scale(burstScale, burstScale);
 
-			// Draw the bursting hex
 			this.canvasManager.drawHexOnCanvas(
 				ctx,
 				0,
@@ -1159,7 +1062,6 @@ class HexSeptominoGame {
 				2,
 			);
 
-			// Draw the number with burst effect
 			if (animatingHex.startHeight > 0 && opacity > 0.1) {
 				ctx.fillStyle = '#fff';
 				ctx.font = `bold ${fontSize}px Arial`;
@@ -1171,7 +1073,6 @@ class HexSeptominoGame {
 			ctx.restore();
 		});
 
-		// Handle drag hover effects
 		if (this.isDragging && this.draggedPieceIndex !== null && this.dragHoverHex) {
 			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
 			if (piece) {
@@ -1184,16 +1085,13 @@ class HexSeptominoGame {
 					if (hex) {
 						const pos = this.renderer.hexToPixel(hex.q, hex.r);
 						if (canPlace) {
-							// Light yellow halo effect for placeable
 							this.drawHaloEffect(ctx, pos.x, pos.y);
 						}
-						// No red effect for invalid - just no visual feedback as requested
 					}
 				});
 			}
 		}
 
-		// Original preview hex for old click-to-place system (keeping for backwards compatibility during transition)
 		const previewHex = this.mouseHex || this.touchHex;
 		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) && !this.isDragging) {
 			const piece = this.gameState.getCurrentPiece();
@@ -1231,16 +1129,12 @@ class HexSeptominoGame {
 			});
 		}
 
-		// Draw invalid placement animation
 		if (this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) {
 			const elapsed = performance.now() - this.invalidPlacementAnimation.startTime;
 			const progress = elapsed / this.invalidPlacementAnimation.duration;
 
-			// Create a pulsing effect: scale from 1.0 to 1.3 and back
-			// Two full pulses
 			const pulseProgress = Math.sin(progress * Math.PI * 2);
 			const scale = 1.0 + pulseProgress * 0.3;
-			// Fade out over time
 			const opacity = Math.max(0, 1 - progress);
 
 			const piece = this.gameState.getCurrentPiece();
@@ -1270,7 +1164,6 @@ class HexSeptominoGame {
 		const piecesContainer = document.getElementById('piecesContainer');
 		if (!piecesContainer) return;
 
-		// Clear existing pieces
 		piecesContainer.innerHTML = '';
 
 		const pieces = this.gameState.getPieces();
@@ -1281,17 +1174,14 @@ class HexSeptominoGame {
 			const piece = pieces[i];
 			const isPlaced = this.gameState.isPiecePlaced(i);
 
-			// Create piece container
 			const pieceContainer = document.createElement('div');
 			pieceContainer.className = `draggable-piece ${isPlaced ? 'empty-slot' : ''}`;
 			pieceContainer.dataset['pieceIndex'] = i.toString();
 
-			// Create SVG for the piece
 			if (!piece) continue;
 			const svg = this.createPieceSVG(piece, isPlaced);
 			pieceContainer.appendChild(svg);
 
-			// Set up drag handlers if not placed
 			if (!isPlaced) {
 				this.setupPieceDragHandlers(pieceContainer, i);
 			}
@@ -1299,20 +1189,16 @@ class HexSeptominoGame {
 			piecesContainer.appendChild(pieceContainer);
 		}
 
-		// Update more pieces button
 		const morePiecesBtn = document.getElementById('morePiecesBtn') as HTMLButtonElement;
 		if (morePiecesBtn) {
 			const totalPages = Math.ceil(pieces.length / this.piecesPerPage);
 
-			// Disable button only if there's one page or less
 			if (totalPages <= 1) {
 				morePiecesBtn.disabled = true;
 			} else {
-				// Check if there are any unplaced pieces on OTHER pages
 				let hasUnplacedOnOtherPages = false;
 
 				for (let page = 0; page < totalPages; page++) {
-					// Skip current page
 					if (page === this.currentPage) continue;
 
 					const pageStart = page * this.piecesPerPage;
@@ -1328,7 +1214,6 @@ class HexSeptominoGame {
 					if (hasUnplacedOnOtherPages) break;
 				}
 
-				// Enable button if there are unplaced pieces on other pages
 				morePiecesBtn.disabled = !hasUnplacedOnOtherPages;
 			}
 		}
@@ -1342,14 +1227,12 @@ class HexSeptominoGame {
 		svg.style.display = 'block';
 
 		if (!isPlaced) {
-			// Calculate the relative positions of tiles
 			piece.tiles.forEach((tile) => {
 				const adjustedQ = tile.q - piece.center.q;
 				const adjustedR = tile.r - piece.center.r;
 				const x = 15 * ((3 / 2) * adjustedQ);
 				const y = 15 * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
 
-				// Create hexagon path
 				const hex = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 				const points = [];
 				for (let i = 0; i < 6; i++) {
@@ -1373,24 +1256,19 @@ class HexSeptominoGame {
 	private renderFullSizePieceOnCanvas(canvas: HTMLCanvasElement, piece: Piece): void {
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
-
-		// Clear canvas
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		// Use the same hex size as the board
 		const hexSize = this.renderer.hexSize;
 
 		ctx.save();
 		ctx.translate(canvas.width / 2, canvas.height / 2);
 
 		piece.tiles.forEach((tile) => {
-			// Adjust for piece center
 			const adjustedQ = tile.q - piece.center.q;
 			const adjustedR = tile.r - piece.center.r;
 			const x = hexSize * ((3 / 2) * adjustedQ);
 			const y = hexSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
 
-			// Draw transparent hex with board-size hexes
 			this.drawTransparentPieceHex(ctx, x, y, hexSize);
 		});
 
@@ -1411,11 +1289,8 @@ class HexSeptominoGame {
 		}
 		ctx.closePath();
 
-		// Transparent with border only - use a color different from board border (#0f3460)
-		// Very light fill
 		ctx.fillStyle = 'rgba(233, 69, 96, 0.1)';
 		ctx.fill();
-		// Different from board border color
 		ctx.strokeStyle = '#e94560';
 		ctx.lineWidth = 2;
 		ctx.stroke();
@@ -1425,21 +1300,18 @@ class HexSeptominoGame {
 		const piece = this.gameState.getPieceByIndex(pieceIndex);
 		if (!piece) return;
 
-		// Calculate actual bounds of the piece
 		const hexSize = this.renderer.hexSize;
 		const minQ = Math.min(...piece.tiles.map((tile) => tile.q - piece.center.q));
 		const maxQ = Math.max(...piece.tiles.map((tile) => tile.q - piece.center.q));
 		const minR = Math.min(...piece.tiles.map((tile) => tile.r - piece.center.r));
 		const maxR = Math.max(...piece.tiles.map((tile) => tile.r - piece.center.r));
 
-		// Calculate canvas dimensions based on actual piece bounds
 		const hexWidth = hexSize * (3 / 2);
 		const hexHeight = hexSize * Math.sqrt(3);
 
 		const canvasWidth = (maxQ - minQ + 1) * hexWidth + hexSize;
 		const canvasHeight = (maxR - minR + 1) * hexHeight + hexSize;
 
-		// Create preview container
 		const preview = document.createElement('div');
 		preview.className = 'drag-preview';
 		preview.style.position = 'fixed';
@@ -1448,25 +1320,20 @@ class HexSeptominoGame {
 		preview.style.left = `${clientX - canvasWidth / 2}px`;
 		preview.style.top = `${clientY - canvasHeight / 2}px`;
 
-		// Create canvas for the piece
 		const canvas = document.createElement('canvas');
 		canvas.width = canvasWidth;
 		canvas.height = canvasHeight;
 		preview.appendChild(canvas);
 
-		// Render the piece at full board size
 		this.renderFullSizePieceOnCanvas(canvas, piece);
 
-		// Add to document
 		document.body.appendChild(preview);
 		this.dragPreviewElement = preview;
 	}
 
 	private setupPieceDragHandlers(element: HTMLElement, pieceIndex: number): void {
-		// Mouse events
 		element.addEventListener('mousedown', (e) => this.handlePieceDragStart(e, pieceIndex));
 
-		// Touch events
 		element.addEventListener('touchstart', (e) => this.handlePieceTouchStart(e, pieceIndex), {passive: false});
 	}
 
@@ -1476,7 +1343,6 @@ class HexSeptominoGame {
 	}
 
 	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number): void {
-		// Don't start drag if we're in the middle of a panel swipe
 		if (this.isSwipingPanel) {
 			return;
 		}
@@ -1496,15 +1362,12 @@ class HexSeptominoGame {
 		this.draggedPieceIndex = pieceIndex;
 		this.draggedPieceElement = element.closest('.draggable-piece') as HTMLElement;
 
-		// Add dragging class to original element
 		if (this.draggedPieceElement) {
 			this.draggedPieceElement.classList.add('dragging');
 		}
 
-		// Create floating drag preview
 		this.createDragPreview(pieceIndex, clientX, clientY);
 
-		// Set up global drag listeners
 		document.addEventListener('mousemove', this.handleGlobalDragMove);
 		document.addEventListener('mouseup', this.handleGlobalDragEnd);
 		document.addEventListener('touchmove', this.handleGlobalTouchMove, {passive: false});
@@ -1528,7 +1391,6 @@ class HexSeptominoGame {
 	};
 
 	private updateDragPosition(clientX: number, clientY: number): void {
-		// Update floating drag preview position (center it on cursor)
 		if (this.dragPreviewElement) {
 			const canvas = this.dragPreviewElement.querySelector('canvas');
 			if (canvas) {
@@ -1539,7 +1401,6 @@ class HexSeptominoGame {
 			}
 		}
 
-		// Check if hovering over game canvas
 		const canvas = this.canvasManager.getCanvas();
 		const rect = canvas.getBoundingClientRect();
 
@@ -1558,7 +1419,6 @@ class HexSeptominoGame {
 			this.dragHoverHex = null;
 		}
 
-		// Re-render to show hover effects
 		this.render();
 	}
 
@@ -1575,11 +1435,9 @@ class HexSeptominoGame {
 	private finishDrag(): void {
 		if (!this.isDragging || this.draggedPieceIndex === null) return;
 
-		// Try to place piece if hovering over valid location
 		if (this.dragHoverHex) {
 			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
 			if (piece && this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r)) {
-				// Set the current piece to the dragged piece for placement
 				this.gameState.setCurrentPieceIndex(this.draggedPieceIndex);
 				this.placePiece(this.dragHoverHex.q, this.dragHoverHex.r);
 			} else if (piece) {
@@ -1587,12 +1445,10 @@ class HexSeptominoGame {
 			}
 		}
 
-		// Clean up drag state
 		if (this.draggedPieceElement) {
 			this.draggedPieceElement.classList.remove('dragging');
 		}
 
-		// Remove drag preview
 		if (this.dragPreviewElement) {
 			document.body.removeChild(this.dragPreviewElement);
 			this.dragPreviewElement = null;
@@ -1603,13 +1459,11 @@ class HexSeptominoGame {
 		this.draggedPieceElement = null;
 		this.dragHoverHex = null;
 
-		// Remove global listeners
 		document.removeEventListener('mousemove', this.handleGlobalDragMove);
 		document.removeEventListener('mouseup', this.handleGlobalDragEnd);
 		document.removeEventListener('touchmove', this.handleGlobalTouchMove);
 		document.removeEventListener('touchend', this.handleGlobalTouchEnd);
 
-		// Clear any hover effects
 		this.render();
 	}
 
@@ -1630,18 +1484,15 @@ class HexSeptominoGame {
 		const parent = canvas.parentElement;
 		if (!parent) return;
 
-		// Clear canvas
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 		if (pieceIndex === null) {
-			// No piece available - show disabled state
 			parent.classList.add('disabled');
 			ctx.fillStyle = '#333';
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
 			return;
 		}
 
-		// Enable button
 		parent.classList.remove('disabled');
 
 		const piece = this.gameState.getPieceByIndex(pieceIndex);
@@ -1655,7 +1506,6 @@ class HexSeptominoGame {
 		const color = this.gameState.isPiecePlaced(pieceIndex) ? '#666' : '#e94560';
 
 		piece.tiles.forEach((tile) => {
-			// Adjust for piece center
 			const adjustedQ = tile.q - piece.center.q;
 			const adjustedR = tile.r - piece.center.r;
 			const x = previewHexSize * ((3 / 2) * adjustedQ);
@@ -1722,7 +1572,6 @@ class HexSeptominoGame {
 	private drawHaloEffect(ctx: CanvasRenderingContext2D, x: number, y: number): void {
 		ctx.save();
 
-		// Inner light yellow fill
 		ctx.beginPath();
 		for (let i = 0; i < 6; i++) {
 			const angle = (Math.PI / 3) * i;
@@ -1735,11 +1584,9 @@ class HexSeptominoGame {
 			}
 		}
 		ctx.closePath();
-		// Light yellow inside
 		ctx.fillStyle = 'rgba(255, 235, 59, 0.2)';
 		ctx.fill();
 
-		// Outer glow effect
 		const glowSize = this.renderer.hexSize * 1.3;
 		ctx.beginPath();
 		for (let i = 0; i < 6; i++) {
@@ -1754,7 +1601,6 @@ class HexSeptominoGame {
 		}
 		ctx.closePath();
 
-		// Create gradient for glow effect
 		const gradient = ctx.createRadialGradient(x, y, this.renderer.hexSize, x, y, glowSize);
 		gradient.addColorStop(0, 'rgba(255, 235, 59, 0.3)');
 		gradient.addColorStop(1, 'rgba(255, 235, 59, 0.0)');
@@ -1787,9 +1633,7 @@ class HexSeptominoGame {
 		};
 
 		this.animatingHexes.forEach((hex) => {
-			// Apply delay to each hex
 			const hexElapsed = Math.max(0, elapsed - hex.delay);
-			// 400ms per hex animation
 			const hexProgress = Math.min(hexElapsed / 400, 1);
 			const easedHexProgress = easeInOutCubic(hexProgress);
 			hex.progress = easedHexProgress;
