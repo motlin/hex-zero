@@ -12,7 +12,7 @@ jobs:
     pre-commit:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: actions/setup-python@v5
               with:
                   python-version: '3.x'
@@ -27,7 +27,7 @@ jobs:
             checks: write
             pull-requests: write
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: jdx/mise-action@v2
 
             - run: just eslint-ci
@@ -39,7 +39,7 @@ jobs:
     biome:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: jdx/mise-action@v2
 
             - run: just biome-ci
@@ -47,7 +47,7 @@ jobs:
     prettier:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: jdx/mise-action@v2
 
             - run: just prettier-ci
@@ -55,21 +55,21 @@ jobs:
     typecheck:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: jdx/mise-action@v2
             - run: just typecheck-ci
 
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: jdx/mise-action@v2
             - run: just build-ci
 
     test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - uses: jdx/mise-action@v2
 
             - run: just test-ci
