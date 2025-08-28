@@ -148,7 +148,7 @@ function launchSimulator(deviceName) {
         console.log('✅ Simulator ready');
         return udid;
     } catch (error) {
-        throw new Error(`Failed to launch simulator: ${error.message}`);
+        throw new Error(`Failed to launch simulator: ${error.message}`, { cause: error });
     }
 }
 
@@ -165,7 +165,7 @@ function installAndLaunchApp(udid) {
 
         console.log('✅ App launched successfully');
     } catch (error) {
-        throw new Error(`Failed to launch app: ${error.message}`);
+        throw new Error(`Failed to launch app: ${error.message}`, { cause: error });
     }
 }
 

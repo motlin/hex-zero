@@ -134,7 +134,7 @@ function installAndLaunchApp() {
 
         console.log('✅ App launched successfully');
     } catch (error) {
-        throw new Error(`Failed to launch app: ${error.message}`);
+        throw new Error(`Failed to launch app: ${error.message}`, { cause: error });
     }
 }
 

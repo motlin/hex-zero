@@ -432,13 +432,21 @@ class HexSeptominoGame {
 		this.performanceOptimizer = MobilePerformanceOptimizer.getInstance();
 		this.performanceMonitor = new PerformanceMonitor();
 		this.performanceMonitor.setRenderer(this.optimizedRenderer);
+
+		// iOS devices need a smaller initial zoom to fit the board properly
+		const deviceInfo = deviceOptimizer.getDeviceInfo();
+		if (deviceInfo?.platform === 'ios') {
+			this.zoomFactor = 0.85;
+		} else {
+			this.zoomFactor = 1.0;
+		}
+
 		this.updateCanvasSize();
 
 		this.colors = DEFAULT_COLORS;
 
 		this.mouseHex = null;
 		this.touchHex = null;
-		this.zoomFactor = 1.0;
 		this.hintPos = null;
 		this.hintTimeout = null;
 		this.animatingHexes = [];
@@ -1802,7 +1810,12 @@ class HexSeptominoGame {
 
 	private createPieceSVG(piece: Piece, isPlaced: boolean): SVGElement {
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-		svg.setAttribute('viewBox', '-50 -50 100 100');
+		// 30 is a reasonable base size
+		const scaleFactor = this.renderer.hexSize / 30;
+		// Scale piece size proportionally
+		const pieceSvgSize = 15 * scaleFactor;
+		const viewBoxSize = 50 * scaleFactor;
+		svg.setAttribute('viewBox', `-${viewBoxSize} -${viewBoxSize} ${viewBoxSize * 2} ${viewBoxSize * 2}`);
 		svg.style.width = '100%';
 		svg.style.height = '100%';
 		svg.style.display = 'block';
@@ -1811,15 +1824,15 @@ class HexSeptominoGame {
 			piece.tiles.forEach((tile) => {
 				const adjustedQ = tile.q - piece.center.q;
 				const adjustedR = tile.r - piece.center.r;
-				const x = 15 * ((3 / 2) * adjustedQ);
-				const y = 15 * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
+				const x = pieceSvgSize * ((3 / 2) * adjustedQ);
+				const y = pieceSvgSize * ((Math.sqrt(3) / 2) * adjustedQ + Math.sqrt(3) * adjustedR);
 
 				const hex = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 				const points = [];
 				for (let i = 0; i < 6; i++) {
 					const angle = (Math.PI / 3) * i;
-					const hx = x + 15 * Math.cos(angle);
-					const hy = y + 15 * Math.sin(angle);
+					const hx = x + pieceSvgSize * Math.cos(angle);
+					const hy = y + pieceSvgSize * Math.sin(angle);
 					points.push(`${hx},${hy}`);
 				}
 				hex.setAttribute('points', points.join(' '));

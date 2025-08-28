@@ -52,18 +52,17 @@ export class CanvasManager {
 	updateCanvasSize(radius: number, zoomFactor: number): number {
 		const rect = this.canvas.getBoundingClientRect();
 
-		// Get optimal canvas size from performance optimizer
 		const optimalSize = this.performanceOptimizer.getOptimalCanvasSize(rect.width, rect.height);
 
-		// Apply device-specific canvas scale
-		const deviceCanvasScale = this.deviceOptimizer.getCanvasScale();
+		// For iOS, we don't need additional device-specific scaling since
+		// the performance optimizer already handles devicePixelRatio
+		const isIOS = this.deviceOptimizer.getDeviceInfo()?.platform === 'ios';
+		const deviceCanvasScale = isIOS ? 1.0 : this.deviceOptimizer.getCanvasScale();
 		const finalScale = optimalSize.scale * deviceCanvasScale;
 
-		// Set canvas size with optimized dimensions
 		this.canvas.width = optimalSize.width;
 		this.canvas.height = optimalSize.height;
 
-		// Scale the context to ensure correct drawing dimensions
 		this.ctx.setTransform(finalScale, 0, 0, finalScale, 0, 0);
 
 		return calculateHexSize(rect.width, rect.height, radius, zoomFactor);
