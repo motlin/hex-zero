@@ -12,6 +12,7 @@ declare global {
 		startCustomGame: () => void;
 		showDifficultyScreen: () => void;
 		showInstructions: () => void;
+		toggleFullscreen: () => void;
 		game: HexSeptominoGame | null;
 	}
 }
@@ -66,6 +67,39 @@ function hideInstructions(): void {
 
 	if (dontShowAgain?.checked) {
 		localStorage.setItem('hexZeroDontShowInstructions', 'true');
+	}
+}
+
+function toggleFullscreen(): void {
+	const documentElement = document.documentElement;
+
+	if (!document.fullscreenElement) {
+		if (documentElement.requestFullscreen) {
+			documentElement.requestFullscreen().catch((error) => {
+				console.error('Error attempting to enable fullscreen:', error);
+			});
+		}
+	} else {
+		if (document.exitFullscreen) {
+			document.exitFullscreen();
+		}
+	}
+
+	updateFullscreenButtonText();
+}
+
+function updateFullscreenButtonText(): void {
+	const isFullscreen = !!document.fullscreenElement;
+	const buttonText = isFullscreen ? '⛶ Exit Fullscreen' : '⛶ Fullscreen';
+
+	const fullscreenButton = document.getElementById('fullscreenButton');
+	if (fullscreenButton) {
+		fullscreenButton.textContent = buttonText;
+	}
+
+	const menuFullscreenButton = document.getElementById('menuFullscreenButton');
+	if (menuFullscreenButton) {
+		menuFullscreenButton.textContent = buttonText;
 	}
 }
 
@@ -178,6 +212,20 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (e.key === 'Escape' && instructionsModal && !instructionsModal.classList.contains('hidden')) {
 			hideInstructions();
 		}
+	});
+
+	const fullscreenButton = document.getElementById('fullscreenButton');
+	if (fullscreenButton) {
+		fullscreenButton.addEventListener('click', () => toggleFullscreen());
+	}
+
+	const menuFullscreenButton = document.getElementById('menuFullscreenButton');
+	if (menuFullscreenButton) {
+		menuFullscreenButton.addEventListener('click', () => toggleFullscreen());
+	}
+
+	document.addEventListener('fullscreenchange', () => {
+		updateFullscreenButtonText();
 	});
 });
 
@@ -1681,6 +1729,7 @@ window.startGame = startGame;
 window.startCustomGame = startCustomGame;
 window.showDifficultyScreen = showDifficultyScreen;
 window.showInstructions = showInstructions;
+window.toggleFullscreen = toggleFullscreen;
 window.game = game;
 
 export {};
