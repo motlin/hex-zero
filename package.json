@@ -34,7 +34,7 @@
 		"@types/canvas-confetti": "^1.9.0",
 		"@types/node": "^24.6.2",
 		"@vitest/ui": "^3.2.4",
-		"eslint": "^9.36.0",
+		"eslint": "^9.37.0",
 		"eslint-config-prettier": "^10.1.8",
 		"globals": "^16.4.0",
 		"jiti": "^2.6.1",
