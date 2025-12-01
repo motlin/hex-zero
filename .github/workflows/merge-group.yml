@@ -76,8 +76,10 @@ jobs:
 
     all-checks:
         name: All checks
+        if: ${{ !cancelled() }}
         needs: [pre-commit, eslint, biome, prettier, typecheck, build, test]
         runs-on: ubuntu-latest
         steps:
-            - name: All checks passed
-              run: echo "All checks passed!"
+            - uses: re-actors/alls-green@release/v1
+              with:
+                  jobs: ${{ toJSON(needs) }}
