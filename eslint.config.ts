@@ -5,7 +5,7 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import type {Linter} from 'eslint';
 
 const config: Linter.Config[] = [
-	{ignores: ['dist/', 'node_modules/', '.llm/']},
+	{ignores: ['dist/', 'node_modules/', '.llm/', 'ios/', 'android/']},
 
 	js.configs.recommended as Linter.Config,
 	...(typescript.configs.recommended as Linter.Config[]),

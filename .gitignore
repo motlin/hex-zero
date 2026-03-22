@@ -26,3 +26,7 @@ yarn-error.log*
 .envrc
 eslint_report.json
 /.vite/
+
+# Capacitor native platforms
+/android/
+/ios/
