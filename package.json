@@ -28,7 +28,7 @@
 	},
 	"homepage": "https://github.com/motlin/hex-zero#readme",
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.8",
+		"@biomejs/biome": "2.4.8",
 		"@eslint/js": "^10.0.1",
 		"@testing-library/dom": "^10.4.1",
 		"@types/canvas-confetti": "^1.9.0",
@@ -43,7 +43,7 @@
 		"typescript": "^5.9.3",
 		"typescript-eslint": "^8.57.1",
 		"vite": "^8.0.1",
-		"vitest": "^4.0.2"
+		"vitest": "^4.0.18"
 	},
 	"dependencies": {
 		"canvas-confetti": "^1.9.4"
