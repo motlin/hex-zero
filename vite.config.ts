@@ -19,6 +19,7 @@ export default defineConfig(({mode: _mode}) => {
 		},
 		server: {
 			port: 3000,
+			allowedHosts: process.env['VITE_ALLOWED_HOSTS'] ? process.env['VITE_ALLOWED_HOSTS'].split(',') : [],
 		},
 	};
 });
