@@ -68,25 +68,6 @@ export function getHexCorners(centerX: number, centerY: number, size: number): P
 }
 
 /**
- * 🔷 Calculate optimal hex size based on viewport dimensions
- */
-export function calculateOptimalHexSize(
-	viewportWidth: number,
-	viewportHeight: number,
-	gridRadius: number,
-	zoomFactor: number = 1.0,
-	padding: number = 60,
-): number {
-	const widthBasedHexSize = (viewportWidth - padding) / (gridRadius * 3);
-	const heightBasedHexSize = (viewportHeight - padding) / (gridRadius * 2 * Math.sqrt(3));
-	const baseHexSize = Math.min(widthBasedHexSize, heightBasedHexSize);
-
-	const fitFactor = 0.9;
-	const hexSize = Math.max(10, baseHexSize * fitFactor * zoomFactor);
-	return hexSize;
-}
-
-/**
  * 🔷 Calculate distance between two hex coordinates
  */
 export function hexDistance(q1: number, r1: number, q2: number, r2: number): number {
