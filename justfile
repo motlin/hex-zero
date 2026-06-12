@@ -29,7 +29,7 @@ check: install
 
 # Run tests
 test *args: install
-    {{ if ci != "" { "vp exec playwright install --with-deps chromium" } else { "true" } }}
+    {{ if ci != "" { "if test -x node_modules/.bin/playwright; then vp exec playwright install --with-deps chromium; fi" } else { "true" } }}
     vp run test:run {{args}}
 
 # Type-check the project
