@@ -624,6 +624,33 @@ describe('GameState', () => {
 			const customGame = new GameState(5, 12);
 			expect(customGame.getDifficulty()).toBe('Custom');
 		});
+
+		it('preserves selected difficulty after undoing all moves and winning', () => {
+			const mediumGame = new GameState(3, 6, 'Medium');
+
+			const solve = () => {
+				let attempts = 0;
+				while (!mediumGame.isGameWon() && attempts < 50) {
+					const hint = mediumGame.getSolutionHint();
+					if (hint === null) {
+						throw new Error('Expected solution hint');
+					}
+					expect(mediumGame.placePiece(hint.q, hint.r)).toBe(true);
+					attempts++;
+				}
+				expect(mediumGame.isGameWon()).toBe(true);
+			};
+
+			solve();
+			while (mediumGame.canUndo()) {
+				mediumGame.undo();
+			}
+			expect(mediumGame.isGameWon()).toBe(false);
+
+			solve();
+			expect(mediumGame.getDifficulty()).toBe('Medium');
+			expect(mediumGame.getUndoCount()).toBeGreaterThan(0);
+		});
 	});
 
 	describe('restart', () => {

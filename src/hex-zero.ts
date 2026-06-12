@@ -1,5 +1,5 @@
 import confetti from 'canvas-confetti';
-import {GameState, type HexCoordinate, type Piece} from './game-state';
+import {GameState, type GameDifficulty, type HexCoordinate, type Piece} from './game-state';
 import {HexRenderer} from './renderer/HexRenderer';
 import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
 import {CanvasManager} from './canvas/CanvasManager';
@@ -9,7 +9,7 @@ import {getElementByIdOrNull, getRequiredElementById} from './dom-utils';
 
 declare global {
 	interface Window {
-		startGame: (radius: number, numPieces: number) => void;
+		startGame: (radius: number, numPieces: number, difficulty?: GameDifficulty) => void;
 		startCustomGame: () => void;
 		showDifficultyScreen: () => void;
 		showInstructions: () => void;
@@ -32,18 +32,18 @@ interface AnimatingHex {
 let game: HexSeptominoGame | null = null;
 let globalAchievementManager: AchievementManager | null = null;
 
-function startGame(radius: number, numPieces: number): void {
+function startGame(radius: number, numPieces: number, difficulty?: GameDifficulty): void {
 	getRequiredElementById('difficultyScreen', HTMLElement).classList.add('hidden');
 	getRequiredElementById('gameScreen', HTMLElement).classList.remove('hidden');
 
-	game = new HexSeptominoGame(radius, numPieces);
+	game = new HexSeptominoGame(radius, numPieces, difficulty);
 	window.game = game;
 }
 
 function startCustomGame(): void {
 	const radius = parseInt(getRequiredElementById('customRadius', HTMLInputElement).value);
 	const pieces = parseInt(getRequiredElementById('customPieces', HTMLInputElement).value);
-	startGame(radius, pieces);
+	startGame(radius, pieces, 'Custom');
 }
 
 function showDifficultyScreen(): void {
@@ -278,9 +278,9 @@ class HexSeptominoGame {
 	private swipeStartY: number | null;
 	private isSwipingPanel: boolean;
 
-	constructor(radius: number, numPieces: number) {
+	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty) {
 		this.canvasManager = new CanvasManager('gameCanvas');
-		this.gameState = new GameState(radius, numPieces);
+		this.gameState = new GameState(radius, numPieces, difficulty);
 		this.renderer = new HexRenderer(30);
 		this.updateCanvasSize();
 
