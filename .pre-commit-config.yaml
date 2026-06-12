@@ -21,6 +21,13 @@ repos:
           - id: mixed-line-ending
             args: ['--fix=lf']
 
+    - repo: https://github.com/adrienverge/yamllint.git
+      rev: v1.38.0
+      hooks:
+          - id: yamllint
+            types: [yaml]
+            exclude: "^(node_modules/|dist/|storybook-static/|\\.llm/|\\.claude/|pnpm-lock\\.yaml)"
+
     - repo: local
       hooks:
           - id: vp-staged
@@ -34,12 +41,6 @@ repos:
             entry: vp exec markdownlint-cli2
             language: system
             types: [markdown]
-          - id: yamllint
-            name: yamllint
-            entry: yamllint
-            language: system
-            types: [yaml]
-            exclude: "^(node_modules/|dist/|storybook-static/|\\.llm/|\\.claude/|pnpm-lock\\.yaml)"
           - id: fallow
             name: fallow
             entry: vp exec fallow fix --base HEAD --yes --no-create-config

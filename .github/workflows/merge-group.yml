@@ -95,7 +95,7 @@ jobs:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - run: yamllint .
+            - run: pre-commit run yamllint --all-files
 
     fallow:
         runs-on: ubuntu-latest
