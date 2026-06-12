@@ -1,4 +1,4 @@
-import {describe, it, expect, beforeEach} from 'vitest';
+import {describe, it, expect, beforeEach} from 'vite-plus/test';
 import {GameState} from './game-state';
 
 describe('GameState', () => {
@@ -100,7 +100,7 @@ describe('GameState', () => {
 			expect(gameState.isPiecePlaced(originalIndex)).toBe(true);
 
 			// Set current piece back to the placed piece and try to place it again
-			gameState['currentPieceIndex'] = originalIndex;
+			gameState.setCurrentPieceIndex(originalIndex);
 			const secondPlacement = gameState.placePiece(validPosition!.q, validPosition!.r);
 			expect(secondPlacement).toBe(false);
 		});

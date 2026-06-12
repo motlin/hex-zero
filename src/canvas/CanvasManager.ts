@@ -1,16 +1,21 @@
 import {calculateHexSize} from '../canvas-utils';
+import {getRequiredElementById} from '../dom-utils';
+
+function getRequiredContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+	const ctx = canvas.getContext('2d');
+	if (ctx === null) {
+		throw new Error('Failed to get 2d rendering context');
+	}
+	return ctx;
+}
 
 export class CanvasManager {
-	private canvas: HTMLCanvasElement;
-	private ctx: CanvasRenderingContext2D;
-	private previewCanvas: HTMLCanvasElement;
-	private previewCtx: CanvasRenderingContext2D;
+	private readonly canvas: HTMLCanvasElement;
+	private readonly ctx: CanvasRenderingContext2D;
 
-	constructor(canvasId: string, previewCanvasId: string) {
-		this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-		this.ctx = this.canvas.getContext('2d')!;
-		this.previewCanvas = document.getElementById(previewCanvasId) as HTMLCanvasElement;
-		this.previewCtx = this.previewCanvas.getContext('2d')!;
+	constructor(canvasId: string) {
+		this.canvas = getRequiredElementById(canvasId, HTMLCanvasElement);
+		this.ctx = getRequiredContext(this.canvas);
 	}
 
 	getCanvas(): HTMLCanvasElement {
@@ -19,14 +24,6 @@ export class CanvasManager {
 
 	getContext(): CanvasRenderingContext2D {
 		return this.ctx;
-	}
-
-	getPreviewCanvas(): HTMLCanvasElement {
-		return this.previewCanvas;
-	}
-
-	getPreviewContext(): CanvasRenderingContext2D {
-		return this.previewCtx;
 	}
 
 	updateCanvasSize(radius: number, zoomFactor: number): number {
@@ -41,11 +38,6 @@ export class CanvasManager {
 	clearCanvas(backgroundColor: string): void {
 		this.ctx.fillStyle = backgroundColor;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-	}
-
-	clearPreviewCanvas(backgroundColor: string): void {
-		this.previewCtx.fillStyle = backgroundColor;
-		this.previewCtx.fillRect(0, 0, this.previewCanvas.width, this.previewCanvas.height);
 	}
 
 	drawHexOnCanvas(

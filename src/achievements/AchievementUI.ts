@@ -1,9 +1,9 @@
 import type {AchievementId} from './AchievementDefinitions';
 import {ACHIEVEMENTS, getAchievementsByCategory} from './AchievementDefinitions';
-import type {AchievementData, AchievementStats} from './AchievementStorage';
+import type {AchievementMap, AchievementStats} from './AchievementStorage';
 
 export class AchievementUI {
-	private activeNotifications: HTMLElement[] = [];
+	private readonly activeNotifications: HTMLElement[] = [];
 
 	initialize(): void {
 		this.addStyles();
@@ -218,11 +218,13 @@ export class AchievementUI {
 
 		const closeBtn = document.getElementById('achievementClose');
 		if (closeBtn) {
-			closeBtn.addEventListener('click', () => this.hideModal());
+			closeBtn.addEventListener('click', () => {
+				this.hideModal();
+			});
 		}
 	}
 
-	showAchievementsModal(achievements: Record<AchievementId, AchievementData>, stats: AchievementStats): void {
+	showAchievementsModal(achievements: AchievementMap, stats: AchievementStats): void {
 		const modal = document.getElementById('achievementModal');
 		const content = document.getElementById('achievementContent');
 		if (!modal || !content) return;
@@ -277,13 +279,14 @@ export class AchievementUI {
 
 	private renderAchievements(
 		categoryAchievements: (typeof ACHIEVEMENTS)[AchievementId][],
-		playerAchievements: Record<AchievementId, AchievementData>,
+		playerAchievements: AchievementMap,
 	): string {
 		return categoryAchievements
 			.map((achievement) => {
 				const data = playerAchievements[achievement.id];
-				const unlocked = data?.unlocked || false;
-				const unlockedDate = data?.unlockedAt ? new Date(data.unlockedAt).toLocaleDateString() : '';
+				const unlocked = data?.unlocked === true;
+				const unlockedDate =
+					data?.unlockedAt === undefined ? '' : new Date(data.unlockedAt).toLocaleDateString();
 
 				return `
         <div class="achievement-item ${unlocked ? 'unlocked' : 'locked'}">
@@ -312,7 +315,6 @@ export class AchievementUI {
 
 	private showUnlockNotification(achievementId: AchievementId): void {
 		const achievement = ACHIEVEMENTS[achievementId];
-		if (!achievement) return;
 
 		const notification = document.createElement('div');
 		notification.className = 'achievement-notification';

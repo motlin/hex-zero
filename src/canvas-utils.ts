@@ -1,9 +1,3 @@
-export interface CanvasDimensions {
-	width: number;
-	height: number;
-	hexSize: number;
-}
-
 export function calculateHexSize(
 	canvasWidth: number,
 	canvasHeight: number,

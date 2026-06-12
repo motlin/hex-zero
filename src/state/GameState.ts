@@ -1,5 +1,5 @@
 import {HexGrid, type HexCoordinate} from './HexGrid';
-import {SeptominoGenerator, type Piece} from './SeptominoGenerator';
+import {generateSet, type Piece} from './SeptominoGenerator';
 
 interface Move {
 	pieceIndex: number;
@@ -26,15 +26,15 @@ interface GameSettings {
 }
 
 export class GameState {
-	private settings: GameSettings;
-	private grid: HexGrid;
+	private readonly settings: GameSettings;
+	private readonly grid: HexGrid;
 	private pieces: Piece[];
 	private currentPieceIndex: number;
-	private placedPieces: Set<number>;
+	private readonly placedPieces: Set<number>;
 	private solution: SolutionMove[];
 	private history: Move[];
 	private redoStack: Move[];
-	private initialGridState: Map<string, number>;
+	private readonly initialGridState: Map<string, number>;
 	private undoCount: number;
 	private hintCount: number;
 
@@ -55,7 +55,7 @@ export class GameState {
 	}
 
 	private generateLevel(): void {
-		this.pieces = SeptominoGenerator.generateSet(this.settings.numPieces);
+		this.pieces = generateSet(this.settings.numPieces);
 		this.solution = [];
 		this.placedPieces.clear();
 		this.history = [];
@@ -195,9 +195,8 @@ export class GameState {
 	}
 
 	undo(): boolean {
-		if (this.history.length === 0) return false;
-
-		const move = this.history.pop()!;
+		const move = this.history.pop();
+		if (move === undefined) return false;
 		this.redoStack.push(move);
 
 		move.heightChanges.forEach((change) => {
@@ -213,9 +212,8 @@ export class GameState {
 	}
 
 	redo(): boolean {
-		if (this.redoStack.length === 0) return false;
-
-		const move = this.redoStack.pop()!;
+		const move = this.redoStack.pop();
+		if (move === undefined) return false;
 
 		move.heightChanges.forEach((change) => {
 			const hex = this.grid.getHex(change.q, change.r);
@@ -316,10 +314,6 @@ export class GameState {
 		return [...this.history];
 	}
 
-	getRedoStack(): Move[] {
-		return [...this.redoStack];
-	}
-
 	getUndoCount(): number {
 		return this.undoCount;
 	}
@@ -352,5 +346,3 @@ export class GameState {
 		return this.placedPieces.size >= this.pieces.length;
 	}
 }
-
-export type {Move, HeightChange, SolutionMove, GameSettings};

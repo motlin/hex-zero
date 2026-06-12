@@ -61,5 +61,5 @@
 	// Options: "lf" | "crlf" | "cr" | "auto"
 	endOfLine: 'lf',
 
-	"experimentalOperatorPosition": "start"
+	experimentalOperatorPosition: 'start',
 }
