@@ -1437,26 +1437,24 @@ class HexSeptominoGame {
 
 	private setupPieceDragHandlers(element: HTMLElement, pieceIndex: number): void {
 		element.addEventListener('mousedown', (e) => {
-			this.handlePieceDragStart(e, pieceIndex);
+			this.handlePieceDragStart(e, pieceIndex, element);
 		});
 
 		element.addEventListener(
 			'touchstart',
 			(e) => {
-				this.handlePieceTouchStart(e, pieceIndex);
+				this.handlePieceTouchStart(e, pieceIndex, element);
 			},
 			{passive: false},
 		);
 	}
 
-	private handlePieceDragStart(event: MouseEvent, pieceIndex: number): void {
+	private handlePieceDragStart(event: MouseEvent, pieceIndex: number, element: HTMLElement): void {
 		event.preventDefault();
-		if (event.target instanceof HTMLElement) {
-			this.startDrag(pieceIndex, event.clientX, event.clientY, event.target);
-		}
+		this.startDrag(pieceIndex, event.clientX, event.clientY, element);
 	}
 
-	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number): void {
+	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number, element: HTMLElement): void {
 		if (this.isSwipingPanel) {
 			return;
 		}
@@ -1465,9 +1463,7 @@ class HexSeptominoGame {
 		if (event.touches.length === 1) {
 			const touch = event.touches[0];
 			if (!touch) return;
-			if (event.target instanceof HTMLElement) {
-				this.startDrag(pieceIndex, touch.clientX, touch.clientY, event.target);
-			}
+			this.startDrag(pieceIndex, touch.clientX, touch.clientY, element);
 		}
 	}
 
