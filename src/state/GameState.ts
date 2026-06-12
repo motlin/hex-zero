@@ -25,8 +25,11 @@ interface GameSettings {
 	numPieces: number;
 }
 
+export type GameDifficulty = 'Easy' | 'Medium' | 'Hard' | 'Extreme' | 'Impossible' | 'Custom';
+
 export class GameState {
 	private readonly settings: GameSettings;
+	private readonly difficulty: GameDifficulty;
 	private readonly grid: HexGrid;
 	private pieces: Piece[];
 	private currentPieceIndex: number;
@@ -38,8 +41,9 @@ export class GameState {
 	private undoCount: number;
 	private hintCount: number;
 
-	constructor(radius: number, numPieces: number) {
+	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty) {
 		this.settings = {radius, numPieces};
+		this.difficulty = difficulty ?? GameState.detectDifficulty(radius, numPieces);
 		this.grid = new HexGrid(radius);
 		this.pieces = [];
 		this.currentPieceIndex = 0;
@@ -250,9 +254,7 @@ export class GameState {
 		return solutionMove ? {q: solutionMove.q, r: solutionMove.r} : null;
 	}
 
-	getDifficulty(): string {
-		const {radius, numPieces} = this.settings;
-
+	private static detectDifficulty(radius: number, numPieces: number): GameDifficulty {
 		if (radius === 3 && numPieces === 4) return 'Easy';
 		if (radius === 3 && numPieces === 6) return 'Medium';
 		if (radius === 3 && numPieces === 8) return 'Hard';
@@ -260,6 +262,10 @@ export class GameState {
 		if (radius === 4 && numPieces === 14) return 'Impossible';
 
 		return 'Custom';
+	}
+
+	getDifficulty(): GameDifficulty {
+		return this.difficulty;
 	}
 
 	getSettings(): GameSettings {
