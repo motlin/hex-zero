@@ -1,7 +1,7 @@
 import type {AchievementId, DifficultyLevel} from './AchievementDefinitions';
-import {ACHIEVEMENTS} from './AchievementDefinitions';
+import {ACHIEVEMENTS, isAchievementId} from './AchievementDefinitions';
 import type {AchievementSaveData} from './AchievementStorage';
-import {AchievementStorage} from './AchievementStorage';
+import {loadAchievements, saveAchievements} from './AchievementStorage';
 import {AchievementUI} from './AchievementUI';
 
 export interface GameCompletionData {
@@ -13,14 +13,14 @@ export interface GameCompletionData {
 }
 
 export class AchievementManager {
-	private data: AchievementSaveData;
-	private ui: AchievementUI;
-	private unlockedThisSession: Set<AchievementId> = new Set();
+	private readonly data: AchievementSaveData;
+	private readonly ui: AchievementUI;
+	private readonly unlockedThisSession: Set<AchievementId> = new Set();
 	private checkInOrderProgress: number[] = [];
 	private placedInOrder: boolean = true;
 
 	constructor() {
-		this.data = AchievementStorage.load();
+		this.data = loadAchievements();
 		this.ui = new AchievementUI();
 	}
 
@@ -56,7 +56,7 @@ export class AchievementManager {
 	trackGameStart(): void {
 		this.data.stats.gamesPlayed++;
 		this.resetInOrderTracking();
-		AchievementStorage.save(this.data);
+		saveAchievements(this.data);
 	}
 
 	trackMove(): void {
@@ -70,32 +70,32 @@ export class AchievementManager {
 	onGameComplete(completionData: GameCompletionData): void {
 		this.data.stats.gamesWon++;
 		this.data.stats.winsByDifficulty[completionData.difficulty] =
-			(this.data.stats.winsByDifficulty[completionData.difficulty] || 0) + 1;
+			(this.data.stats.winsByDifficulty[completionData.difficulty] ?? 0) + 1;
 
 		const newAchievements: AchievementId[] = [];
 
 		const difficultyLower = completionData.difficulty.toLowerCase();
 
-		const baseAchievementId = `beat_${difficultyLower}` as AchievementId;
-		if (this.unlockAchievement(baseAchievementId)) {
+		const baseAchievementId = `beat_${difficultyLower}`;
+		if (isAchievementId(baseAchievementId) && this.unlockAchievement(baseAchievementId)) {
 			newAchievements.push(baseAchievementId);
 		}
 
 		if (completionData.undoCount === 0) {
-			const noUndoAchievementId = `beat_${difficultyLower}_no_undo` as AchievementId;
-			if (this.unlockAchievement(noUndoAchievementId)) {
+			const noUndoAchievementId = `beat_${difficultyLower}_no_undo`;
+			if (isAchievementId(noUndoAchievementId) && this.unlockAchievement(noUndoAchievementId)) {
 				newAchievements.push(noUndoAchievementId);
 			}
 		}
 
 		if (this.placedInOrder) {
-			const inOrderAchievementId = `beat_${difficultyLower}_in_order` as AchievementId;
-			if (this.unlockAchievement(inOrderAchievementId)) {
+			const inOrderAchievementId = `beat_${difficultyLower}_in_order`;
+			if (isAchievementId(inOrderAchievementId) && this.unlockAchievement(inOrderAchievementId)) {
 				newAchievements.push(inOrderAchievementId);
 			}
 		}
 
-		AchievementStorage.save(this.data);
+		saveAchievements(this.data);
 
 		if (newAchievements.length > 0) {
 			this.ui.showUnlockNotifications(newAchievements);
@@ -105,7 +105,8 @@ export class AchievementManager {
 	}
 
 	private unlockAchievement(id: AchievementId): boolean {
-		if (!this.data.achievements[id] || !this.data.achievements[id].unlocked) {
+		const existing = this.data.achievements[id];
+		if (existing === undefined || !existing.unlocked) {
 			this.data.achievements[id] = {
 				unlocked: true,
 				unlockedAt: Date.now(),

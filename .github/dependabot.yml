@@ -41,8 +41,8 @@ updates:
       labels:
           - 'dependencies'
       ignore:
-        - dependency-name: 'ataylorme/eslint-annotate-action'
-          versions: ['3.x']
+          - dependency-name: 'ataylorme/eslint-annotate-action'
+            versions: ['3.x']
       commit-message:
           prefix: 'dependabot'
           include: 'scope'

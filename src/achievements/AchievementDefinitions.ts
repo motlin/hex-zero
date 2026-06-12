@@ -23,7 +23,7 @@ export interface Achievement {
 	hidden?: boolean;
 }
 
-export const DIFFICULTY_LEVELS = ['Easy', 'Medium', 'Hard', 'Extreme', 'Impossible'] as const;
+const DIFFICULTY_LEVELS = ['Easy', 'Medium', 'Hard', 'Extreme', 'Impossible'] as const;
 export type DifficultyLevel = (typeof DIFFICULTY_LEVELS)[number];
 
 export const ACHIEVEMENTS: Record<AchievementId, Achievement> = {
@@ -118,6 +118,14 @@ export const ACHIEVEMENTS: Record<AchievementId, Achievement> = {
 		icon: '5️⃣',
 	},
 };
+
+export function isDifficultyLevel(value: string): value is DifficultyLevel {
+	return (DIFFICULTY_LEVELS as readonly string[]).includes(value);
+}
+
+export function isAchievementId(value: string): value is AchievementId {
+	return Object.prototype.hasOwnProperty.call(ACHIEVEMENTS, value);
+}
 
 export function getAchievementsByCategory(): {
 	completion: Achievement[];

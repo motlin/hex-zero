@@ -4,7 +4,8 @@ import {HexRenderer} from './renderer/HexRenderer';
 import {DEFAULT_COLORS, type ColorMap} from './ui/ColorTheme';
 import {CanvasManager} from './canvas/CanvasManager';
 import {AchievementManager} from './achievements/AchievementManager';
-import type {DifficultyLevel} from './achievements/AchievementDefinitions';
+import {isDifficultyLevel} from './achievements/AchievementDefinitions';
+import {getElementByIdOrNull, getRequiredElementById} from './dom-utils';
 
 declare global {
 	interface Window {
@@ -32,22 +33,22 @@ let game: HexSeptominoGame | null = null;
 let globalAchievementManager: AchievementManager | null = null;
 
 function startGame(radius: number, numPieces: number): void {
-	document.getElementById('difficultyScreen')!.classList.add('hidden');
-	document.getElementById('gameScreen')!.classList.remove('hidden');
+	getRequiredElementById('difficultyScreen', HTMLElement).classList.add('hidden');
+	getRequiredElementById('gameScreen', HTMLElement).classList.remove('hidden');
 
 	game = new HexSeptominoGame(radius, numPieces);
 	window.game = game;
 }
 
 function startCustomGame(): void {
-	const radius = parseInt((document.getElementById('customRadius') as HTMLInputElement).value);
-	const pieces = parseInt((document.getElementById('customPieces') as HTMLInputElement).value);
+	const radius = parseInt(getRequiredElementById('customRadius', HTMLInputElement).value);
+	const pieces = parseInt(getRequiredElementById('customPieces', HTMLInputElement).value);
 	startGame(radius, pieces);
 }
 
 function showDifficultyScreen(): void {
-	document.getElementById('gameScreen')!.classList.add('hidden');
-	document.getElementById('difficultyScreen')!.classList.remove('hidden');
+	getRequiredElementById('gameScreen', HTMLElement).classList.add('hidden');
+	getRequiredElementById('difficultyScreen', HTMLElement).classList.remove('hidden');
 }
 
 function showInstructions(): void {
@@ -59,13 +60,13 @@ function showInstructions(): void {
 
 function hideInstructions(): void {
 	const modal = document.getElementById('instructionsModal');
-	const dontShowAgain = document.getElementById('dontShowAgain') as HTMLInputElement;
+	const dontShowAgain = getElementByIdOrNull('dontShowAgain', HTMLInputElement);
 
 	if (modal) {
 		modal.classList.add('hidden');
 	}
 
-	if (dontShowAgain?.checked) {
+	if (dontShowAgain?.checked === true) {
 		localStorage.setItem('hexZeroDontShowInstructions', 'true');
 	}
 }
@@ -73,16 +74,12 @@ function hideInstructions(): void {
 function toggleFullscreen(): void {
 	const documentElement = document.documentElement;
 
-	if (!document.fullscreenElement) {
-		if (documentElement.requestFullscreen) {
-			documentElement.requestFullscreen().catch((error) => {
-				console.error('Error attempting to enable fullscreen:', error);
-			});
-		}
+	if (document.fullscreenElement === null) {
+		documentElement.requestFullscreen().catch((error: unknown) => {
+			console.error('Error attempting to enable fullscreen:', error);
+		});
 	} else {
-		if (document.exitFullscreen) {
-			document.exitFullscreen();
-		}
+		void document.exitFullscreen();
 	}
 
 	updateFullscreenButtonText();
@@ -119,8 +116,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		instructionsOverlay.addEventListener('click', hideInstructions);
 	}
 
-	const hamburgerBtn = document.getElementById('hamburgerBtn') as HTMLElement;
-	const hamburgerMenu = document.getElementById('hamburgerMenu') as HTMLElement;
+	const hamburgerBtn = getElementByIdOrNull('hamburgerBtn', HTMLElement);
+	const hamburgerMenu = getElementByIdOrNull('hamburgerMenu', HTMLElement);
 
 	if (hamburgerBtn && hamburgerMenu) {
 		hamburgerBtn.addEventListener('click', (e) => {
@@ -129,19 +126,24 @@ window.addEventListener('DOMContentLoaded', () => {
 		});
 
 		document.addEventListener('click', (e) => {
-			if (!hamburgerBtn.contains(e.target as Node) && !hamburgerMenu.contains(e.target as Node)) {
+			const target = e.target;
+			if (target instanceof Node && !hamburgerBtn.contains(target) && !hamburgerMenu.contains(target)) {
 				hamburgerMenu.classList.add('hidden');
 			}
 		});
 
 		hamburgerMenu.addEventListener('click', () => {
-			setTimeout(() => hamburgerMenu.classList.add('hidden'), 100);
+			setTimeout(() => {
+				hamburgerMenu.classList.add('hidden');
+			}, 100);
 		});
 	}
 
 	const newGameBtn = document.getElementById('newGameBtn');
 	if (newGameBtn) {
-		newGameBtn.addEventListener('click', () => showDifficultyScreen());
+		newGameBtn.addEventListener('click', () => {
+			showDifficultyScreen();
+		});
 	}
 
 	const restartBtn = document.getElementById('restartBtn');
@@ -155,7 +157,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	const howToPlayBtn = document.getElementById('howToPlayBtn');
 	if (howToPlayBtn) {
-		howToPlayBtn.addEventListener('click', () => showInstructions());
+		howToPlayBtn.addEventListener('click', () => {
+			showInstructions();
+		});
 	}
 
 	const achievementsButton = document.getElementById('achievementsButton');
@@ -176,7 +180,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		});
 
 		document.addEventListener('click', (e) => {
-			if (!menuHamburgerBtn.contains(e.target as Node) && !menuHamburgerMenu.contains(e.target as Node)) {
+			const target = e.target;
+			if (target instanceof Node && !menuHamburgerBtn.contains(target) && !menuHamburgerMenu.contains(target)) {
 				menuHamburgerMenu.classList.add('hidden');
 			}
 		});
@@ -190,7 +195,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	}
 
 	const menuAchievementsButton = document.getElementById('menuAchievementsButton');
-	if (menuAchievementsButton && globalAchievementManager) {
+	if (menuAchievementsButton) {
 		menuAchievementsButton.addEventListener('click', () => {
 			menuHamburgerMenu?.classList.add('hidden');
 			globalAchievementManager?.showAchievements();
@@ -216,12 +221,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	const fullscreenButton = document.getElementById('fullscreenButton');
 	if (fullscreenButton) {
-		fullscreenButton.addEventListener('click', () => toggleFullscreen());
+		fullscreenButton.addEventListener('click', () => {
+			toggleFullscreen();
+		});
 	}
 
 	const menuFullscreenButton = document.getElementById('menuFullscreenButton');
 	if (menuFullscreenButton) {
-		menuFullscreenButton.addEventListener('click', () => toggleFullscreen());
+		menuFullscreenButton.addEventListener('click', () => {
+			toggleFullscreen();
+		});
 	}
 
 	document.addEventListener('fullscreenchange', () => {
@@ -230,10 +239,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 class HexSeptominoGame {
-	private canvasManager: CanvasManager;
-	private gameState: GameState;
-	private renderer: HexRenderer;
-	private colors: ColorMap;
+	private readonly canvasManager: CanvasManager;
+	private readonly gameState: GameState;
+	private readonly renderer: HexRenderer;
+	private readonly colors: ColorMap;
 	private mouseHex: HexCoordinate | null;
 	private touchHex: HexCoordinate | null;
 	private isTouching: boolean;
@@ -242,7 +251,7 @@ class HexSeptominoGame {
 	private hintTimeout: number | null;
 	private animatingHexes: AnimatingHex[];
 	private animationStartTime: number | null;
-	private animationDuration: number;
+	private readonly animationDuration: number;
 	private isPanning: boolean;
 	private panStartX: number;
 	private panStartY: number;
@@ -255,10 +264,10 @@ class HexSeptominoGame {
 		position: HexCoordinate;
 		duration: number;
 	} | null;
-	private achievementManager: AchievementManager;
+	private readonly achievementManager: AchievementManager;
 
 	private currentPage: number;
-	private piecesPerPage: number;
+	private readonly piecesPerPage: number;
 	private isDragging: boolean;
 	private draggedPieceIndex: number | null;
 	private draggedPieceElement: HTMLElement | null;
@@ -270,7 +279,7 @@ class HexSeptominoGame {
 	private isSwipingPanel: boolean;
 
 	constructor(radius: number, numPieces: number) {
-		this.canvasManager = new CanvasManager('gameCanvas', 'piecePreview');
+		this.canvasManager = new CanvasManager('gameCanvas');
 		this.gameState = new GameState(radius, numPieces);
 		this.renderer = new HexRenderer(30);
 		this.updateCanvasSize();
@@ -306,7 +315,10 @@ class HexSeptominoGame {
 		this.swipeStartY = null;
 		this.isSwipingPanel = false;
 
-		this.achievementManager = globalAchievementManager!;
+		if (globalAchievementManager === null) {
+			throw new Error('AchievementManager is not initialized');
+		}
+		this.achievementManager = globalAchievementManager;
 		this.achievementManager.trackGameStart();
 
 		this.setupEventListeners();
@@ -334,10 +346,18 @@ class HexSeptominoGame {
 
 	private setupEventListeners(): void {
 		const canvas = this.canvasManager.getCanvas();
-		canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-		canvas.addEventListener('click', (e) => this.handleClick(e));
-		canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
-		canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+		canvas.addEventListener('mousemove', (e) => {
+			this.handleMouseMove(e);
+		});
+		canvas.addEventListener('click', (e) => {
+			this.handleClick(e);
+		});
+		canvas.addEventListener('mousedown', (e) => {
+			this.handleMouseDown(e);
+		});
+		canvas.addEventListener('mouseup', (e) => {
+			this.handleMouseUp(e);
+		});
 
 		canvas.addEventListener(
 			'wheel',
@@ -350,34 +370,68 @@ class HexSeptominoGame {
 			},
 			{passive: false},
 		);
-		canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), {passive: false});
-		canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), {passive: false});
-		canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), {passive: false});
-		canvas.addEventListener('touchcancel', (e) => this.handleTouchCancel(e));
+		canvas.addEventListener(
+			'touchstart',
+			(e) => {
+				this.handleTouchStart(e);
+			},
+			{passive: false},
+		);
+		canvas.addEventListener(
+			'touchmove',
+			(e) => {
+				this.handleTouchMove(e);
+			},
+			{passive: false},
+		);
+		canvas.addEventListener(
+			'touchend',
+			(e) => {
+				this.handleTouchEnd(e);
+			},
+			{passive: false},
+		);
+		canvas.addEventListener('touchcancel', (e) => {
+			this.handleTouchCancel(e);
+		});
 		canvas.addEventListener('mouseleave', () => {
 			this.mouseHex = null;
 			this.isPanning = false;
 			this.render();
 		});
 
-		document.addEventListener('keydown', (e) => this.handleKeyPress(e));
-		(document.getElementById('hintBtn') as HTMLElement).addEventListener('click', () => this.toggleHint());
+		document.addEventListener('keydown', (e) => {
+			this.handleKeyPress(e);
+		});
+		getRequiredElementById('hintBtn', HTMLElement).addEventListener('click', () => {
+			this.toggleHint();
+		});
 
-		(document.getElementById('undoBtn') as HTMLElement).addEventListener('click', () => this.undo());
-		(document.getElementById('redoBtn') as HTMLElement).addEventListener('click', () => this.redo());
+		getRequiredElementById('undoBtn', HTMLElement).addEventListener('click', () => {
+			this.undo();
+		});
+		getRequiredElementById('redoBtn', HTMLElement).addEventListener('click', () => {
+			this.redo();
+		});
 
-		(document.getElementById('morePiecesBtn') as HTMLElement).addEventListener('click', () => this.morePieces());
+		getRequiredElementById('morePiecesBtn', HTMLElement).addEventListener('click', () => {
+			this.morePieces();
+		});
 
 		const closeBtn = document.getElementById('closeShortcutsBtn');
 		const modal = document.getElementById('keyboardShortcutsModal');
 		const modalOverlay = modal?.querySelector('.modal-overlay');
 
 		if (closeBtn) {
-			closeBtn.addEventListener('click', () => this.toggleKeyboardShortcuts());
+			closeBtn.addEventListener('click', () => {
+				this.toggleKeyboardShortcuts();
+			});
 		}
 
 		if (modalOverlay) {
-			modalOverlay.addEventListener('click', () => this.toggleKeyboardShortcuts());
+			modalOverlay.addEventListener('click', () => {
+				this.toggleKeyboardShortcuts();
+			});
 		}
 
 		const showInstructionsFromShortcuts = document.getElementById('showInstructionsFromShortcuts');
@@ -636,7 +690,7 @@ class HexSeptominoGame {
 
 	private clearHint(): void {
 		this.hintPos = null;
-		if (this.hintTimeout) {
+		if (this.hintTimeout !== null) {
 			clearTimeout(this.hintTimeout);
 			this.hintTimeout = null;
 		}
@@ -670,43 +724,41 @@ class HexSeptominoGame {
 		this.clearHint();
 		this.achievementManager.resetInOrderTracking();
 
-		(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
+		getRequiredElementById('solutionStatus', HTMLElement).textContent = '';
 		this.updateUI();
 		this.render();
 		this.renderBottomPanel();
 	}
 
 	startNewGame(): void {
-		document.getElementById('victoryScreen')!.classList.add('hidden');
+		getRequiredElementById('victoryScreen', HTMLElement).classList.add('hidden');
 		showDifficultyScreen();
 	}
 
 	restartAndHideVictory(): void {
-		document.getElementById('victoryScreen')!.classList.add('hidden');
+		getRequiredElementById('victoryScreen', HTMLElement).classList.add('hidden');
 		this.restart();
 	}
 
 	private checkWinCondition(): void {
 		if (this.gameState.isGameWon()) {
-			const victoryScreen = document.getElementById('victoryScreen')!;
+			const victoryScreen = getRequiredElementById('victoryScreen', HTMLElement);
 			victoryScreen.classList.remove('hidden');
 
 			const difficulty = this.gameState.getDifficulty();
-			(document.getElementById('victoryDifficulty') as HTMLElement).textContent = difficulty;
-			(document.getElementById('victoryUndos') as HTMLElement).textContent = this.gameState
-				.getUndoCount()
-				.toString();
-			(document.getElementById('victoryHints') as HTMLElement).textContent = this.gameState
-				.getHintCount()
-				.toString();
+			getRequiredElementById('victoryDifficulty', HTMLElement).textContent = difficulty;
+			getRequiredElementById('victoryUndos', HTMLElement).textContent = this.gameState.getUndoCount().toString();
+			getRequiredElementById('victoryHints', HTMLElement).textContent = this.gameState.getHintCount().toString();
 
-			this.achievementManager.onGameComplete({
-				difficulty: difficulty as DifficultyLevel,
-				undoCount: this.gameState.getUndoCount(),
-				hintCount: this.gameState.getHintCount(),
-				moveCount: this.gameState.getMoveCount(),
-				placedInOrder: this.achievementManager.isPlacedInOrder(),
-			});
+			if (isDifficultyLevel(difficulty)) {
+				this.achievementManager.onGameComplete({
+					difficulty,
+					undoCount: this.gameState.getUndoCount(),
+					hintCount: this.gameState.getHintCount(),
+					moveCount: this.gameState.getMoveCount(),
+					placedInOrder: this.achievementManager.isPlacedInOrder(),
+				});
+			}
 			const duration = 3000;
 			const animationEnd = Date.now() + duration;
 			const defaults = {startVelocity: 30, spread: 360, ticks: 60, zIndex: 2100};
@@ -719,17 +771,18 @@ class HexSeptominoGame {
 				const timeLeft = animationEnd - Date.now();
 
 				if (timeLeft <= 0) {
-					return clearInterval(interval);
+					clearInterval(interval);
+					return;
 				}
 
 				const particleCount = 50 * (timeLeft / duration);
-				confetti({
+				void confetti({
 					...defaults,
 					particleCount,
 					origin: {x: randomInRange(0.1, 0.3), y: Math.random() - 0.2},
 					colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
 				});
-				confetti({
+				void confetti({
 					...defaults,
 					particleCount,
 					origin: {x: randomInRange(0.7, 0.9), y: Math.random() - 0.2},
@@ -738,7 +791,7 @@ class HexSeptominoGame {
 			}, 250);
 
 			const message = 'Congratulations! You solved it!';
-			(document.getElementById('solutionStatus') as HTMLElement).textContent = message;
+			getRequiredElementById('solutionStatus', HTMLElement).textContent = message;
 		}
 	}
 
@@ -1035,11 +1088,11 @@ class HexSeptominoGame {
 
 	private updateUI(): void {
 		if (!this.gameState.getAllPiecesPlaced()) {
-			(document.getElementById('solutionStatus') as HTMLElement).textContent = '';
+			getRequiredElementById('solutionStatus', HTMLElement).textContent = '';
 		}
 
-		const undoBtn = document.getElementById('undoBtn') as HTMLButtonElement;
-		const redoBtn = document.getElementById('redoBtn') as HTMLButtonElement;
+		const undoBtn = getElementByIdOrNull('undoBtn', HTMLButtonElement);
+		const redoBtn = getElementByIdOrNull('redoBtn', HTMLButtonElement);
 
 		if (undoBtn) {
 			undoBtn.disabled = !this.gameState.canUndo();
@@ -1073,7 +1126,7 @@ class HexSeptominoGame {
 				displayHeight = animatingHex.targetHeight;
 			}
 
-			const color = this.colors[displayHeight] || (displayHeight > 10 ? '#1a1a1a' : '#000');
+			const color = this.colors[displayHeight] ?? (displayHeight > 10 ? '#1a1a1a' : '#000');
 			this.drawHex(ctx, pos.x, pos.y, color, '#0f3460', 2);
 
 			if (displayHeight > 0) {
@@ -1105,7 +1158,7 @@ class HexSeptominoGame {
 				0,
 				0,
 				this.renderer.hexSize,
-				this.colors[animatingHex.startHeight] || (animatingHex.startHeight > 10 ? '#1a1a1a' : '#000'),
+				this.colors[animatingHex.startHeight] ?? (animatingHex.startHeight > 10 ? '#1a1a1a' : '#000'),
 				'#0f3460',
 				2,
 			);
@@ -1124,11 +1177,12 @@ class HexSeptominoGame {
 		if (this.isDragging && this.draggedPieceIndex !== null && this.dragHoverHex) {
 			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
 			if (piece) {
-				const canPlace = this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r);
+				const dragHoverHex = this.dragHoverHex;
+				const canPlace = this.canPlacePiece(piece, dragHoverHex.q, dragHoverHex.r);
 
 				piece.tiles.forEach((tile) => {
-					const adjustedQ = this.dragHoverHex!.q + tile.q - piece.center.q;
-					const adjustedR = this.dragHoverHex!.r + tile.r - piece.center.r;
+					const adjustedQ = dragHoverHex.q + tile.q - piece.center.q;
+					const adjustedR = dragHoverHex.r + tile.r - piece.center.r;
 					const hex = grid.getHex(adjustedQ, adjustedR);
 					if (hex) {
 						const pos = this.renderer.hexToPixel(hex.q, hex.r);
@@ -1140,7 +1194,7 @@ class HexSeptominoGame {
 			}
 		}
 
-		const previewHex = this.mouseHex || this.touchHex;
+		const previewHex = this.mouseHex ?? this.touchHex;
 		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) && !this.isDragging) {
 			const piece = this.gameState.getCurrentPiece();
 			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
@@ -1161,10 +1215,11 @@ class HexSeptominoGame {
 		}
 
 		if (this.hintPos) {
+			const hintPos = this.hintPos;
 			const piece = this.gameState.getCurrentPiece();
 			piece.tiles.forEach((tile) => {
-				const adjustedQ = this.hintPos!.q + tile.q - piece.center.q;
-				const adjustedR = this.hintPos!.r + tile.r - piece.center.r;
+				const adjustedQ = hintPos.q + tile.q - piece.center.q;
+				const adjustedR = hintPos.r + tile.r - piece.center.r;
 				const hex = grid.getHex(adjustedQ, adjustedR);
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
@@ -1177,9 +1232,10 @@ class HexSeptominoGame {
 			});
 		}
 
-		if (this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive) {
-			const elapsed = performance.now() - this.invalidPlacementAnimation.startTime;
-			const progress = elapsed / this.invalidPlacementAnimation.duration;
+		if (this.invalidPlacementAnimation?.isActive === true) {
+			const invalidPlacementAnimation = this.invalidPlacementAnimation;
+			const elapsed = performance.now() - invalidPlacementAnimation.startTime;
+			const progress = elapsed / invalidPlacementAnimation.duration;
 
 			const pulseProgress = Math.sin(progress * Math.PI * 2);
 			const scale = 1.0 + pulseProgress * 0.3;
@@ -1187,8 +1243,8 @@ class HexSeptominoGame {
 
 			const piece = this.gameState.getCurrentPiece();
 			piece.tiles.forEach((tile) => {
-				const adjustedQ = this.invalidPlacementAnimation!.position.q + tile.q - piece.center.q;
-				const adjustedR = this.invalidPlacementAnimation!.position.r + tile.r - piece.center.r;
+				const adjustedQ = invalidPlacementAnimation.position.q + tile.q - piece.center.q;
+				const adjustedR = invalidPlacementAnimation.position.r + tile.r - piece.center.r;
 				const hex = grid.getHex(adjustedQ, adjustedR);
 				if (hex) {
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
@@ -1237,7 +1293,7 @@ class HexSeptominoGame {
 			piecesContainer.appendChild(pieceContainer);
 		}
 
-		const morePiecesBtn = document.getElementById('morePiecesBtn') as HTMLButtonElement;
+		const morePiecesBtn = getElementByIdOrNull('morePiecesBtn', HTMLButtonElement);
 		if (morePiecesBtn) {
 			const totalPages = Math.ceil(pieces.length / this.piecesPerPage);
 
@@ -1380,14 +1436,24 @@ class HexSeptominoGame {
 	}
 
 	private setupPieceDragHandlers(element: HTMLElement, pieceIndex: number): void {
-		element.addEventListener('mousedown', (e) => this.handlePieceDragStart(e, pieceIndex));
+		element.addEventListener('mousedown', (e) => {
+			this.handlePieceDragStart(e, pieceIndex);
+		});
 
-		element.addEventListener('touchstart', (e) => this.handlePieceTouchStart(e, pieceIndex), {passive: false});
+		element.addEventListener(
+			'touchstart',
+			(e) => {
+				this.handlePieceTouchStart(e, pieceIndex);
+			},
+			{passive: false},
+		);
 	}
 
 	private handlePieceDragStart(event: MouseEvent, pieceIndex: number): void {
 		event.preventDefault();
-		this.startDrag(pieceIndex, event.clientX, event.clientY, event.target as HTMLElement);
+		if (event.target instanceof HTMLElement) {
+			this.startDrag(pieceIndex, event.clientX, event.clientY, event.target);
+		}
 	}
 
 	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number): void {
@@ -1399,7 +1465,9 @@ class HexSeptominoGame {
 		if (event.touches.length === 1) {
 			const touch = event.touches[0];
 			if (!touch) return;
-			this.startDrag(pieceIndex, touch.clientX, touch.clientY, event.target as HTMLElement);
+			if (event.target instanceof HTMLElement) {
+				this.startDrag(pieceIndex, touch.clientX, touch.clientY, event.target);
+			}
 		}
 	}
 
@@ -1408,7 +1476,8 @@ class HexSeptominoGame {
 
 		this.isDragging = true;
 		this.draggedPieceIndex = pieceIndex;
-		this.draggedPieceElement = element.closest('.draggable-piece') as HTMLElement;
+		const closest = element.closest('.draggable-piece');
+		this.draggedPieceElement = closest instanceof HTMLElement ? closest : null;
 
 		if (this.draggedPieceElement) {
 			this.draggedPieceElement.classList.add('dragging');
@@ -1422,13 +1491,13 @@ class HexSeptominoGame {
 		document.addEventListener('touchend', this.handleGlobalTouchEnd);
 	}
 
-	private handleGlobalDragMove = (event: MouseEvent): void => {
+	private readonly handleGlobalDragMove = (event: MouseEvent): void => {
 		if (!this.isDragging) return;
 		event.preventDefault();
 		this.updateDragPosition(event.clientX, event.clientY);
 	};
 
-	private handleGlobalTouchMove = (event: TouchEvent): void => {
+	private readonly handleGlobalTouchMove = (event: TouchEvent): void => {
 		if (!this.isDragging) return;
 		event.preventDefault();
 		if (event.touches.length === 1) {
@@ -1470,12 +1539,12 @@ class HexSeptominoGame {
 		this.render();
 	}
 
-	private handleGlobalDragEnd = (_event: MouseEvent): void => {
+	private readonly handleGlobalDragEnd = (_event: MouseEvent): void => {
 		if (!this.isDragging) return;
 		this.finishDrag();
 	};
 
-	private handleGlobalTouchEnd = (_event: TouchEvent): void => {
+	private readonly handleGlobalTouchEnd = (_event: TouchEvent): void => {
 		if (!this.isDragging) return;
 		this.finishDrag();
 	};
@@ -1523,11 +1592,11 @@ class HexSeptominoGame {
 	}
 
 	private renderPieceNavigationCanvas(canvasId: string, pieceIndex: number | null): void {
-		const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-		if (!canvas) return;
+		const canvas = getElementByIdOrNull(canvasId, HTMLCanvasElement);
+		if (canvas === null) return;
 
 		const ctx = canvas.getContext('2d');
-		if (!ctx) return;
+		if (ctx === null) return;
 
 		const parent = canvas.parentElement;
 		if (!parent) return;
@@ -1662,9 +1731,11 @@ class HexSeptominoGame {
 	private requestAnimationFrame(): void {
 		if (
 			(this.animationStartTime !== null && this.animatingHexes.length > 0) ||
-			(this.invalidPlacementAnimation && this.invalidPlacementAnimation.isActive)
+			this.invalidPlacementAnimation?.isActive === true
 		) {
-			requestAnimationFrame(() => this.animate());
+			requestAnimationFrame(() => {
+				this.animate();
+			});
 		}
 	}
 

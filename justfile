@@ -1,63 +1,59 @@
 # `just --list --unsorted`
+[group('default')]
 default:
     @just --list --unsorted
 
-# `npm install`
+ci := env("CI", "")
+
+# Install dependencies
+[group('setup')]
 install:
-    npm install
+    vp install
+    vp fmt CLAUDE.md
 
-# `npm ci`
-install-ci:
-    npm ci
+# Run dev server
+dev *args: install
+    vp dev {{args}}
 
-# `npm run dev`
-dev: install
-    npm run dev
-
-# `npm run lint`
+# Run linter
 lint: install
-    npm run lint
+    vp lint {{ if ci != "" { "--format github" } else { "--fix" } }}
 
-# `npm run ci:eslint`
-eslint-ci: install-ci
-    npm run ci:eslint
-
-# `npm run format`
+# Run formatter
 format: install
-    npm run format
+    vp fmt {{ if ci != "" { "--check" } else { "" } }}
 
-# `npm run ci:biome`
-biome-ci: install-ci
-    npm run ci:biome
+# Run checks (format + lint + typecheck)
+check: install
+    vp check {{ if ci != "" { "" } else { "--fix" } }}
 
-# `npm run ci:prettier`
-prettier-ci: install-ci
-    npm run ci:prettier
+# Run tests
+test *args: install
+    {{ if ci != "" { "vp exec playwright install --with-deps chromium" } else { "true" } }}
+    vp run test:run {{args}}
 
-# `npm run test:run`
-test: install
-    npm run test:run
-
-# `npm run test:run`
-test-ci: install-ci
-    npm run test:run
-
-# `npm run ci:typecheck`
+# Type-check the project
 typecheck: install
-    npm run ci:typecheck
+    vp run typecheck
 
-# `npm run ci:typecheck`
-typecheck-ci: install-ci
-    npm run ci:typecheck
-
-# `npm run build`
+# Build the project
 build: install
-    npm run build
+    vp run build
 
-# `npm run build`
-build-ci: install-ci
-    npm run build
+# Run fallow codebase intelligence (dead code, duplication, drift)
+fallow: install
+    vp run {{ if ci != "" { "fallow:ci" } else { "fallow" } }}
+
+# Run Storybook
+storybook *args: install
+    vp run storybook {{args}}
+
+# Run pre-commit hooks on all files (same as CI's pre-commit job)
+pre-commit: install
+    pre-commit run --all-files
 
 # Run all pre-commit checks
-precommit: format lint typecheck build test
-    @echo "✅ All pre-commit checks passed!"
+[arg("quick", long, value="true", help="Skip tests")]
+precommit quick="": check build fallow pre-commit
+    {{ if quick != "true" { "just test" } else { "true" } }}
+    @echo "All pre-commit checks passed!"

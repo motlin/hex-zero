@@ -1,0 +1,11 @@
+{
+	"$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+	"entry": ["src/hex-zero.ts"],
+	"ignorePatterns": [],
+	"duplicates": {
+		"minOccurrences": 3
+	},
+	"rules": {
+		"unused-dependencies": "warn"
+	}
+}

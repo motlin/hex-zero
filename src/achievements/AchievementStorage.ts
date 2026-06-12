@@ -15,16 +15,18 @@ export interface AchievementStats {
 	winsByDifficulty: Record<string, number>;
 }
 
+export type AchievementMap = Partial<Record<AchievementId, AchievementData>>;
+
 export interface AchievementSaveData {
-	achievements: Record<AchievementId, AchievementData>;
+	achievements: AchievementMap;
 	stats: AchievementStats;
 }
 
 const STORAGE_KEY = 'hexZeroAchievements';
 
-export class AchievementStorage {
-	private static defaultData: AchievementSaveData = {
-		achievements: {} as Record<AchievementId, AchievementData>,
+function createDefaultData(): AchievementSaveData {
+	return {
+		achievements: {},
 		stats: {
 			gamesPlayed: 0,
 			gamesWon: 0,
@@ -34,36 +36,44 @@ export class AchievementStorage {
 			winsByDifficulty: {},
 		},
 	};
+}
 
-	static load(): AchievementSaveData {
-		try {
-			const stored = localStorage.getItem(STORAGE_KEY);
-			if (stored) {
-				const data = JSON.parse(stored);
+interface StoredSaveData {
+	achievements?: AchievementMap;
+	stats?: Partial<AchievementStats>;
+}
+
+function isStoredSaveData(value: unknown): value is StoredSaveData {
+	return typeof value === 'object' && value !== null;
+}
+
+export function loadAchievements(): AchievementSaveData {
+	const defaultData = createDefaultData();
+	try {
+		const stored = localStorage.getItem(STORAGE_KEY);
+		if (stored !== null && stored !== '') {
+			const parsed: unknown = JSON.parse(stored);
+			if (isStoredSaveData(parsed)) {
 				return {
-					...this.defaultData,
-					...data,
+					...defaultData,
+					...parsed,
 					stats: {
-						...this.defaultData.stats,
-						...data.stats,
+						...defaultData.stats,
+						...parsed.stats,
 					},
 				};
 			}
-		} catch (e) {
-			console.error('Failed to load achievements:', e);
 		}
-		return {...this.defaultData};
+	} catch (e) {
+		console.error('Failed to load achievements:', e);
 	}
+	return defaultData;
+}
 
-	static save(data: AchievementSaveData): void {
-		try {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-		} catch (e) {
-			console.error('Failed to save achievements:', e);
-		}
-	}
-
-	static reset(): void {
-		localStorage.removeItem(STORAGE_KEY);
+export function saveAchievements(data: AchievementSaveData): void {
+	try {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+	} catch (e) {
+		console.error('Failed to save achievements:', e);
 	}
 }
