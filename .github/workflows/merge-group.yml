@@ -12,7 +12,7 @@ jobs:
     pre-commit:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
@@ -28,7 +28,7 @@ jobs:
     check:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
@@ -43,7 +43,7 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
@@ -58,7 +58,7 @@ jobs:
     test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
@@ -73,7 +73,7 @@ jobs:
     markdownlint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
@@ -89,7 +89,7 @@ jobs:
     yamllint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
@@ -100,7 +100,7 @@ jobs:
     fallow:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v6
+            - uses: actions/checkout@v7
             - uses: jdx/mise-action@v4
               with:
                   cache: true
