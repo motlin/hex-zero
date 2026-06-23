@@ -1,47 +1,47 @@
 name: Deploy to GitHub Pages
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
+    workflow_dispatch:
+    push:
+        branches:
+            - main
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+    contents: read
+    pages: write
+    id-token: write
 
 concurrency:
-  group: 'github-pages'
-  cancel-in-progress: true
+    group: 'github-pages'
+    cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Deploy to GitHub Pages
-    runs-on: ubuntu-latest
-    environment: github-pages
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+    deploy:
+        name: Deploy to GitHub Pages
+        runs-on: ubuntu-latest
+        environment: github-pages
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
 
-      - uses: jdx/mise-action@v4
+            - uses: jdx/mise-action@v4
 
-      - name: Install dependencies
-        run: just install
+            - name: Install dependencies
+              run: just install
 
-      - name: Build project
-        run: just build-ci
-        env:
-          VITE_BASE_PATH: /hex-zero/
+            - name: Build project
+              run: just build-ci
+              env:
+                  VITE_BASE_PATH: /hex-zero/
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
+            - name: Setup Pages
+              uses: actions/configure-pages@v6
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: './dist'
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v5
+              with:
+                  path: './dist'
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v5
