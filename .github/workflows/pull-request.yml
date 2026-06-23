@@ -1,126 +1,126 @@
 # Jobs that run on pull_request, but not on merge_group. This is useful for jobs that post comments on Pull Requests.
 
 on:
-    pull_request:
+  pull_request:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
     # Check if the new commits in a Pull Request contain a merge commit. If so, fail and print them out.
-    forbid-merge-commits:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: motlin/forbid-merge-commits-action@main
+  forbid-merge-commits:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: motlin/forbid-merge-commits-action@main
 
-    automerge-dependabot:
-        if: github.event.pull_request.user.login == 'dependabot[bot]'
-        runs-on: ubuntu-latest
-        permissions:
-            pull-requests: write
-            contents: write
-        steps:
-            - uses: actions/checkout@v7
+  automerge-dependabot:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
 
-            - name: Enable auto-merge for Dependabot PR
-              run: gh pr merge --rebase --auto "${{ github.event.pull_request.number }}"
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enable auto-merge for Dependabot PR
+        run: gh pr merge --rebase --auto "${{ github.event.pull_request.number }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    check-fix:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            pull-requests: write
-        steps:
-            - uses: actions/checkout@v7
-              with:
-                  ref: ${{ github.event.pull_request.head.ref }}
-                  repository: ${{ github.event.pull_request.head.repo.full_name }}
-                  token: ${{ secrets.GITHUB_TOKEN }}
+  check-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: jdx/mise-action@v4
-              with:
-                  cache: true
-              env:
-                  GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v5
-              with:
-                  path: ~/.local/share/pnpm/store
-                  key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+      - uses: jdx/mise-action@v4
+        with:
+          cache: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/cache@v5
+        with:
+          path: ~/.local/share/pnpm/store
+          key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
 
-            - name: Configure Git
-              run: |
-                  git config --global user.name "GitHub Actions"
-                  git config --global user.email "github-actions@github.com"
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
 
-            - name: Run vp check --fix
-              run: |
-                  vp install
-                  vp check --fix
+      - name: Run vp check --fix
+        run: |
+          vp install
+          vp check --fix
 
-                  if [[ -n $(git status --porcelain) ]]; then
-                    FIX_BRANCH="fix-${{ github.event.pull_request.number }}-check"
-                    git switch --create $FIX_BRANCH
+          if [[ -n $(git status --porcelain) ]]; then
+            FIX_BRANCH="fix-${{ github.event.pull_request.number }}-check"
+            git switch --create $FIX_BRANCH
 
-                    git add --all
-                    git commit --message "Apply vp check fixes."
-                    git push --force origin $FIX_BRANCH
+            git add --all
+            git commit --message "Apply vp check fixes."
+            git push --force origin $FIX_BRANCH
 
-                    echo "vp check fixes have been pushed to the $FIX_BRANCH branch."
-                    exit 1
-                  else
-                    echo "No changes needed by vp check"
-                  fi
+            echo "vp check fixes have been pushed to the $FIX_BRANCH branch."
+            exit 1
+          else
+            echo "No changes needed by vp check"
+          fi
 
-    pre-commit-fix:
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write
-            pull-requests: write
-        steps:
-            - uses: actions/checkout@v7
-              with:
-                  ref: ${{ github.event.pull_request.head.ref }}
-                  repository: ${{ github.event.pull_request.head.repo.full_name }}
-                  token: ${{ secrets.GITHUB_TOKEN }}
+  pre-commit-fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-            - uses: jdx/mise-action@v4
-              env:
-                  GITHUB_TOKEN: ${{ github.token }}
+      - uses: jdx/mise-action@v4
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
-            - run: just install
+      - run: just install
 
-            - name: Configure Git
-              run: |
-                  git config --global user.name "GitHub Actions"
-                  git config --global user.email "github-actions@github.com"
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "github-actions@github.com"
 
-            - name: Run pre-commit
-              run: |
-                  pre-commit run --all-files || true
+      - name: Run pre-commit
+        run: |
+          pre-commit run --all-files || true
 
-                  if [[ -n $(git status --porcelain) ]]; then
-                    FIX_BRANCH="fix-${{ github.event.pull_request.number }}-pre-commit"
-                    git switch --create $FIX_BRANCH
+          if [[ -n $(git status --porcelain) ]]; then
+            FIX_BRANCH="fix-${{ github.event.pull_request.number }}-pre-commit"
+            git switch --create $FIX_BRANCH
 
-                    git add --all
-                    git commit --message "Apply pre-commit fixes."
-                    git push --force origin $FIX_BRANCH
+            git add --all
+            git commit --message "Apply pre-commit fixes."
+            git push --force origin $FIX_BRANCH
 
-                    echo "pre-commit fixes have been pushed to the $FIX_BRANCH branch."
-                    exit 1
-                  else
-                    echo "No changes needed by pre-commit"
-                  fi
+            echo "pre-commit fixes have been pushed to the $FIX_BRANCH branch."
+            exit 1
+          else
+            echo "No changes needed by pre-commit"
+          fi
 
-    all-pr-checks:
-        name: All PR checks
-        if: ${{ !cancelled() }}
-        needs: [forbid-merge-commits, check-fix, pre-commit-fix]
-        runs-on: ubuntu-latest
-        steps:
-            - uses: re-actors/alls-green@release/v1
-              with:
-                  jobs: ${{ toJSON(needs) }}
+  all-pr-checks:
+    name: All PR checks
+    if: ${{ !cancelled() }}
+    needs: [forbid-merge-commits, check-fix, pre-commit-fix]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}

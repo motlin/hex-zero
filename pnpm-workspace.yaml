@@ -1,22 +1,22 @@
 onlyBuiltDependencies:
-    - esbuild
+  - esbuild
 catalog:
-    vite: npm:@voidzero-dev/vite-plus-core@latest
-    vitest: npm:@voidzero-dev/vite-plus-test@latest
-    vite-plus: latest
+  vite: npm:@voidzero-dev/vite-plus-core@latest
+  vitest: npm:@voidzero-dev/vite-plus-test@latest
+  vite-plus: latest
 overrides:
-    vite: 'catalog:'
-    vitest: 'catalog:'
+  vite: 'catalog:'
+  vitest: 'catalog:'
 peerDependencyRules:
-    allowAny:
-        - vite
-        - vitest
-    allowedVersions:
-        vite: '*'
-        vitest: '*'
+  allowAny:
+    - vite
+    - vitest
+  allowedVersions:
+    vite: '*'
+    vitest: '*'
 allowBuilds:
-    '@sentry/cli': true
-    '@swc/core': true
-    esbuild: true
-    fallow: true
-    unrs-resolver: true
+  '@sentry/cli': true
+  '@swc/core': true
+  esbuild: true
+  fallow: true
+  unrs-resolver: true
