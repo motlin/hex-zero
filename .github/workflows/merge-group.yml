@@ -15,13 +15,13 @@ jobs:
     pre-commit:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.local/share/pnpm/store
                   key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -31,13 +31,13 @@ jobs:
     check:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.local/share/pnpm/store
                   key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -46,13 +46,13 @@ jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.local/share/pnpm/store
                   key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -61,13 +61,13 @@ jobs:
     test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.local/share/pnpm/store
                   key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -76,13 +76,13 @@ jobs:
     markdownlint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.local/share/pnpm/store
                   key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -92,8 +92,8 @@ jobs:
     yamllint:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
@@ -103,13 +103,13 @@ jobs:
     fallow:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
-            - uses: jdx/mise-action@v4
+            - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+            - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
               with:
                   cache: true
               env:
                   GITHUB_TOKEN: ${{ github.token }}
-            - uses: actions/cache@v6
+            - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ~/.local/share/pnpm/store
                   key: pnpm-${{ hashFiles('pnpm-lock.yaml') }}
@@ -121,6 +121,6 @@ jobs:
         needs: [pre-commit, check, build, test, markdownlint, yamllint, fallow]
         runs-on: ubuntu-latest
         steps:
-            - uses: re-actors/alls-green@release/v1
+            - uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # release/v1
               with:
                   jobs: ${{ toJSON(needs) }}
