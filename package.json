@@ -43,7 +43,7 @@
 		"fallow": "^2.104.0",
 		"jsdom": "^29.1.1",
 		"markdownlint-cli2": "^0.23.0",
-		"typescript": "^6.0.3",
+		"typescript": "^7.0.2",
 		"vite": "catalog:",
 		"vite-plus": "catalog:",
 		"vitest": "catalog:"
