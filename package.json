@@ -41,7 +41,7 @@
 		"@vitest/ui": "^4.1.9",
 		"eslint": "^10.6.0",
 		"fallow": "^2.104.0",
-		"jsdom": "^29.1.1",
+		"jsdom": "^30.0.0",
 		"markdownlint-cli2": "^0.23.0",
 		"typescript": "^6.0.3",
 		"vite": "catalog:",
