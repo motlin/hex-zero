@@ -40,7 +40,7 @@
 		"@typescript/native-preview": "^7.0.0-dev.20260702.3",
 		"@vitest/ui": "^4.1.9",
 		"eslint": "^10.6.0",
-		"fallow": "^2.104.0",
+		"fallow": "^3.10.0",
 		"jsdom": "^29.1.1",
 		"markdownlint-cli2": "^0.23.0",
 		"typescript": "^6.0.3",
