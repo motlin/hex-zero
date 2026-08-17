@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - uses: jdx/mise-action@v4.2.4
+      - uses: jdx/mise-action@v4.2.5
 
       - name: Install dependencies
         run: just install
