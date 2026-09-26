@@ -39,7 +39,7 @@
 		"@types/node": "^26.6.2",
 		"@typescript/native-preview": "^7.0.0-dev.20260702.3",
 		"@vitest/ui": "catalog:",
-		"eslint": "^10.6.0",
+		"eslint": "^10.11.0",
 		"fallow": "^2.104.0",
 		"jsdom": "^29.1.1",
 		"markdownlint-cli2": "^0.23.0",
