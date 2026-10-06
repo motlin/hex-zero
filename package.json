@@ -36,7 +36,7 @@
 	"devDependencies": {
 		"@testing-library/dom": "^10.4.2",
 		"@types/canvas-confetti": "^1.9.0",
-		"@types/node": "^26.6.3",
+		"@types/node": "^26.6.4",
 		"@typescript/native-preview": "^7.0.0-dev.20260702.3",
 		"@vitest/ui": "catalog:",
 		"eslint": "^10.11.0",
