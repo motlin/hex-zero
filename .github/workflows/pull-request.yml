@@ -61,8 +61,8 @@ jobs:
 
       - name: Run vp check --fix
         run: |
-          vp install
-          vp check --fix
+          pnpm install
+          pnpm exec vp check --fix
 
           if [[ -n $(git status --porcelain) ]]; then
             FIX_BRANCH="fix-${{ github.event.pull_request.number }}-check"

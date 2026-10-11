@@ -8,7 +8,7 @@ ci := env("CI", "")
 # Install dependencies
 [group('setup')]
 install:
-    vp install
+    pnpm install
     vp fmt CLAUDE.md
 
 # Run dev server
