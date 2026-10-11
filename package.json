@@ -28,7 +28,7 @@
 		"test": "node node_modules/vitest/dist/cli.js",
 		"test:ui": "node node_modules/vitest/dist/cli.js --ui",
 		"test:run": "node node_modules/vitest/dist/cli.js run",
-		"prepare": "vp config"
+		"prepare": "VITE_GIT_HOOKS=0 vp config"
 	},
 	"dependencies": {
 		"canvas-confetti": "^1.9.4"
