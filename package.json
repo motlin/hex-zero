@@ -1,52 +1,51 @@
 {
-	"name": "hex-zero",
-	"version": "1.0.0",
-	"description": "Hex Zero is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.",
-	"keywords": [],
-	"homepage": "https://github.com/motlin/hex-zero#readme",
-	"bugs": {
-		"url": "https://github.com/motlin/hex-zero/issues"
-	},
-	"author": "",
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/motlin/hex-zero.git"
-	},
-	"type": "module",
-	"scripts": {
-		"preinstall": "npx only-allow pnpm",
-		"dev": "vp dev",
-		"preview": "vp preview",
-		"build": "tsgo && vp build",
-		"oxlint": "vp lint . --fix",
-		"oxlint:ci": "vp lint . --format github",
-		"fmt": "vp fmt",
-		"fmt:ci": "vp fmt --check",
-		"fallow": "fallow fix --yes",
-		"fallow:ci": "fallow dead-code",
-		"typecheck": "tsgo --noEmit",
-		"test": "node node_modules/vitest/dist/cli.js",
-		"test:ui": "node node_modules/vitest/dist/cli.js --ui",
-		"test:run": "node node_modules/vitest/dist/cli.js run",
-		"prepare": "VITE_GIT_HOOKS=0 vp config"
-	},
-	"dependencies": {
-		"canvas-confetti": "^1.9.4"
-	},
-	"devDependencies": {
-		"@testing-library/dom": "^10.4.2",
-		"@types/canvas-confetti": "^1.9.0",
-		"@types/node": "^26.6.5",
-		"@typescript/native-preview": "^7.0.0-dev.20260702.3",
-		"@vitest/ui": "catalog:",
-		"eslint": "^10.12.0",
-		"fallow": "^3.33.1",
-		"jsdom": "^30.1.2",
-		"markdownlint-cli2": "^0.23.3",
-		"typescript": "^7.0.2",
-		"vite": "catalog:",
-		"vite-plus": "catalog:",
-		"vitest": "catalog:"
-	},
-	"packageManager": "pnpm@11.1.1"
+  "name": "hex-zero",
+  "version": "1.0.0",
+  "description": "Hex Zero is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.",
+  "keywords": [],
+  "homepage": "https://github.com/motlin/hex-zero#readme",
+  "bugs": {
+    "url": "https://github.com/motlin/hex-zero/issues"
+  },
+  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motlin/hex-zero.git"
+  },
+  "type": "module",
+  "scripts": {
+    "preinstall": "npx only-allow pnpm",
+    "dev": "vp dev",
+    "preview": "vp preview",
+    "build": "tsgo && vp build",
+    "oxlint": "vp lint . --fix",
+    "oxlint:ci": "vp lint . --format github",
+    "fmt": "vp fmt",
+    "fmt:ci": "vp fmt --check",
+    "fallow": "fallow fix --yes",
+    "fallow:ci": "fallow dead-code",
+    "typecheck": "tsgo --noEmit",
+    "test": "node node_modules/vitest/dist/cli.js",
+    "test:ui": "node node_modules/vitest/dist/cli.js --ui",
+    "test:run": "node node_modules/vitest/dist/cli.js run",
+    "prepare": "VITE_GIT_HOOKS=0 vp config"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.4.2",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^26.6.5",
+    "@typescript/native-preview": "^7.0.0-dev.20260702.3",
+    "@vitest/ui": "catalog:",
+    "vitest": "catalog:",
+    "fallow": "^3.33.1",
+    "jsdom": "^30.1.2",
+    "markdownlint-cli2": "^0.23.3",
+    "typescript": "^7.0.2",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  },
+  "packageManager": "pnpm@11.1.1"
 }
