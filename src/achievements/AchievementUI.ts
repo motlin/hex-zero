@@ -2,15 +2,18 @@ import type {AchievementId} from './AchievementDefinitions';
 import {ACHIEVEMENTS, getAchievementsByCategory} from './AchievementDefinitions';
 import type {AchievementMap, AchievementStats} from './AchievementStorage';
 
-export class AchievementUI {
+export class AchievementUI
+{
 	private readonly activeNotifications: HTMLElement[] = [];
 
-	initialize(): void {
+	initialize(): void
+	{
 		this.addStyles();
 		this.createModal();
 	}
 
-	private addStyles(): void {
+	private addStyles(): void
+	{
 		const style = document.createElement('style');
 		style.textContent = `
       .achievement-modal {
@@ -195,7 +198,8 @@ export class AchievementUI {
 		document.head.appendChild(style);
 	}
 
-	private createModal(): void {
+	private createModal(): void
+	{
 		const modal = document.createElement('div');
 		modal.id = 'achievementModal';
 		modal.className = 'achievement-modal';
@@ -210,21 +214,26 @@ export class AchievementUI {
     `;
 		document.body.appendChild(modal);
 
-		modal.addEventListener('click', (e) => {
-			if (e.target === modal) {
+		modal.addEventListener('click', (e) =>
+		{
+			if (e.target === modal)
+			{
 				this.hideModal();
 			}
 		});
 
 		const closeBtn = document.getElementById('achievementClose');
-		if (closeBtn) {
-			closeBtn.addEventListener('click', () => {
+		if (closeBtn)
+		{
+			closeBtn.addEventListener('click', () =>
+			{
 				this.hideModal();
 			});
 		}
 	}
 
-	showAchievementsModal(achievements: AchievementMap, stats: AchievementStats): void {
+	showAchievementsModal(achievements: AchievementMap, stats: AchievementStats): void
+	{
 		const modal = document.getElementById('achievementModal');
 		const content = document.getElementById('achievementContent');
 		if (!modal || !content) return;
@@ -280,9 +289,11 @@ export class AchievementUI {
 	private renderAchievements(
 		categoryAchievements: (typeof ACHIEVEMENTS)[AchievementId][],
 		playerAchievements: AchievementMap,
-	): string {
+	): string
+	{
 		return categoryAchievements
-			.map((achievement) => {
+			.map((achievement) =>
+			{
 				const data = playerAchievements[achievement.id];
 				const unlocked = data?.unlocked === true;
 				const unlockedDate =
@@ -300,20 +311,25 @@ export class AchievementUI {
 			.join('');
 	}
 
-	hideModal(): void {
+	hideModal(): void
+	{
 		const modal = document.getElementById('achievementModal');
-		if (modal) {
+		if (modal)
+		{
 			modal.style.display = 'none';
 		}
 	}
 
-	showUnlockNotifications(achievementIds: AchievementId[]): void {
-		achievementIds.forEach((id) => {
+	showUnlockNotifications(achievementIds: AchievementId[]): void
+	{
+		achievementIds.forEach((id) =>
+		{
 			this.showUnlockNotification(id);
 		});
 	}
 
-	private showUnlockNotification(achievementId: AchievementId): void {
+	private showUnlockNotification(achievementId: AchievementId): void
+	{
 		const achievement = ACHIEVEMENTS[achievementId];
 
 		const notification = document.createElement('div');
@@ -337,13 +353,16 @@ export class AchievementUI {
 		document.body.appendChild(notification);
 		this.activeNotifications.push(notification);
 
-		setTimeout(() => {
+		setTimeout(() =>
+		{
 			notification.classList.add('hiding');
-			setTimeout(() => {
+			setTimeout(() =>
+			{
 				notification.remove();
 				// Remove from active notifications and reposition remaining ones
 				const index = this.activeNotifications.indexOf(notification);
-				if (index > -1) {
+				if (index > -1)
+				{
 					this.activeNotifications.splice(index, 1);
 					this.repositionNotifications();
 				}
@@ -351,8 +370,10 @@ export class AchievementUI {
 		}, 4000);
 	}
 
-	private repositionNotifications(): void {
-		this.activeNotifications.forEach((notification, index) => {
+	private repositionNotifications(): void
+	{
+		this.activeNotifications.forEach((notification, index) =>
+		{
 			const topOffset = 20 + index * 170;
 			notification.style.top = `${topOffset}px`;
 		});
