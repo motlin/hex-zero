@@ -238,4 +238,4 @@ The development server will start and provide a local URL (typically `http://loc
 - `just test`: Run test suite
 - `just build`: Build for production
 - `just lint`: Run ESLint
-- `just format`: Format code with Prettier
+- `just format`: Format code with [oxfmt-next-line](https://www.npmjs.com/package/oxfmt-next-line)
