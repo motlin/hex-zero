@@ -1,33 +1,38 @@
 import {HexGrid, type HexCoordinate} from './HexGrid';
 import {generateSet, type Piece} from './SeptominoGenerator';
 
-interface Move {
+interface Move
+{
 	pieceIndex: number;
 	q: number;
 	r: number;
 	heightChanges: HeightChange[];
 }
 
-interface HeightChange {
+interface HeightChange
+{
 	q: number;
 	r: number;
 	oldHeight: number;
 }
 
-interface SolutionMove {
+interface SolutionMove
+{
 	pieceIndex: number;
 	q: number;
 	r: number;
 }
 
-interface GameSettings {
+interface GameSettings
+{
 	radius: number;
 	numPieces: number;
 }
 
 export type GameDifficulty = 'Easy' | 'Medium' | 'Hard' | 'Extreme' | 'Impossible' | 'Custom';
 
-export class GameState {
+export class GameState
+{
 	private readonly settings: GameSettings;
 	private readonly difficulty: GameDifficulty;
 	private readonly grid: HexGrid;
@@ -41,8 +46,13 @@ export class GameState {
 	private undoCount: number;
 	private hintCount: number;
 
-	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty) {
-		this.settings = {radius, numPieces};
+	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty)
+	{
+		this.settings =
+		{
+			radius,
+			numPieces,
+		};
 		this.difficulty = difficulty ?? GameState.detectDifficulty(radius, numPieces);
 		this.grid = new HexGrid(radius);
 		this.pieces = [];
@@ -58,7 +68,8 @@ export class GameState {
 		this.generateLevel();
 	}
 
-	private generateLevel(): void {
+	private generateLevel(): void
+	{
 		this.pieces = generateSet(this.settings.numPieces);
 		this.solution = [];
 		this.placedPieces.clear();
@@ -70,45 +81,62 @@ export class GameState {
 
 		const positions = Array.from(this.grid.hexes.values());
 
-		this.pieces.forEach((piece, index) => {
+		this.pieces.forEach((piece, index) =>
+		{
 			const validPositions = positions.filter((pos) => this.canPlacePiece(piece, pos.q, pos.r, false));
 
-			if (validPositions.length === 0) {
+			if (validPositions.length === 0)
+			{
 				throw new Error(`Cannot place piece ${index} during level generation - no valid positions available`);
 			}
 
 			const pos = validPositions[Math.floor(Math.random() * validPositions.length)];
 			if (!pos) throw new Error('No position selected');
-			this.solution.push({pieceIndex: index, q: pos.q, r: pos.r});
+			this.solution.push(
+				{
+					pieceIndex: index,
+					q: pos.q,
+					r: pos.r,
+				},
+			);
 
-			piece.tiles.forEach((tile) => {
+			piece.tiles.forEach((tile) =>
+			{
 				// During generation, pos represents where the center should go
 				const adjustedQ = pos.q + tile.q - piece.center.q;
 				const adjustedR = pos.r + tile.r - piece.center.r;
 				const hex = this.grid.getHex(adjustedQ, adjustedR);
-				if (hex) {
+				if (hex)
+				{
 					hex.height = hex.height + 1;
 				}
 			});
 		});
 
-		this.grid.hexes.forEach((hex, key) => {
+		this.grid.hexes.forEach((hex, key) =>
+		{
 			this.initialGridState.set(key, hex.height);
 		});
 	}
 
-	canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
-		return piece.tiles.every((tile) => {
+	canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean
+	{
+		return piece.tiles.every((tile) =>
+		{
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
-			if (checkHeight) {
+			if (checkHeight)
+			{
 				return hex !== undefined && hex.height > 0;
-			} else {
+			}
+			else
+			{
 				return hex !== undefined;
 			}
 		});
 	}
 
-	placePiece(centerQ: number, centerR: number): boolean {
+	placePiece(centerQ: number, centerR: number): boolean
+	{
 		const piece = this.pieces[this.currentPieceIndex];
 		if (!piece) return false;
 		if (!this.canPlacePiece(piece, centerQ, centerR)) return false;
@@ -116,17 +144,26 @@ export class GameState {
 
 		this.redoStack = [];
 
-		const move: Move = {
+		const move: Move =
+		{
 			pieceIndex: this.currentPieceIndex,
 			q: centerQ,
 			r: centerR,
 			heightChanges: [],
 		};
 
-		piece.tiles.forEach((tile) => {
+		piece.tiles.forEach((tile) =>
+		{
 			const hex = this.grid.getHex(centerQ + tile.q, centerR + tile.r);
-			if (hex && hex.height > 0) {
-				move.heightChanges.push({q: hex.q, r: hex.r, oldHeight: hex.height});
+			if (hex && hex.height > 0)
+			{
+				move.heightChanges.push(
+					{
+						q: hex.q,
+						r: hex.r,
+						oldHeight: hex.height,
+					},
+				);
 				hex.height--;
 			}
 		});
@@ -138,29 +175,36 @@ export class GameState {
 		return true;
 	}
 
-	private findNextUnplacedPiece(): void {
-		for (let i = 0; i < this.pieces.length; i++) {
+	private findNextUnplacedPiece(): void
+	{
+		for (let i = 0; i < this.pieces.length; i++)
+		{
 			const index = (this.currentPieceIndex + 1 + i) % this.pieces.length;
-			if (!this.placedPieces.has(index)) {
+			if (!this.placedPieces.has(index))
+			{
 				this.currentPieceIndex = index;
 				return;
 			}
 		}
 	}
 
-	cyclePiece(direction: number): boolean {
+	cyclePiece(direction: number): boolean
+	{
 		if (this.placedPieces.size >= this.pieces.length) return false;
 
 		let attempts = 0;
 		let newIndex = this.currentPieceIndex;
 
-		do {
+		do
+		{
 			newIndex = (newIndex + direction + this.pieces.length) % this.pieces.length;
 			attempts++;
 			if (attempts > this.pieces.length) break;
-		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
+		}
+		while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
 
-		if (newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex)) {
+		if (newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex))
+		{
 			this.currentPieceIndex = newIndex;
 			return true;
 		}
@@ -168,42 +212,50 @@ export class GameState {
 		return false;
 	}
 
-	getNextPieceIndex(): number | null {
+	getNextPieceIndex(): number | null
+	{
 		if (this.placedPieces.size >= this.pieces.length) return null;
 
 		let attempts = 0;
 		let newIndex = this.currentPieceIndex;
 
-		do {
+		do
+		{
 			newIndex = (newIndex + 1 + this.pieces.length) % this.pieces.length;
 			attempts++;
 			if (attempts > this.pieces.length) return null;
-		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
+		}
+		while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
 
 		return newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex) ? newIndex : null;
 	}
 
-	getPreviousPieceIndex(): number | null {
+	getPreviousPieceIndex(): number | null
+	{
 		if (this.placedPieces.size >= this.pieces.length) return null;
 
 		let attempts = 0;
 		let newIndex = this.currentPieceIndex;
 
-		do {
+		do
+		{
 			newIndex = (newIndex - 1 + this.pieces.length) % this.pieces.length;
 			attempts++;
 			if (attempts > this.pieces.length) return null;
-		} while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
+		}
+		while (this.placedPieces.has(newIndex) && newIndex !== this.currentPieceIndex);
 
 		return newIndex !== this.currentPieceIndex && !this.placedPieces.has(newIndex) ? newIndex : null;
 	}
 
-	undo(): boolean {
+	undo(): boolean
+	{
 		const move = this.history.pop();
 		if (move === undefined) return false;
 		this.redoStack.push(move);
 
-		move.heightChanges.forEach((change) => {
+		move.heightChanges.forEach((change) =>
+		{
 			const hex = this.grid.getHex(change.q, change.r);
 			if (hex) hex.height = change.oldHeight;
 		});
@@ -215,11 +267,13 @@ export class GameState {
 		return true;
 	}
 
-	redo(): boolean {
+	redo(): boolean
+	{
 		const move = this.redoStack.pop();
 		if (move === undefined) return false;
 
-		move.heightChanges.forEach((change) => {
+		move.heightChanges.forEach((change) =>
+		{
 			const hex = this.grid.getHex(change.q, change.r);
 			if (hex) hex.height = change.oldHeight - 1;
 		});
@@ -231,8 +285,10 @@ export class GameState {
 		return true;
 	}
 
-	restart(): void {
-		this.initialGridState.forEach((height, key) => {
+	restart(): void
+	{
+		this.initialGridState.forEach((height, key) =>
+		{
 			const hex = this.grid.hexes.get(key);
 			if (hex) hex.height = height;
 		});
@@ -245,16 +301,25 @@ export class GameState {
 		this.hintCount = 0;
 	}
 
-	isGameWon(): boolean {
+	isGameWon(): boolean
+	{
 		return Array.from(this.grid.hexes.values()).every((hex) => hex.height === 0);
 	}
 
-	getSolutionHint(): HexCoordinate | null {
+	getSolutionHint(): HexCoordinate | null
+	{
 		const solutionMove = this.solution.find((move) => move.pieceIndex === this.currentPieceIndex);
-		return solutionMove ? {q: solutionMove.q, r: solutionMove.r} : null;
+		return solutionMove
+			?
+				{
+					q: solutionMove.q,
+					r: solutionMove.r,
+				}
+			: null;
 	}
 
-	private static detectDifficulty(radius: number, numPieces: number): GameDifficulty {
+	private static detectDifficulty(radius: number, numPieces: number): GameDifficulty
+	{
 		if (radius === 3 && numPieces === 4) return 'Easy';
 		if (radius === 3 && numPieces === 6) return 'Medium';
 		if (radius === 3 && numPieces === 8) return 'Hard';
@@ -264,91 +329,122 @@ export class GameState {
 		return 'Custom';
 	}
 
-	getDifficulty(): GameDifficulty {
+	getDifficulty(): GameDifficulty
+	{
 		return this.difficulty;
 	}
 
-	getSettings(): GameSettings {
-		return {...this.settings};
+	getSettings(): GameSettings
+	{
+		return {
+			...this.settings,
+		};
 	}
 
-	getGrid(): HexGrid {
+	getGrid(): HexGrid
+	{
 		return this.grid;
 	}
 
-	getPieces(): Piece[] {
-		return this.pieces.map((piece) => ({
+	getPieces(): Piece[]
+	{
+		return this.pieces.map((piece) => (
+		{
 			tiles: [...piece.tiles],
-			center: {...piece.center},
+			center:
+			{
+				...piece.center,
+			},
 		}));
 	}
 
-	getCurrentPieceIndex(): number {
+	getCurrentPieceIndex(): number
+	{
 		return this.currentPieceIndex;
 	}
 
-	setCurrentPieceIndex(index: number): void {
-		if (index >= 0 && index < this.pieces.length) {
+	setCurrentPieceIndex(index: number): void
+	{
+		if (index >= 0 && index < this.pieces.length)
+		{
 			this.currentPieceIndex = index;
 		}
 	}
 
-	getCurrentPiece(): Piece {
+	getCurrentPiece(): Piece
+	{
 		const piece = this.pieces[this.currentPieceIndex];
 		if (!piece) throw new Error('No current piece found');
 		return {
 			tiles: [...piece.tiles],
-			center: {...piece.center},
+			center:
+			{
+				...piece.center,
+			},
 		};
 	}
 
-	getPieceByIndex(index: number): Piece | null {
+	getPieceByIndex(index: number): Piece | null
+	{
 		if (index < 0 || index >= this.pieces.length) return null;
 		const piece = this.pieces[index];
 		if (!piece) return null;
 		return {
 			tiles: [...piece.tiles],
-			center: {...piece.center},
+			center:
+			{
+				...piece.center,
+			},
 		};
 	}
 
-	getPlacedPieces(): Set<number> {
+	getPlacedPieces(): Set<number>
+	{
 		return new Set(this.placedPieces);
 	}
 
-	getHistory(): Move[] {
+	getHistory(): Move[]
+	{
 		return [...this.history];
 	}
 
-	getUndoCount(): number {
+	getUndoCount(): number
+	{
 		return this.undoCount;
 	}
 
-	getHintCount(): number {
+	getHintCount(): number
+	{
 		return this.hintCount;
 	}
 
-	incrementHintCount(): void {
+	incrementHintCount(): void
+	{
 		this.hintCount++;
 	}
 
-	getMoveCount(): number {
+	getMoveCount(): number
+	{
 		return this.history.length;
 	}
 
-	canUndo(): boolean {
+	canUndo(): boolean
+	{
 		return this.history.length > 0;
 	}
 
-	canRedo(): boolean {
+	canRedo(): boolean
+	{
 		return this.redoStack.length > 0;
 	}
 
-	isPiecePlaced(pieceIndex: number): boolean {
+	isPiecePlaced(pieceIndex: number): boolean
+	{
 		return this.placedPieces.has(pieceIndex);
 	}
 
-	getAllPiecesPlaced(): boolean {
+	getAllPiecesPlaced(): boolean
+	{
 		return this.placedPieces.size >= this.pieces.length;
 	}
 }

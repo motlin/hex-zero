@@ -4,16 +4,19 @@
 	"description": "Hex Zero is a browser-based hexagonal puzzle game where players place septomino pieces to reduce all board tiles to zero.",
 	"keywords": [],
 	"homepage": "https://github.com/motlin/hex-zero#readme",
-	"bugs": {
+	"bugs":
+	{
 		"url": "https://github.com/motlin/hex-zero/issues"
 	},
 	"author": "",
-	"repository": {
+	"repository":
+	{
 		"type": "git",
 		"url": "git+https://github.com/motlin/hex-zero.git"
 	},
 	"type": "module",
-	"scripts": {
+	"scripts":
+	{
 		"preinstall": "npx only-allow pnpm",
 		"dev": "vp dev",
 		"preview": "vp preview",
@@ -30,10 +33,12 @@
 		"test:run": "node node_modules/vitest/dist/cli.js run",
 		"prepare": "VITE_GIT_HOOKS=0 vp config"
 	},
-	"dependencies": {
+	"dependencies":
+	{
 		"canvas-confetti": "^1.9.4"
 	},
-	"devDependencies": {
+	"devDependencies":
+	{
 		"@testing-library/dom": "^10.4.2",
 		"@types/canvas-confetti": "^1.9.0",
 		"@types/node": "^26.6.6",

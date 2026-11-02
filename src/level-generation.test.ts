@@ -1,20 +1,44 @@
 import {describe, test, expect} from 'vite-plus/test';
 import {GameState} from './state/GameState';
 
-describe('Level Generation Reliability', () => {
-	test('Standard difficulties reliably generate levels (500 tests)', () => {
+describe('Level Generation Reliability', () =>
+{
+	test('Standard difficulties reliably generate levels (500 tests)', () =>
+	{
 		const configs = [
-			{radius: 3, numPieces: 4, name: 'Easy'},
-			{radius: 3, numPieces: 6, name: 'Medium'},
-			{radius: 3, numPieces: 8, name: 'Hard'},
-			{radius: 4, numPieces: 10, name: 'Extreme'},
-			{radius: 4, numPieces: 14, name: 'Impossible'},
+			{
+				radius: 3,
+				numPieces: 4,
+				name: 'Easy',
+			},
+			{
+				radius: 3,
+				numPieces: 6,
+				name: 'Medium',
+			},
+			{
+				radius: 3,
+				numPieces: 8,
+				name: 'Hard',
+			},
+			{
+				radius: 4,
+				numPieces: 10,
+				name: 'Extreme',
+			},
+			{
+				radius: 4,
+				numPieces: 14,
+				name: 'Impossible',
+			},
 		];
 
 		let totalTests = 0;
 
-		configs.forEach(({radius, numPieces}) => {
-			for (let i = 0; i < 100; i++) {
+		configs.forEach(({radius, numPieces}) =>
+		{
+			for (let i = 0; i < 100; i++)
+			{
 				// Should not throw an exception
 				const gameState = new GameState(radius, numPieces);
 				expect(gameState).toBeDefined();
@@ -26,19 +50,42 @@ describe('Level Generation Reliability', () => {
 		expect(totalTests).toBe(500);
 	});
 
-	test('Extreme custom configurations reliably generate levels (200 tests)', () => {
+	test('Extreme custom configurations reliably generate levels (200 tests)', () =>
+	{
 		const extremeConfigs = [
-			{radius: 5, numPieces: 20, name: 'Very Large'},
-			{radius: 6, numPieces: 30, name: 'Huge'},
-			{radius: 2, numPieces: 10, name: 'Small Board Many Pieces'},
-			{radius: 1, numPieces: 5, name: 'Tiny Board'},
-			{radius: 7, numPieces: 50, name: 'Massive'},
+			{
+				radius: 5,
+				numPieces: 20,
+				name: 'Very Large',
+			},
+			{
+				radius: 6,
+				numPieces: 30,
+				name: 'Huge',
+			},
+			{
+				radius: 2,
+				numPieces: 10,
+				name: 'Small Board Many Pieces',
+			},
+			{
+				radius: 1,
+				numPieces: 5,
+				name: 'Tiny Board',
+			},
+			{
+				radius: 7,
+				numPieces: 50,
+				name: 'Massive',
+			},
 		];
 
 		let totalTests = 0;
 
-		extremeConfigs.forEach(({radius, numPieces}) => {
-			for (let i = 0; i < 40; i++) {
+		extremeConfigs.forEach(({radius, numPieces}) =>
+		{
+			for (let i = 0; i < 40; i++)
+			{
 				// Should not throw an exception
 				expect(() => new GameState(radius, numPieces)).not.toThrow();
 				totalTests++;
@@ -48,23 +95,35 @@ describe('Level Generation Reliability', () => {
 		expect(totalTests).toBe(200);
 	});
 
-	test('Artificially constrained scenarios still work reliably', () => {
+	test('Artificially constrained scenarios still work reliably', () =>
+	{
 		// Test scenarios with very small boards and many pieces
 		// These should still work due to height stacking up to 6 levels
 
 		const constrainedConfigs = [
 			// 7 hexes, 20 pieces
-			{radius: 1, numPieces: 20},
+			{
+				radius: 1,
+				numPieces: 20,
+			},
 			// 7 hexes, 50 pieces
-			{radius: 1, numPieces: 50},
+			{
+				radius: 1,
+				numPieces: 50,
+			},
 			// 19 hexes, 50 pieces
-			{radius: 2, numPieces: 50},
+			{
+				radius: 2,
+				numPieces: 50,
+			},
 		];
 
 		let totalTests = 0;
 
-		constrainedConfigs.forEach(({radius, numPieces}) => {
-			for (let i = 0; i < 20; i++) {
+		constrainedConfigs.forEach(({radius, numPieces}) =>
+		{
+			for (let i = 0; i < 20; i++)
+			{
 				// Should not throw an exception even with extreme constraints
 				expect(() => new GameState(radius, numPieces)).not.toThrow();
 				totalTests++;
@@ -74,7 +133,8 @@ describe('Level Generation Reliability', () => {
 		expect(totalTests).toBe(60);
 	});
 
-	test('Edge case: minimum radius with maximum pieces generates game with high stacks', () => {
+	test('Edge case: minimum radius with maximum pieces generates game with high stacks', () =>
+	{
 		// This is the specific case that was broken - radius 2 with 15 pieces
 		const gameState = new GameState(2, 15);
 
@@ -94,7 +154,8 @@ describe('Level Generation Reliability', () => {
 		expect(maxHeight).toBeGreaterThanOrEqual(1);
 	});
 
-	test('Extreme configurations can create heights above 6', () => {
+	test('Extreme configurations can create heights above 6', () =>
+	{
 		// With 15 pieces on a radius 2 board (19 hexes), we expect heights > 6
 		const gameState = new GameState(2, 15);
 
@@ -114,7 +175,8 @@ describe('Level Generation Reliability', () => {
 		expect(() => gameState.getCurrentPiece()).not.toThrow();
 	});
 
-	test('Radius 2 with 15 pieces generates a solvable game', () => {
+	test('Radius 2 with 15 pieces generates a solvable game', () =>
+	{
 		const gameState = new GameState(2, 15);
 
 		// Game should generate successfully
@@ -125,14 +187,17 @@ describe('Level Generation Reliability', () => {
 		const piecesWithHints = new Set<number>();
 
 		// Test all pieces by cycling through them
-		for (let i = 0; i < 15; i++) {
+		for (let i = 0; i < 15; i++)
+		{
 			const hint = gameState.getSolutionHint();
-			if (hint) {
+			if (hint)
+			{
 				piecesWithHints.add(gameState.getCurrentPieceIndex());
 			}
 
 			// Cycle to next piece (if possible)
-			if (i < 14) {
+			if (i < 14)
+			{
 				gameState.cyclePiece(1);
 			}
 		}
@@ -143,7 +208,8 @@ describe('Level Generation Reliability', () => {
 		// Test that we can actually place at least one piece using its hint
 		// This verifies the solution coordinates are valid
 		const firstHint = gameState.getSolutionHint();
-		if (firstHint) {
+		if (firstHint)
+		{
 			const currentPiece = gameState.getCurrentPiece();
 			const canPlaceAtHint = gameState.canPlacePiece(currentPiece, firstHint.q, firstHint.r);
 			expect(canPlaceAtHint).toBe(true);
@@ -153,7 +219,8 @@ describe('Level Generation Reliability', () => {
 		expect(gameState.isGameWon()).toBe(false);
 	});
 
-	test('Radius 2 with 15 pieces can be solved by following hints', () => {
+	test('Radius 2 with 15 pieces can be solved by following hints', () =>
+	{
 		const gameState = new GameState(2, 15);
 
 		// Solve the puzzle by placing pieces using hints
@@ -161,26 +228,34 @@ describe('Level Generation Reliability', () => {
 		// Safety limit
 		const maxAttempts = 100;
 
-		while (!gameState.isGameWon() && attempts < maxAttempts) {
+		while (!gameState.isGameWon() && attempts < maxAttempts)
+		{
 			const hint = gameState.getSolutionHint();
 
-			if (hint) {
+			if (hint)
+			{
 				const currentPiece = gameState.getCurrentPiece();
 				const canPlace = gameState.canPlacePiece(currentPiece, hint.q, hint.r);
 
-				if (canPlace) {
+				if (canPlace)
+				{
 					const placed = gameState.placePiece(hint.q, hint.r);
 					expect(placed).toBe(true);
-				} else {
+				}
+				else
+				{
 					// If we can't place at hint position, the puzzle generation might have an issue
 					throw new Error(
 						`Cannot place piece ${gameState.getCurrentPieceIndex()} at hint position (${hint.q}, ${hint.r})`,
 					);
 				}
-			} else {
+			}
+			else
+			{
 				// If no hint available, try to cycle to next piece
 				const cycled = gameState.cyclePiece(1);
-				if (!cycled) {
+				if (!cycled)
+				{
 					// No more pieces to cycle through
 					break;
 				}

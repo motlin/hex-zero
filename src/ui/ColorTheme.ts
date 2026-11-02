@@ -1,6 +1,7 @@
 type ColorMap = Record<number, string>;
 
-export const DEFAULT_COLORS: ColorMap = {
+export const DEFAULT_COLORS: ColorMap =
+{
 	0: '#16213e',
 	1: '#e94560',
 	2: '#e67e22',

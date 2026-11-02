@@ -7,8 +7,10 @@ import {AchievementManager} from './achievements/AchievementManager';
 import {isDifficultyLevel} from './achievements/AchievementDefinitions';
 import {getElementByIdOrNull, getRequiredElementById} from './dom-utils';
 
-declare global {
-	interface Window {
+declare global
+{
+	interface Window
+	{
 		startGame: (radius: number, numPieces: number, difficulty?: GameDifficulty) => void;
 		startCustomGame: () => void;
 		showDifficultyScreen: () => void;
@@ -18,7 +20,8 @@ declare global {
 	}
 }
 
-interface AnimatingHex {
+interface AnimatingHex
+{
 	q: number;
 	r: number;
 	centerQ: number;
@@ -32,7 +35,8 @@ interface AnimatingHex {
 let game: HexSeptominoGame | null = null;
 let globalAchievementManager: AchievementManager | null = null;
 
-function startGame(radius: number, numPieces: number, difficulty?: GameDifficulty): void {
+function startGame(radius: number, numPieces: number, difficulty?: GameDifficulty): void
+{
 	getRequiredElementById('difficultyScreen', HTMLElement).classList.add('hidden');
 	getRequiredElementById('gameScreen', HTMLElement).classList.remove('hidden');
 
@@ -40,67 +44,83 @@ function startGame(radius: number, numPieces: number, difficulty?: GameDifficult
 	window.game = game;
 }
 
-function startCustomGame(): void {
+function startCustomGame(): void
+{
 	const radius = parseInt(getRequiredElementById('customRadius', HTMLInputElement).value);
 	const pieces = parseInt(getRequiredElementById('customPieces', HTMLInputElement).value);
 	startGame(radius, pieces, 'Custom');
 }
 
-function showDifficultyScreen(): void {
+function showDifficultyScreen(): void
+{
 	getRequiredElementById('gameScreen', HTMLElement).classList.add('hidden');
 	getRequiredElementById('difficultyScreen', HTMLElement).classList.remove('hidden');
 }
 
-function showInstructions(): void {
+function showInstructions(): void
+{
 	const modal = document.getElementById('instructionsModal');
-	if (modal) {
+	if (modal)
+	{
 		modal.classList.remove('hidden');
 	}
 }
 
-function hideInstructions(): void {
+function hideInstructions(): void
+{
 	const modal = document.getElementById('instructionsModal');
 	const dontShowAgain = getElementByIdOrNull('dontShowAgain', HTMLInputElement);
 
-	if (modal) {
+	if (modal)
+	{
 		modal.classList.add('hidden');
 	}
 
-	if (dontShowAgain?.checked === true) {
+	if (dontShowAgain?.checked === true)
+	{
 		localStorage.setItem('hexZeroDontShowInstructions', 'true');
 	}
 }
 
-function toggleFullscreen(): void {
+function toggleFullscreen(): void
+{
 	const documentElement = document.documentElement;
 
-	if (document.fullscreenElement === null) {
-		documentElement.requestFullscreen().catch((error: unknown) => {
+	if (document.fullscreenElement === null)
+	{
+		documentElement.requestFullscreen().catch((error: unknown) =>
+		{
 			console.error('Error attempting to enable fullscreen:', error);
 		});
-	} else {
+	}
+	else
+	{
 		void document.exitFullscreen();
 	}
 
 	updateFullscreenButtonText();
 }
 
-function updateFullscreenButtonText(): void {
+function updateFullscreenButtonText(): void
+{
 	const isFullscreen = !!document.fullscreenElement;
 	const buttonText = isFullscreen ? '⛶ Exit Fullscreen' : '⛶ Fullscreen';
 
 	const fullscreenButton = document.getElementById('fullscreenButton');
-	if (fullscreenButton) {
+	if (fullscreenButton)
+	{
 		fullscreenButton.textContent = buttonText;
 	}
 
 	const menuFullscreenButton = document.getElementById('menuFullscreenButton');
-	if (menuFullscreenButton) {
+	if (menuFullscreenButton)
+	{
 		menuFullscreenButton.textContent = buttonText;
 	}
 }
 
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', () =>
+{
 	globalAchievementManager = new AchievementManager();
 	globalAchievementManager.initialize();
 
@@ -108,63 +128,80 @@ window.addEventListener('DOMContentLoaded', () => {
 	const instructionsOverlay = instructionsModal?.querySelector('.modal-overlay');
 	const closeInstructionsBtn = document.getElementById('closeInstructionsBtn');
 
-	if (closeInstructionsBtn) {
+	if (closeInstructionsBtn)
+	{
 		closeInstructionsBtn.addEventListener('click', hideInstructions);
 	}
 
-	if (instructionsOverlay) {
+	if (instructionsOverlay)
+	{
 		instructionsOverlay.addEventListener('click', hideInstructions);
 	}
 
 	const hamburgerBtn = getElementByIdOrNull('hamburgerBtn', HTMLElement);
 	const hamburgerMenu = getElementByIdOrNull('hamburgerMenu', HTMLElement);
 
-	if (hamburgerBtn && hamburgerMenu) {
-		hamburgerBtn.addEventListener('click', (e) => {
+	if (hamburgerBtn && hamburgerMenu)
+	{
+		hamburgerBtn.addEventListener('click', (e) =>
+		{
 			e.stopPropagation();
 			hamburgerMenu.classList.toggle('hidden');
 		});
 
-		document.addEventListener('click', (e) => {
+		document.addEventListener('click', (e) =>
+		{
 			const target = e.target;
-			if (target instanceof Node && !hamburgerBtn.contains(target) && !hamburgerMenu.contains(target)) {
+			if (target instanceof Node && !hamburgerBtn.contains(target) && !hamburgerMenu.contains(target))
+			{
 				hamburgerMenu.classList.add('hidden');
 			}
 		});
 
-		hamburgerMenu.addEventListener('click', () => {
-			setTimeout(() => {
+		hamburgerMenu.addEventListener('click', () =>
+		{
+			setTimeout(() =>
+			{
 				hamburgerMenu.classList.add('hidden');
 			}, 100);
 		});
 	}
 
 	const newGameBtn = document.getElementById('newGameBtn');
-	if (newGameBtn) {
-		newGameBtn.addEventListener('click', () => {
+	if (newGameBtn)
+	{
+		newGameBtn.addEventListener('click', () =>
+		{
 			showDifficultyScreen();
 		});
 	}
 
 	const restartBtn = document.getElementById('restartBtn');
-	if (restartBtn) {
-		restartBtn.addEventListener('click', () => {
-			if (window.game) {
+	if (restartBtn)
+	{
+		restartBtn.addEventListener('click', () =>
+		{
+			if (window.game)
+			{
 				window.game.restart();
 			}
 		});
 	}
 
 	const howToPlayBtn = document.getElementById('howToPlayBtn');
-	if (howToPlayBtn) {
-		howToPlayBtn.addEventListener('click', () => {
+	if (howToPlayBtn)
+	{
+		howToPlayBtn.addEventListener('click', () =>
+		{
 			showInstructions();
 		});
 	}
 
 	const achievementsButton = document.getElementById('achievementsButton');
-	if (achievementsButton) {
-		achievementsButton.addEventListener('click', () => {
+	if (achievementsButton)
+	{
+		achievementsButton.addEventListener('click', () =>
+		{
 			globalAchievementManager?.showAchievements();
 		});
 	}
@@ -173,30 +210,38 @@ window.addEventListener('DOMContentLoaded', () => {
 	const menuHamburgerMenu = document.getElementById('menuHamburgerMenu');
 	const howToPlayMenuBtn = document.getElementById('howToPlayMenuBtn');
 
-	if (menuHamburgerBtn && menuHamburgerMenu) {
-		menuHamburgerBtn.addEventListener('click', (e) => {
+	if (menuHamburgerBtn && menuHamburgerMenu)
+	{
+		menuHamburgerBtn.addEventListener('click', (e) =>
+		{
 			e.stopPropagation();
 			menuHamburgerMenu.classList.toggle('hidden');
 		});
 
-		document.addEventListener('click', (e) => {
+		document.addEventListener('click', (e) =>
+		{
 			const target = e.target;
-			if (target instanceof Node && !menuHamburgerBtn.contains(target) && !menuHamburgerMenu.contains(target)) {
+			if (target instanceof Node && !menuHamburgerBtn.contains(target) && !menuHamburgerMenu.contains(target))
+			{
 				menuHamburgerMenu.classList.add('hidden');
 			}
 		});
 	}
 
-	if (howToPlayMenuBtn) {
-		howToPlayMenuBtn.addEventListener('click', () => {
+	if (howToPlayMenuBtn)
+	{
+		howToPlayMenuBtn.addEventListener('click', () =>
+		{
 			menuHamburgerMenu?.classList.add('hidden');
 			showInstructions();
 		});
 	}
 
 	const menuAchievementsButton = document.getElementById('menuAchievementsButton');
-	if (menuAchievementsButton) {
-		menuAchievementsButton.addEventListener('click', () => {
+	if (menuAchievementsButton)
+	{
+		menuAchievementsButton.addEventListener('click', () =>
+		{
 			menuHamburgerMenu?.classList.add('hidden');
 			globalAchievementManager?.showAchievements();
 		});
@@ -208,37 +253,46 @@ window.addEventListener('DOMContentLoaded', () => {
 	const isFirstTime = localStorage.getItem('hexZeroFirstTime') === null;
 	const dontShowInstructions = localStorage.getItem('hexZeroDontShowInstructions') === 'true';
 
-	if (isFirstTime && !dontShowInstructions) {
+	if (isFirstTime && !dontShowInstructions)
+	{
 		showInstructions();
 		localStorage.setItem('hexZeroFirstTime', 'false');
 	}
 
-	document.addEventListener('keydown', (e) => {
-		if (e.key === 'Escape' && instructionsModal && !instructionsModal.classList.contains('hidden')) {
+	document.addEventListener('keydown', (e) =>
+	{
+		if (e.key === 'Escape' && instructionsModal && !instructionsModal.classList.contains('hidden'))
+		{
 			hideInstructions();
 		}
 	});
 
 	const fullscreenButton = document.getElementById('fullscreenButton');
-	if (fullscreenButton) {
-		fullscreenButton.addEventListener('click', () => {
+	if (fullscreenButton)
+	{
+		fullscreenButton.addEventListener('click', () =>
+		{
 			toggleFullscreen();
 		});
 	}
 
 	const menuFullscreenButton = document.getElementById('menuFullscreenButton');
-	if (menuFullscreenButton) {
-		menuFullscreenButton.addEventListener('click', () => {
+	if (menuFullscreenButton)
+	{
+		menuFullscreenButton.addEventListener('click', () =>
+		{
 			toggleFullscreen();
 		});
 	}
 
-	document.addEventListener('fullscreenchange', () => {
+	document.addEventListener('fullscreenchange', () =>
+	{
 		updateFullscreenButtonText();
 	});
 });
 
-class HexSeptominoGame {
+class HexSeptominoGame
+{
 	private readonly canvasManager: CanvasManager;
 	private readonly gameState: GameState;
 	private readonly renderer: HexRenderer;
@@ -258,7 +312,8 @@ class HexSeptominoGame {
 	private panOffsetX: number;
 	private panOffsetY: number;
 	private lastPinchDistance: number | null;
-	private invalidPlacementAnimation: {
+	private invalidPlacementAnimation:
+	{
 		isActive: boolean;
 		startTime: number;
 		position: HexCoordinate;
@@ -278,7 +333,8 @@ class HexSeptominoGame {
 	private swipeStartY: number | null;
 	private isSwipingPanel: boolean;
 
-	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty) {
+	constructor(radius: number, numPieces: number, difficulty?: GameDifficulty)
+	{
 		this.canvasManager = new CanvasManager('gameCanvas');
 		this.gameState = new GameState(radius, numPieces, difficulty);
 		this.renderer = new HexRenderer(30);
@@ -315,7 +371,8 @@ class HexSeptominoGame {
 		this.swipeStartY = null;
 		this.isSwipingPanel = false;
 
-		if (globalAchievementManager === null) {
+		if (globalAchievementManager === null)
+		{
 			throw new Error('AchievementManager is not initialized');
 		}
 		this.achievementManager = globalAchievementManager;
@@ -326,95 +383,123 @@ class HexSeptominoGame {
 		this.render();
 		this.renderBottomPanel();
 
-		setTimeout(() => {
+		setTimeout(() =>
+		{
 			this.updateCanvasSize();
 			this.render();
 			this.renderBottomPanel();
 		}, 100);
 
-		window.addEventListener('resize', () => {
+		window.addEventListener('resize', () =>
+		{
 			this.updateCanvasSize();
 			this.render();
 			this.renderBottomPanel();
 		});
 	}
 
-	private updateCanvasSize(): void {
+	private updateCanvasSize(): void
+	{
 		const settings = this.gameState.getSettings();
 		this.renderer.hexSize = this.canvasManager.updateCanvasSize(settings.radius, this.zoomFactor);
 	}
 
-	private setupEventListeners(): void {
+	private setupEventListeners(): void
+	{
 		const canvas = this.canvasManager.getCanvas();
-		canvas.addEventListener('mousemove', (e) => {
+		canvas.addEventListener('mousemove', (e) =>
+		{
 			this.handleMouseMove(e);
 		});
-		canvas.addEventListener('click', (e) => {
+		canvas.addEventListener('click', (e) =>
+		{
 			this.handleClick(e);
 		});
-		canvas.addEventListener('mousedown', (e) => {
+		canvas.addEventListener('mousedown', (e) =>
+		{
 			this.handleMouseDown(e);
 		});
-		canvas.addEventListener('mouseup', (e) => {
+		canvas.addEventListener('mouseup', (e) =>
+		{
 			this.handleMouseUp(e);
 		});
 
 		canvas.addEventListener(
 			'wheel',
-			(e) => {
+			(e) =>
+			{
 				e.preventDefault();
 
-				if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+				if (Math.abs(e.deltaY) > Math.abs(e.deltaX))
+				{
 					this.handleWheelEvent(e);
 				}
 			},
-			{passive: false},
+			{
+				passive: false,
+			},
 		);
 		canvas.addEventListener(
 			'touchstart',
-			(e) => {
+			(e) =>
+			{
 				this.handleTouchStart(e);
 			},
-			{passive: false},
+			{
+				passive: false,
+			},
 		);
 		canvas.addEventListener(
 			'touchmove',
-			(e) => {
+			(e) =>
+			{
 				this.handleTouchMove(e);
 			},
-			{passive: false},
+			{
+				passive: false,
+			},
 		);
 		canvas.addEventListener(
 			'touchend',
-			(e) => {
+			(e) =>
+			{
 				this.handleTouchEnd(e);
 			},
-			{passive: false},
+			{
+				passive: false,
+			},
 		);
-		canvas.addEventListener('touchcancel', (e) => {
+		canvas.addEventListener('touchcancel', (e) =>
+		{
 			this.handleTouchCancel(e);
 		});
-		canvas.addEventListener('mouseleave', () => {
+		canvas.addEventListener('mouseleave', () =>
+		{
 			this.mouseHex = null;
 			this.isPanning = false;
 			this.render();
 		});
 
-		document.addEventListener('keydown', (e) => {
+		document.addEventListener('keydown', (e) =>
+		{
 			this.handleKeyPress(e);
 		});
-		getRequiredElementById('hintBtn', HTMLElement).addEventListener('click', () => {
+		getRequiredElementById('hintBtn', HTMLElement).addEventListener('click', () =>
+		{
 			this.toggleHint();
 		});
 
-		getRequiredElementById('undoBtn', HTMLElement).addEventListener('click', () => {
+		getRequiredElementById('undoBtn', HTMLElement).addEventListener('click', () =>
+		{
 			this.undo();
 		});
-		getRequiredElementById('redoBtn', HTMLElement).addEventListener('click', () => {
+		getRequiredElementById('redoBtn', HTMLElement).addEventListener('click', () =>
+		{
 			this.redo();
 		});
 
-		getRequiredElementById('morePiecesBtn', HTMLElement).addEventListener('click', () => {
+		getRequiredElementById('morePiecesBtn', HTMLElement).addEventListener('click', () =>
+		{
 			this.morePieces();
 		});
 
@@ -422,29 +507,38 @@ class HexSeptominoGame {
 		const modal = document.getElementById('keyboardShortcutsModal');
 		const modalOverlay = modal?.querySelector('.modal-overlay');
 
-		if (closeBtn) {
-			closeBtn.addEventListener('click', () => {
+		if (closeBtn)
+		{
+			closeBtn.addEventListener('click', () =>
+			{
 				this.toggleKeyboardShortcuts();
 			});
 		}
 
-		if (modalOverlay) {
-			modalOverlay.addEventListener('click', () => {
+		if (modalOverlay)
+		{
+			modalOverlay.addEventListener('click', () =>
+			{
 				this.toggleKeyboardShortcuts();
 			});
 		}
 
 		const showInstructionsFromShortcuts = document.getElementById('showInstructionsFromShortcuts');
-		if (showInstructionsFromShortcuts) {
-			showInstructionsFromShortcuts.addEventListener('click', () => {
+		if (showInstructionsFromShortcuts)
+		{
+			showInstructionsFromShortcuts.addEventListener('click', () =>
+			{
 				this.toggleKeyboardShortcuts();
 				showInstructions();
 			});
 		}
 
-		document.addEventListener('keydown', (e) => {
-			if (e.key === 'Escape') {
-				if (modal && !modal.classList.contains('hidden')) {
+		document.addEventListener('keydown', (e) =>
+		{
+			if (e.key === 'Escape')
+			{
+				if (modal && !modal.classList.contains('hidden'))
+				{
 					this.toggleKeyboardShortcuts();
 				}
 			}
@@ -453,14 +547,17 @@ class HexSeptominoGame {
 		this.setupPanelSwipeHandlers();
 	}
 
-	private setupPanelSwipeHandlers(): void {
+	private setupPanelSwipeHandlers(): void
+	{
 		const piecesContainer = document.getElementById('piecesContainer');
 		if (!piecesContainer) return;
 
 		piecesContainer.addEventListener(
 			'touchstart',
-			(e) => {
-				if (e.touches.length >= 2) {
+			(e) =>
+			{
+				if (e.touches.length >= 2)
+				{
 					const firstTouch = e.touches[0];
 					if (!firstTouch) return;
 					this.swipeStartX = firstTouch.clientX;
@@ -470,33 +567,45 @@ class HexSeptominoGame {
 					this.isTouching = false;
 				}
 			},
-			{passive: true},
+			{
+				passive: true,
+			},
 		);
 
 		piecesContainer.addEventListener(
 			'touchmove',
-			(e) => {
-				if (this.isSwipingPanel && e.touches.length >= 2 && this.swipeStartX !== null) {
+			(e) =>
+			{
+				if (this.isSwipingPanel && e.touches.length >= 2 && this.swipeStartX !== null)
+				{
 					e.preventDefault();
 				}
 			},
-			{passive: false},
+			{
+				passive: false,
+			},
 		);
 
 		piecesContainer.addEventListener(
 			'touchend',
-			(e) => {
-				if (this.isSwipingPanel && this.swipeStartX !== null && this.swipeStartY !== null) {
+			(e) =>
+			{
+				if (this.isSwipingPanel && this.swipeStartX !== null && this.swipeStartY !== null)
+				{
 					const touch = e.changedTouches[0];
 					if (!touch) return;
 					const deltaX = touch.clientX - this.swipeStartX;
 					const deltaY = touch.clientY - this.swipeStartY;
 
 					const swipeThreshold = 50;
-					if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-						if (deltaX > 0) {
+					if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold)
+					{
+						if (deltaX > 0)
+						{
 							this.previousPage();
-						} else {
+						}
+						else
+						{
 							this.nextPage();
 						}
 					}
@@ -506,25 +615,32 @@ class HexSeptominoGame {
 					this.isSwipingPanel = false;
 				}
 			},
-			{passive: true},
+			{
+				passive: true,
+			},
 		);
 
 		piecesContainer.addEventListener(
 			'touchcancel',
-			() => {
+			() =>
+			{
 				this.swipeStartX = null;
 				this.swipeStartY = null;
 				this.isSwipingPanel = false;
 			},
-			{passive: true},
+			{
+				passive: true,
+			},
 		);
 	}
 
-	private canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean {
+	private canPlacePiece(piece: Piece, centerQ: number, centerR: number, checkHeight: boolean = true): boolean
+	{
 		return this.gameState.canPlacePiece(piece, centerQ, centerR, checkHeight);
 	}
 
-	private placePiece(centerQ: number, centerR: number): void {
+	private placePiece(centerQ: number, centerR: number): void
+	{
 		this.clearHint();
 
 		const piece = this.gameState.getCurrentPiece();
@@ -532,7 +648,8 @@ class HexSeptominoGame {
 
 		this.animatingHexes = [];
 
-		const sortedPieces = piece.tiles.slice().sort((a, b) => {
+		const sortedPieces = piece.tiles.slice().sort((a, b) =>
+		{
 			if (a.q === 0 && a.r === 0) return -1;
 			if (b.q === 0 && b.r === 0) return 1;
 
@@ -548,23 +665,27 @@ class HexSeptominoGame {
 			return adjustedA - adjustedB;
 		});
 
-		sortedPieces.forEach((tile, index) => {
+		sortedPieces.forEach((tile, index) =>
+		{
 			const adjustedQ = centerQ + tile.q - piece.center.q;
 			const adjustedR = centerR + tile.r - piece.center.r;
 			const hex = grid.getHex(adjustedQ, adjustedR);
-			if (hex && hex.height > 0) {
+			if (hex && hex.height > 0)
+			{
 				const delay = index * 100;
 
-				this.animatingHexes.push({
-					q: hex.q,
-					r: hex.r,
-					centerQ: centerQ,
-					centerR: centerR,
-					startHeight: hex.height,
-					targetHeight: hex.height - 1,
-					progress: 0,
-					delay: delay,
-				});
+				this.animatingHexes.push(
+					{
+						q: hex.q,
+						r: hex.r,
+						centerQ: centerQ,
+						centerR: centerR,
+						startHeight: hex.height,
+						targetHeight: hex.height - 1,
+						progress: 0,
+						delay: delay,
+					},
+				);
 			}
 		});
 
@@ -581,7 +702,8 @@ class HexSeptominoGame {
 
 		this.updateUI();
 
-		setTimeout(() => {
+		setTimeout(() =>
+		{
 			this.checkWinCondition();
 			this.render();
 			this.renderPieceNavigation();
@@ -590,16 +712,19 @@ class HexSeptominoGame {
 		}, this.animationDuration);
 	}
 
-	cyclePiece(direction: number): void {
+	cyclePiece(direction: number): void
+	{
 		const cycled = this.gameState.cyclePiece(direction);
-		if (cycled) {
+		if (cycled)
+		{
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
 		}
 	}
 
-	morePieces(): void {
+	morePieces(): void
+	{
 		const pieces = this.gameState.getPieces();
 		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
 
@@ -608,7 +733,8 @@ class HexSeptominoGame {
 		let nextPage = this.currentPage;
 		let attempts = 0;
 
-		do {
+		do
+		{
 			nextPage = (nextPage + 1) % maxPages;
 			attempts++;
 
@@ -616,23 +742,28 @@ class HexSeptominoGame {
 			const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
 			let hasUnplaced = false;
 
-			for (let i = startIndex; i < endIndex; i++) {
-				if (!this.gameState.isPiecePlaced(i)) {
+			for (let i = startIndex; i < endIndex; i++)
+			{
+				if (!this.gameState.isPiecePlaced(i))
+				{
 					hasUnplaced = true;
 					break;
 				}
 			}
 
-			if (hasUnplaced) {
+			if (hasUnplaced)
+			{
 				this.currentPage = nextPage;
 				break;
 			}
-		} while (attempts < maxPages);
+		}
+		while (attempts < maxPages);
 
 		this.renderBottomPanel();
 	}
 
-	previousPage(): void {
+	previousPage(): void
+	{
 		const pieces = this.gameState.getPieces();
 		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
 
@@ -642,7 +773,8 @@ class HexSeptominoGame {
 		this.renderBottomPanel();
 	}
 
-	nextPage(): void {
+	nextPage(): void
+	{
 		const pieces = this.gameState.getPieces();
 		const maxPages = Math.ceil(pieces.length / this.piecesPerPage);
 
@@ -652,26 +784,32 @@ class HexSeptominoGame {
 		this.renderBottomPanel();
 	}
 
-	private checkAndAdvancePage(): void {
+	private checkAndAdvancePage(): void
+	{
 		const pieces = this.gameState.getPieces();
 		const startIndex = this.currentPage * this.piecesPerPage;
 		const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
 		let allPlacedOnCurrentPage = true;
-		for (let i = startIndex; i < endIndex; i++) {
-			if (!this.gameState.isPiecePlaced(i)) {
+		for (let i = startIndex; i < endIndex; i++)
+		{
+			if (!this.gameState.isPiecePlaced(i))
+			{
 				allPlacedOnCurrentPage = false;
 				break;
 			}
 		}
 
-		if (allPlacedOnCurrentPage) {
+		if (allPlacedOnCurrentPage)
+		{
 			this.morePieces();
 		}
 	}
 
-	undo(): void {
+	undo(): void
+	{
 		const undone = this.gameState.undo();
-		if (undone) {
+		if (undone)
+		{
 			this.achievementManager.trackUndo();
 			this.updateUI();
 			this.render();
@@ -679,25 +817,31 @@ class HexSeptominoGame {
 		}
 	}
 
-	redo(): void {
+	redo(): void
+	{
 		const redone = this.gameState.redo();
-		if (redone) {
+		if (redone)
+		{
 			this.updateUI();
 			this.render();
 			this.renderBottomPanel();
 		}
 	}
 
-	private clearHint(): void {
+	private clearHint(): void
+	{
 		this.hintPos = null;
-		if (this.hintTimeout !== null) {
+		if (this.hintTimeout !== null)
+		{
 			clearTimeout(this.hintTimeout);
 			this.hintTimeout = null;
 		}
 	}
 
-	toggleHint(): void {
-		if (this.hintPos) {
+	toggleHint(): void
+	{
+		if (this.hintPos)
+		{
 			this.clearHint();
 			this.render();
 			return;
@@ -705,13 +849,15 @@ class HexSeptominoGame {
 
 		const hint = this.gameState.getSolutionHint();
 
-		if (hint) {
+		if (hint)
+		{
 			this.hintPos = hint;
 			this.gameState.incrementHintCount();
 			this.achievementManager.trackHint();
 			this.render();
 
-			this.hintTimeout = window.setTimeout(() => {
+			this.hintTimeout = window.setTimeout(() =>
+			{
 				this.hintPos = null;
 				this.hintTimeout = null;
 				this.render();
@@ -719,7 +865,8 @@ class HexSeptominoGame {
 		}
 	}
 
-	restart(): void {
+	restart(): void
+	{
 		this.gameState.restart();
 		this.clearHint();
 		this.achievementManager.resetInOrderTracking();
@@ -730,18 +877,22 @@ class HexSeptominoGame {
 		this.renderBottomPanel();
 	}
 
-	startNewGame(): void {
+	startNewGame(): void
+	{
 		getRequiredElementById('victoryScreen', HTMLElement).classList.add('hidden');
 		showDifficultyScreen();
 	}
 
-	restartAndHideVictory(): void {
+	restartAndHideVictory(): void
+	{
 		getRequiredElementById('victoryScreen', HTMLElement).classList.add('hidden');
 		this.restart();
 	}
 
-	private checkWinCondition(): void {
-		if (this.gameState.isGameWon()) {
+	private checkWinCondition(): void
+	{
+		if (this.gameState.isGameWon())
+		{
 			const victoryScreen = getRequiredElementById('victoryScreen', HTMLElement);
 			victoryScreen.classList.remove('hidden');
 
@@ -750,44 +901,68 @@ class HexSeptominoGame {
 			getRequiredElementById('victoryUndos', HTMLElement).textContent = this.gameState.getUndoCount().toString();
 			getRequiredElementById('victoryHints', HTMLElement).textContent = this.gameState.getHintCount().toString();
 
-			if (isDifficultyLevel(difficulty)) {
-				this.achievementManager.onGameComplete({
-					difficulty,
-					undoCount: this.gameState.getUndoCount(),
-					hintCount: this.gameState.getHintCount(),
-					moveCount: this.gameState.getMoveCount(),
-					placedInOrder: this.achievementManager.isPlacedInOrder(),
-				});
+			if (isDifficultyLevel(difficulty))
+			{
+				this.achievementManager.onGameComplete(
+					{
+						difficulty,
+						undoCount: this.gameState.getUndoCount(),
+						hintCount: this.gameState.getHintCount(),
+						moveCount: this.gameState.getMoveCount(),
+						placedInOrder: this.achievementManager.isPlacedInOrder(),
+					},
+				);
 			}
 			const duration = 3000;
 			const animationEnd = Date.now() + duration;
-			const defaults = {startVelocity: 30, spread: 360, ticks: 60, zIndex: 2100};
+			const defaults =
+			{
+				startVelocity: 30,
+				spread: 360,
+				ticks: 60,
+				zIndex: 2100,
+			};
 
-			function randomInRange(min: number, max: number) {
+			function randomInRange(min: number, max: number)
+			{
 				return Math.random() * (max - min) + min;
 			}
 
-			const interval = setInterval(function () {
+			const interval = setInterval(function ()
+			{
 				const timeLeft = animationEnd - Date.now();
 
-				if (timeLeft <= 0) {
+				if (timeLeft <= 0)
+				{
 					clearInterval(interval);
 					return;
 				}
 
 				const particleCount = 50 * (timeLeft / duration);
-				void confetti({
-					...defaults,
-					particleCount,
-					origin: {x: randomInRange(0.1, 0.3), y: Math.random() - 0.2},
-					colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
-				});
-				void confetti({
-					...defaults,
-					particleCount,
-					origin: {x: randomInRange(0.7, 0.9), y: Math.random() - 0.2},
-					colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
-				});
+				void confetti(
+					{
+						...defaults,
+						particleCount,
+						origin:
+						{
+							x: randomInRange(0.1, 0.3),
+							y: Math.random() - 0.2,
+						},
+						colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
+					},
+				);
+				void confetti(
+					{
+						...defaults,
+						particleCount,
+						origin:
+						{
+							x: randomInRange(0.7, 0.9),
+							y: Math.random() - 0.2,
+						},
+						colors: ['#e94560', '#f39c12', '#3498db', '#2ecc71', '#9b59b6'],
+					},
+				);
 			}, 250);
 
 			const message = 'Congratulations! You solved it!';
@@ -795,8 +970,10 @@ class HexSeptominoGame {
 		}
 	}
 
-	private handleMouseMove(event: MouseEvent): void {
-		if (this.isPanning) {
+	private handleMouseMove(event: MouseEvent): void
+	{
+		if (this.isPanning)
+		{
 			const deltaX = event.clientX - this.panStartX;
 			const deltaY = event.clientY - this.panStartY;
 			this.panOffsetX = deltaX;
@@ -812,35 +989,45 @@ class HexSeptominoGame {
 
 		const hex = this.renderer.pixelToHex(x, y);
 		const grid = this.gameState.getGrid();
-		if (grid.getHex(hex.q, hex.r)) {
+		if (grid.getHex(hex.q, hex.r))
+		{
 			this.mouseHex = hex;
-		} else {
+		}
+		else
+		{
 			this.mouseHex = null;
 		}
 
 		this.render();
 	}
 
-	private handleMouseDown(event: MouseEvent): void {
-		if (event.button === 0) {
+	private handleMouseDown(event: MouseEvent): void
+	{
+		if (event.button === 0)
+		{
 			this.isPanning = true;
 			this.panStartX = event.clientX - this.panOffsetX;
 			this.panStartY = event.clientY - this.panOffsetY;
 		}
 	}
 
-	private handleMouseUp(_event: MouseEvent): void {
+	private handleMouseUp(_event: MouseEvent): void
+	{
 		this.isPanning = false;
 	}
 
 	private lastWheelTime: number = 0;
 	private consecutiveSmallDeltas: number = 0;
-	private handleWheelEvent(event: WheelEvent): void {
+	private handleWheelEvent(event: WheelEvent): void
+	{
 		let normalizedDelta = event.deltaY;
 
-		if (event.deltaMode === 1) {
+		if (event.deltaMode === 1)
+		{
 			normalizedDelta *= 40;
-		} else if (event.deltaMode === 2) {
+		}
+		else if (event.deltaMode === 2)
+		{
 			normalizedDelta *= 800;
 		}
 
@@ -852,25 +1039,31 @@ class HexSeptominoGame {
 
 		if (direction === 0) return;
 
-		if (absDelta < 4) {
+		if (absDelta < 4)
+		{
 			this.consecutiveSmallDeltas++;
-		} else {
+		}
+		else
+		{
 			this.consecutiveSmallDeltas = 0;
 		}
 
 		const isTrackpad = this.consecutiveSmallDeltas > 2;
 		const minDelay = isTrackpad ? 200 : 120;
 
-		if (timeSinceLastWheel >= minDelay || this.lastWheelTime === 0) {
+		if (timeSinceLastWheel >= minDelay || this.lastWheelTime === 0)
+		{
 			this.cyclePiece(direction);
 			this.lastWheelTime = now;
 		}
 	}
 
-	private handleTouchStart(event: TouchEvent): void {
+	private handleTouchStart(event: TouchEvent): void
+	{
 		event.preventDefault();
 
-		if (event.touches.length === 1) {
+		if (event.touches.length === 1)
+		{
 			const touch = event.touches[0];
 			if (!touch) return;
 			const canvas = this.canvasManager.getCanvas();
@@ -880,12 +1073,15 @@ class HexSeptominoGame {
 
 			const hex = this.renderer.pixelToHex(x, y);
 			const grid = this.gameState.getGrid();
-			if (grid.getHex(hex.q, hex.r)) {
+			if (grid.getHex(hex.q, hex.r))
+			{
 				this.touchHex = hex;
 				this.isTouching = true;
 				this.render();
 			}
-		} else if (event.touches.length === 2) {
+		}
+		else if (event.touches.length === 2)
+		{
 			this.touchHex = null;
 			this.isTouching = false;
 
@@ -902,10 +1098,12 @@ class HexSeptominoGame {
 		}
 	}
 
-	private handleTouchMove(event: TouchEvent): void {
+	private handleTouchMove(event: TouchEvent): void
+	{
 		event.preventDefault();
 
-		if (event.touches.length === 1 && this.isTouching) {
+		if (event.touches.length === 1 && this.isTouching)
+		{
 			const touch = event.touches[0];
 			if (!touch) return;
 			const canvas = this.canvasManager.getCanvas();
@@ -915,13 +1113,18 @@ class HexSeptominoGame {
 
 			const hex = this.renderer.pixelToHex(x, y);
 			const grid = this.gameState.getGrid();
-			if (grid.getHex(hex.q, hex.r)) {
+			if (grid.getHex(hex.q, hex.r))
+			{
 				this.touchHex = hex;
-			} else {
+			}
+			else
+			{
 				this.touchHex = null;
 			}
 			this.render();
-		} else if (event.touches.length === 2) {
+		}
+		else if (event.touches.length === 2)
+		{
 			const touch1 = event.touches[0];
 			const touch2 = event.touches[1];
 			if (!touch1 || !touch2) return;
@@ -929,7 +1132,8 @@ class HexSeptominoGame {
 			const dx = touch2.clientX - touch1.clientX;
 			const dy = touch2.clientY - touch1.clientY;
 			const newPinchDistance = Math.sqrt(dx * dx + dy * dy);
-			if (this.lastPinchDistance !== null) {
+			if (this.lastPinchDistance !== null)
+			{
 				const scale = newPinchDistance / this.lastPinchDistance;
 				this.zoom(scale);
 			}
@@ -944,19 +1148,25 @@ class HexSeptominoGame {
 		}
 	}
 
-	private handleTouchEnd(event: TouchEvent): void {
+	private handleTouchEnd(event: TouchEvent): void
+	{
 		event.preventDefault();
 
-		if (event.touches.length === 0) {
+		if (event.touches.length === 0)
+		{
 			if (
 				this.isTouching &&
 				this.touchHex &&
 				!this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())
-			) {
+			)
+			{
 				const piece = this.gameState.getCurrentPiece();
-				if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r)) {
+				if (this.canPlacePiece(piece, this.touchHex.q, this.touchHex.r))
+				{
 					this.placePiece(this.touchHex.q, this.touchHex.r);
-				} else {
+				}
+				else
+				{
 					this.showInvalidPlacementFeedback(this.touchHex);
 				}
 			}
@@ -965,19 +1175,23 @@ class HexSeptominoGame {
 			this.isTouching = false;
 			this.lastPinchDistance = null;
 			this.render();
-		} else if (event.touches.length === 1) {
+		}
+		else if (event.touches.length === 1)
+		{
 			this.lastPinchDistance = null;
 		}
 	}
 
-	private handleTouchCancel(_event: TouchEvent): void {
+	private handleTouchCancel(_event: TouchEvent): void
+	{
 		this.touchHex = null;
 		this.isTouching = false;
 		this.lastPinchDistance = null;
 		this.render();
 	}
 
-	private handleClick(event: MouseEvent): void {
+	private handleClick(event: MouseEvent): void
+	{
 		if (this.isPanning) return;
 
 		const canvas = this.canvasManager.getCanvas();
@@ -987,18 +1201,24 @@ class HexSeptominoGame {
 
 		const hex = this.renderer.pixelToHex(x, y);
 		const grid = this.gameState.getGrid();
-		if (grid.getHex(hex.q, hex.r) && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex())) {
+		if (grid.getHex(hex.q, hex.r) && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()))
+		{
 			const piece = this.gameState.getCurrentPiece();
-			if (this.canPlacePiece(piece, hex.q, hex.r)) {
+			if (this.canPlacePiece(piece, hex.q, hex.r))
+			{
 				this.placePiece(hex.q, hex.r);
-			} else {
+			}
+			else
+			{
 				this.showInvalidPlacementFeedback(hex);
 			}
 		}
 	}
 
-	private handleKeyPress(event: KeyboardEvent): void {
-		switch (event.key) {
+	private handleKeyPress(event: KeyboardEvent): void
+	{
+		switch (event.key)
+		{
 			case 'ArrowUp':
 				event.preventDefault();
 				this.cyclePiece(-1);
@@ -1041,17 +1261,20 @@ class HexSeptominoGame {
 		}
 	}
 
-	private zoom(factor: number): void {
+	private zoom(factor: number): void
+	{
 		const oldZoom = this.zoomFactor;
 		this.zoomFactor = Math.max(0.5, Math.min(2.0, this.zoomFactor * factor));
 
-		if (oldZoom !== this.zoomFactor) {
+		if (oldZoom !== this.zoomFactor)
+		{
 			this.updateCanvasSize();
 			this.render();
 		}
 	}
 
-	resetView(): void {
+	resetView(): void
+	{
 		this.zoomFactor = 1.0;
 		this.panOffsetX = 0;
 		this.panOffsetY = 0;
@@ -1059,8 +1282,10 @@ class HexSeptominoGame {
 		this.render();
 	}
 
-	resetGame(): void {
-		while (this.gameState.canUndo()) {
+	resetGame(): void
+	{
+		while (this.gameState.canUndo())
+		{
 			this.gameState.undo();
 		}
 		this.clearHint();
@@ -1069,8 +1294,10 @@ class HexSeptominoGame {
 		this.renderBottomPanel();
 	}
 
-	private showInvalidPlacementFeedback(position: HexCoordinate): void {
-		this.invalidPlacementAnimation = {
+	private showInvalidPlacementFeedback(position: HexCoordinate): void
+	{
+		this.invalidPlacementAnimation =
+		{
 			isActive: true,
 			startTime: performance.now(),
 			position: position,
@@ -1079,33 +1306,40 @@ class HexSeptominoGame {
 		this.requestAnimationFrame();
 	}
 
-	private toggleKeyboardShortcuts(): void {
+	private toggleKeyboardShortcuts(): void
+	{
 		const modal = document.getElementById('keyboardShortcutsModal');
-		if (modal) {
+		if (modal)
+		{
 			modal.classList.toggle('hidden');
 		}
 	}
 
-	private updateUI(): void {
-		if (!this.gameState.getAllPiecesPlaced()) {
+	private updateUI(): void
+	{
+		if (!this.gameState.getAllPiecesPlaced())
+		{
 			getRequiredElementById('solutionStatus', HTMLElement).textContent = '';
 		}
 
 		const undoBtn = getElementByIdOrNull('undoBtn', HTMLButtonElement);
 		const redoBtn = getElementByIdOrNull('redoBtn', HTMLButtonElement);
 
-		if (undoBtn) {
+		if (undoBtn)
+		{
 			undoBtn.disabled = !this.gameState.canUndo();
 		}
 
-		if (redoBtn) {
+		if (redoBtn)
+		{
 			redoBtn.disabled = !this.gameState.canRedo();
 		}
 
 		this.renderBottomPanel();
 	}
 
-	private render(): void {
+	private render(): void
+	{
 		const canvas = this.canvasManager.getCanvas();
 		const ctx = this.canvasManager.getContext();
 
@@ -1117,19 +1351,22 @@ class HexSeptominoGame {
 		const fontSize = Math.max(12, Math.floor(this.renderer.hexSize * 0.5));
 		const grid = this.gameState.getGrid();
 
-		grid.hexes.forEach((hex) => {
+		grid.hexes.forEach((hex) =>
+		{
 			const pos = this.renderer.hexToPixel(hex.q, hex.r);
 			let displayHeight = hex.height;
 
 			const animatingHex = this.animatingHexes.find((h) => h.q === hex.q && h.r === hex.r);
-			if (animatingHex) {
+			if (animatingHex)
+			{
 				displayHeight = animatingHex.targetHeight;
 			}
 
 			const color = this.colors[displayHeight] ?? (displayHeight > 10 ? '#1a1a1a' : '#000');
 			this.drawHex(ctx, pos.x, pos.y, color, '#0f3460', 2);
 
-			if (displayHeight > 0) {
+			if (displayHeight > 0)
+			{
 				ctx.fillStyle = '#fff';
 				ctx.font = `bold ${fontSize}px Arial`;
 				ctx.textAlign = 'center';
@@ -1138,7 +1375,8 @@ class HexSeptominoGame {
 			}
 		});
 
-		this.animatingHexes.forEach((animatingHex) => {
+		this.animatingHexes.forEach((animatingHex) =>
+		{
 			const hex = grid.getHex(animatingHex.q, animatingHex.r);
 			if (!hex) return;
 
@@ -1163,7 +1401,8 @@ class HexSeptominoGame {
 				2,
 			);
 
-			if (animatingHex.startHeight > 0 && opacity > 0.1) {
+			if (animatingHex.startHeight > 0 && opacity > 0.1)
+			{
 				ctx.fillStyle = '#fff';
 				ctx.font = `bold ${fontSize}px Arial`;
 				ctx.textAlign = 'center';
@@ -1174,19 +1413,24 @@ class HexSeptominoGame {
 			ctx.restore();
 		});
 
-		if (this.isDragging && this.draggedPieceIndex !== null && this.dragHoverHex) {
+		if (this.isDragging && this.draggedPieceIndex !== null && this.dragHoverHex)
+		{
 			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
-			if (piece) {
+			if (piece)
+			{
 				const dragHoverHex = this.dragHoverHex;
 				const canPlace = this.canPlacePiece(piece, dragHoverHex.q, dragHoverHex.r);
 
-				piece.tiles.forEach((tile) => {
+				piece.tiles.forEach((tile) =>
+				{
 					const adjustedQ = dragHoverHex.q + tile.q - piece.center.q;
 					const adjustedR = dragHoverHex.r + tile.r - piece.center.r;
 					const hex = grid.getHex(adjustedQ, adjustedR);
-					if (hex) {
+					if (hex)
+					{
 						const pos = this.renderer.hexToPixel(hex.q, hex.r);
-						if (canPlace) {
+						if (canPlace)
+						{
 							this.drawHaloEffect(ctx, pos.x, pos.y);
 						}
 					}
@@ -1195,33 +1439,42 @@ class HexSeptominoGame {
 		}
 
 		const previewHex = this.mouseHex ?? this.touchHex;
-		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) && !this.isDragging) {
+		if (previewHex && !this.gameState.isPiecePlaced(this.gameState.getCurrentPieceIndex()) && !this.isDragging)
+		{
 			const piece = this.gameState.getCurrentPiece();
 			const canPlace = this.canPlacePiece(piece, previewHex.q, previewHex.r);
 
-			piece.tiles.forEach((tile) => {
+			piece.tiles.forEach((tile) =>
+			{
 				const adjustedQ = previewHex.q + tile.q - piece.center.q;
 				const adjustedR = previewHex.r + tile.r - piece.center.r;
 				const hex = grid.getHex(adjustedQ, adjustedR);
-				if (hex) {
+				if (hex)
+				{
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
-					if (canPlace) {
+					if (canPlace)
+					{
 						this.drawHex(ctx, pos.x, pos.y, 'rgba(255, 235, 59, 0.3)', '#ffeb3b', 3);
-					} else {
+					}
+					else
+					{
 						this.drawHex(ctx, pos.x, pos.y, 'rgba(244, 67, 54, 0.3)', '#f44336', 3);
 					}
 				}
 			});
 		}
 
-		if (this.hintPos) {
+		if (this.hintPos)
+		{
 			const hintPos = this.hintPos;
 			const piece = this.gameState.getCurrentPiece();
-			piece.tiles.forEach((tile) => {
+			piece.tiles.forEach((tile) =>
+			{
 				const adjustedQ = hintPos.q + tile.q - piece.center.q;
 				const adjustedR = hintPos.r + tile.r - piece.center.r;
 				const hex = grid.getHex(adjustedQ, adjustedR);
-				if (hex) {
+				if (hex)
+				{
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 					ctx.strokeStyle = '#e94560';
 					ctx.lineWidth = 4;
@@ -1232,7 +1485,8 @@ class HexSeptominoGame {
 			});
 		}
 
-		if (this.invalidPlacementAnimation?.isActive === true) {
+		if (this.invalidPlacementAnimation?.isActive === true)
+		{
 			const invalidPlacementAnimation = this.invalidPlacementAnimation;
 			const elapsed = performance.now() - invalidPlacementAnimation.startTime;
 			const progress = elapsed / invalidPlacementAnimation.duration;
@@ -1242,11 +1496,13 @@ class HexSeptominoGame {
 			const opacity = Math.max(0, 1 - progress);
 
 			const piece = this.gameState.getCurrentPiece();
-			piece.tiles.forEach((tile) => {
+			piece.tiles.forEach((tile) =>
+			{
 				const adjustedQ = invalidPlacementAnimation.position.q + tile.q - piece.center.q;
 				const adjustedR = invalidPlacementAnimation.position.r + tile.r - piece.center.r;
 				const hex = grid.getHex(adjustedQ, adjustedR);
-				if (hex) {
+				if (hex)
+				{
 					const pos = this.renderer.hexToPixel(hex.q, hex.r);
 
 					ctx.save();
@@ -1264,7 +1520,8 @@ class HexSeptominoGame {
 		ctx.restore();
 	}
 
-	private renderBottomPanel(): void {
+	private renderBottomPanel(): void
+	{
 		const piecesContainer = document.getElementById('piecesContainer');
 		if (!piecesContainer) return;
 
@@ -1274,7 +1531,8 @@ class HexSeptominoGame {
 		const startIndex = this.currentPage * this.piecesPerPage;
 		const endIndex = Math.min(startIndex + this.piecesPerPage, pieces.length);
 
-		for (let i = startIndex; i < endIndex; i++) {
+		for (let i = startIndex; i < endIndex; i++)
+		{
 			const piece = pieces[i];
 			const isPlaced = this.gameState.isPiecePlaced(i);
 
@@ -1286,7 +1544,8 @@ class HexSeptominoGame {
 			const svg = this.createPieceSVG(piece, isPlaced);
 			pieceContainer.appendChild(svg);
 
-			if (!isPlaced) {
+			if (!isPlaced)
+			{
 				this.setupPieceDragHandlers(pieceContainer, i);
 			}
 
@@ -1294,22 +1553,29 @@ class HexSeptominoGame {
 		}
 
 		const morePiecesBtn = getElementByIdOrNull('morePiecesBtn', HTMLButtonElement);
-		if (morePiecesBtn) {
+		if (morePiecesBtn)
+		{
 			const totalPages = Math.ceil(pieces.length / this.piecesPerPage);
 
-			if (totalPages <= 1) {
+			if (totalPages <= 1)
+			{
 				morePiecesBtn.disabled = true;
-			} else {
+			}
+			else
+			{
 				let hasUnplacedOnOtherPages = false;
 
-				for (let page = 0; page < totalPages; page++) {
+				for (let page = 0; page < totalPages; page++)
+				{
 					if (page === this.currentPage) continue;
 
 					const pageStart = page * this.piecesPerPage;
 					const pageEnd = Math.min(pageStart + this.piecesPerPage, pieces.length);
 
-					for (let i = pageStart; i < pageEnd; i++) {
-						if (!this.gameState.isPiecePlaced(i)) {
+					for (let i = pageStart; i < pageEnd; i++)
+					{
+						if (!this.gameState.isPiecePlaced(i))
+						{
 							hasUnplacedOnOtherPages = true;
 							break;
 						}
@@ -1323,15 +1589,18 @@ class HexSeptominoGame {
 		}
 	}
 
-	private createPieceSVG(piece: Piece, isPlaced: boolean): SVGElement {
+	private createPieceSVG(piece: Piece, isPlaced: boolean): SVGElement
+	{
 		const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		svg.setAttribute('viewBox', '-50 -50 100 100');
 		svg.style.width = '100%';
 		svg.style.height = '100%';
 		svg.style.display = 'block';
 
-		if (!isPlaced) {
-			piece.tiles.forEach((tile) => {
+		if (!isPlaced)
+		{
+			piece.tiles.forEach((tile) =>
+			{
 				const adjustedQ = tile.q - piece.center.q;
 				const adjustedR = tile.r - piece.center.r;
 				const x = 15 * ((3 / 2) * adjustedQ);
@@ -1339,7 +1608,8 @@ class HexSeptominoGame {
 
 				const hex = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
 				const points = [];
-				for (let i = 0; i < 6; i++) {
+				for (let i = 0; i < 6; i++)
+				{
 					const angle = (Math.PI / 3) * i;
 					const hx = x + 15 * Math.cos(angle);
 					const hy = y + 15 * Math.sin(angle);
@@ -1357,7 +1627,8 @@ class HexSeptominoGame {
 		return svg;
 	}
 
-	private renderFullSizePieceOnCanvas(canvas: HTMLCanvasElement, piece: Piece): void {
+	private renderFullSizePieceOnCanvas(canvas: HTMLCanvasElement, piece: Piece): void
+	{
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1367,7 +1638,8 @@ class HexSeptominoGame {
 		ctx.save();
 		ctx.translate(canvas.width / 2, canvas.height / 2);
 
-		piece.tiles.forEach((tile) => {
+		piece.tiles.forEach((tile) =>
+		{
 			const adjustedQ = tile.q - piece.center.q;
 			const adjustedR = tile.r - piece.center.r;
 			const x = hexSize * ((3 / 2) * adjustedQ);
@@ -1379,15 +1651,20 @@ class HexSeptominoGame {
 		ctx.restore();
 	}
 
-	private drawTransparentPieceHex(ctx: CanvasRenderingContext2D, x: number, y: number, size: number): void {
+	private drawTransparentPieceHex(ctx: CanvasRenderingContext2D, x: number, y: number, size: number): void
+	{
 		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++)
+		{
 			const angle = (Math.PI / 3) * i;
 			const hx = x + size * Math.cos(angle);
 			const hy = y + size * Math.sin(angle);
-			if (i === 0) {
+			if (i === 0)
+			{
 				ctx.moveTo(hx, hy);
-			} else {
+			}
+			else
+			{
 				ctx.lineTo(hx, hy);
 			}
 		}
@@ -1400,7 +1677,8 @@ class HexSeptominoGame {
 		ctx.stroke();
 	}
 
-	private createDragPreview(pieceIndex: number, clientX: number, clientY: number): void {
+	private createDragPreview(pieceIndex: number, clientX: number, clientY: number): void
+	{
 		const piece = this.gameState.getPieceByIndex(pieceIndex);
 		if (!piece) return;
 
@@ -1435,39 +1713,49 @@ class HexSeptominoGame {
 		this.dragPreviewElement = preview;
 	}
 
-	private setupPieceDragHandlers(element: HTMLElement, pieceIndex: number): void {
-		element.addEventListener('mousedown', (e) => {
+	private setupPieceDragHandlers(element: HTMLElement, pieceIndex: number): void
+	{
+		element.addEventListener('mousedown', (e) =>
+		{
 			this.handlePieceDragStart(e, pieceIndex, element);
 		});
 
 		element.addEventListener(
 			'touchstart',
-			(e) => {
+			(e) =>
+			{
 				this.handlePieceTouchStart(e, pieceIndex, element);
 			},
-			{passive: false},
+			{
+				passive: false,
+			},
 		);
 	}
 
-	private handlePieceDragStart(event: MouseEvent, pieceIndex: number, element: HTMLElement): void {
+	private handlePieceDragStart(event: MouseEvent, pieceIndex: number, element: HTMLElement): void
+	{
 		event.preventDefault();
 		this.startDrag(pieceIndex, event.clientX, event.clientY, element);
 	}
 
-	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number, element: HTMLElement): void {
-		if (this.isSwipingPanel) {
+	private handlePieceTouchStart(event: TouchEvent, pieceIndex: number, element: HTMLElement): void
+	{
+		if (this.isSwipingPanel)
+		{
 			return;
 		}
 
 		event.preventDefault();
-		if (event.touches.length === 1) {
+		if (event.touches.length === 1)
+		{
 			const touch = event.touches[0];
 			if (!touch) return;
 			this.startDrag(pieceIndex, touch.clientX, touch.clientY, element);
 		}
 	}
 
-	private startDrag(pieceIndex: number, clientX: number, clientY: number, element: HTMLElement): void {
+	private startDrag(pieceIndex: number, clientX: number, clientY: number, element: HTMLElement): void
+	{
 		if (this.gameState.isPiecePlaced(pieceIndex)) return;
 
 		this.isDragging = true;
@@ -1475,7 +1763,8 @@ class HexSeptominoGame {
 		const closest = element.closest('.draggable-piece');
 		this.draggedPieceElement = closest instanceof HTMLElement ? closest : null;
 
-		if (this.draggedPieceElement) {
+		if (this.draggedPieceElement)
+		{
 			this.draggedPieceElement.classList.add('dragging');
 		}
 
@@ -1483,30 +1772,42 @@ class HexSeptominoGame {
 
 		document.addEventListener('mousemove', this.handleGlobalDragMove);
 		document.addEventListener('mouseup', this.handleGlobalDragEnd);
-		document.addEventListener('touchmove', this.handleGlobalTouchMove, {passive: false});
+		document.addEventListener(
+			'touchmove',
+			this.handleGlobalTouchMove,
+			{
+				passive: false,
+			},
+		);
 		document.addEventListener('touchend', this.handleGlobalTouchEnd);
 	}
 
-	private readonly handleGlobalDragMove = (event: MouseEvent): void => {
+	private readonly handleGlobalDragMove = (event: MouseEvent): void =>
+	{
 		if (!this.isDragging) return;
 		event.preventDefault();
 		this.updateDragPosition(event.clientX, event.clientY);
 	};
 
-	private readonly handleGlobalTouchMove = (event: TouchEvent): void => {
+	private readonly handleGlobalTouchMove = (event: TouchEvent): void =>
+	{
 		if (!this.isDragging) return;
 		event.preventDefault();
-		if (event.touches.length === 1) {
+		if (event.touches.length === 1)
+		{
 			const touch = event.touches[0];
 			if (!touch) return;
 			this.updateDragPosition(touch.clientX, touch.clientY);
 		}
 	};
 
-	private updateDragPosition(clientX: number, clientY: number): void {
-		if (this.dragPreviewElement) {
+	private updateDragPosition(clientX: number, clientY: number): void
+	{
+		if (this.dragPreviewElement)
+		{
 			const canvas = this.dragPreviewElement.querySelector('canvas');
-			if (canvas) {
+			if (canvas)
+			{
 				const halfWidth = canvas.width / 2;
 				const halfHeight = canvas.height / 2;
 				this.dragPreviewElement.style.left = `${clientX - halfWidth}px`;
@@ -1517,52 +1818,67 @@ class HexSeptominoGame {
 		const canvas = this.canvasManager.getCanvas();
 		const rect = canvas.getBoundingClientRect();
 
-		if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+		if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom)
+		{
 			const x = clientX - rect.left - canvas.width / 2 - this.panOffsetX;
 			const y = clientY - rect.top - canvas.height / 2 - this.panOffsetY;
 
 			const hex = this.renderer.pixelToHex(x, y);
 			const grid = this.gameState.getGrid();
-			if (grid.getHex(hex.q, hex.r)) {
+			if (grid.getHex(hex.q, hex.r))
+			{
 				this.dragHoverHex = hex;
-			} else {
+			}
+			else
+			{
 				this.dragHoverHex = null;
 			}
-		} else {
+		}
+		else
+		{
 			this.dragHoverHex = null;
 		}
 
 		this.render();
 	}
 
-	private readonly handleGlobalDragEnd = (_event: MouseEvent): void => {
+	private readonly handleGlobalDragEnd = (_event: MouseEvent): void =>
+	{
 		if (!this.isDragging) return;
 		this.finishDrag();
 	};
 
-	private readonly handleGlobalTouchEnd = (_event: TouchEvent): void => {
+	private readonly handleGlobalTouchEnd = (_event: TouchEvent): void =>
+	{
 		if (!this.isDragging) return;
 		this.finishDrag();
 	};
 
-	private finishDrag(): void {
+	private finishDrag(): void
+	{
 		if (!this.isDragging || this.draggedPieceIndex === null) return;
 
-		if (this.dragHoverHex) {
+		if (this.dragHoverHex)
+		{
 			const piece = this.gameState.getPieceByIndex(this.draggedPieceIndex);
-			if (piece && this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r)) {
+			if (piece && this.canPlacePiece(piece, this.dragHoverHex.q, this.dragHoverHex.r))
+			{
 				this.gameState.setCurrentPieceIndex(this.draggedPieceIndex);
 				this.placePiece(this.dragHoverHex.q, this.dragHoverHex.r);
-			} else if (piece) {
+			}
+			else if (piece)
+			{
 				this.showInvalidPlacementFeedback(this.dragHoverHex);
 			}
 		}
 
-		if (this.draggedPieceElement) {
+		if (this.draggedPieceElement)
+		{
 			this.draggedPieceElement.classList.remove('dragging');
 		}
 
-		if (this.dragPreviewElement) {
+		if (this.dragPreviewElement)
+		{
 			document.body.removeChild(this.dragPreviewElement);
 			this.dragPreviewElement = null;
 		}
@@ -1580,14 +1896,16 @@ class HexSeptominoGame {
 		this.render();
 	}
 
-	private renderPieceNavigation(): void {
+	private renderPieceNavigation(): void
+	{
 		this.renderPieceNavigationCanvas('prevPiece', this.gameState.getPreviousPieceIndex());
 		this.renderPieceNavigationCanvas('nextPiece', this.gameState.getNextPieceIndex());
 		this.renderPieceNavigationCanvas('mobilePrevPiece', this.gameState.getPreviousPieceIndex());
 		this.renderPieceNavigationCanvas('mobileNextPiece', this.gameState.getNextPieceIndex());
 	}
 
-	private renderPieceNavigationCanvas(canvasId: string, pieceIndex: number | null): void {
+	private renderPieceNavigationCanvas(canvasId: string, pieceIndex: number | null): void
+	{
 		const canvas = getElementByIdOrNull(canvasId, HTMLCanvasElement);
 		if (canvas === null) return;
 
@@ -1599,7 +1917,8 @@ class HexSeptominoGame {
 
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-		if (pieceIndex === null) {
+		if (pieceIndex === null)
+		{
 			parent.classList.add('disabled');
 			ctx.fillStyle = '#333';
 			ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1618,7 +1937,8 @@ class HexSeptominoGame {
 
 		const color = this.gameState.isPiecePlaced(pieceIndex) ? '#666' : '#e94560';
 
-		piece.tiles.forEach((tile) => {
+		piece.tiles.forEach((tile) =>
+		{
 			const adjustedQ = tile.q - piece.center.q;
 			const adjustedR = tile.r - piece.center.r;
 			const x = previewHexSize * ((3 / 2) * adjustedQ);
@@ -1635,15 +1955,20 @@ class HexSeptominoGame {
 		y: number,
 		size: number,
 		color: string,
-	): void {
+	): void
+	{
 		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++)
+		{
 			const angle = (Math.PI / 3) * i;
 			const hx = x + size * Math.cos(angle);
 			const hy = y + size * Math.sin(angle);
-			if (i === 0) {
+			if (i === 0)
+			{
 				ctx.moveTo(hx, hy);
-			} else {
+			}
+			else
+			{
 				ctx.lineTo(hx, hy);
 			}
 		}
@@ -1662,19 +1987,25 @@ class HexSeptominoGame {
 		fillColor: string,
 		strokeColor: string,
 		lineWidth: number,
-	): void {
+	): void
+	{
 		this.canvasManager.drawHexOnCanvas(ctx, x, y, this.renderer.hexSize, fillColor, strokeColor, lineWidth);
 	}
 
-	private drawHexOutline(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+	private drawHexOutline(ctx: CanvasRenderingContext2D, x: number, y: number): void
+	{
 		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++)
+		{
 			const angle = (Math.PI / 3) * i;
 			const hx = x + this.renderer.hexSize * Math.cos(angle);
 			const hy = y + this.renderer.hexSize * Math.sin(angle);
-			if (i === 0) {
+			if (i === 0)
+			{
 				ctx.moveTo(hx, hy);
-			} else {
+			}
+			else
+			{
 				ctx.lineTo(hx, hy);
 			}
 		}
@@ -1682,17 +2013,22 @@ class HexSeptominoGame {
 		ctx.stroke();
 	}
 
-	private drawHaloEffect(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+	private drawHaloEffect(ctx: CanvasRenderingContext2D, x: number, y: number): void
+	{
 		ctx.save();
 
 		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++)
+		{
 			const angle = (Math.PI / 3) * i;
 			const hx = x + this.renderer.hexSize * Math.cos(angle);
 			const hy = y + this.renderer.hexSize * Math.sin(angle);
-			if (i === 0) {
+			if (i === 0)
+			{
 				ctx.moveTo(hx, hy);
-			} else {
+			}
+			else
+			{
 				ctx.lineTo(hx, hy);
 			}
 		}
@@ -1702,13 +2038,17 @@ class HexSeptominoGame {
 
 		const glowSize = this.renderer.hexSize * 1.3;
 		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++)
+		{
 			const angle = (Math.PI / 3) * i;
 			const hx = x + glowSize * Math.cos(angle);
 			const hy = y + glowSize * Math.sin(angle);
-			if (i === 0) {
+			if (i === 0)
+			{
 				ctx.moveTo(hx, hy);
-			} else {
+			}
+			else
+			{
 				ctx.lineTo(hx, hy);
 			}
 		}
@@ -1724,60 +2064,76 @@ class HexSeptominoGame {
 		ctx.restore();
 	}
 
-	private requestAnimationFrame(): void {
+	private requestAnimationFrame(): void
+	{
 		if (
 			(this.animationStartTime !== null && this.animatingHexes.length > 0) ||
 			this.invalidPlacementAnimation?.isActive === true
-		) {
-			requestAnimationFrame(() => {
+		)
+		{
+			requestAnimationFrame(() =>
+			{
 				this.animate();
 			});
 		}
 	}
 
-	private handlePiecePlacementAnimation(now: number): boolean {
-		if (this.animationStartTime === null) {
+	private handlePiecePlacementAnimation(now: number): boolean
+	{
+		if (this.animationStartTime === null)
+		{
 			return false;
 		}
 
 		const elapsed = now - this.animationStartTime;
 		const progress = Math.min(elapsed / this.animationDuration, 1);
 
-		const easeInOutCubic = (t: number): number => {
+		const easeInOutCubic = (t: number): number =>
+		{
 			return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 		};
 
-		this.animatingHexes.forEach((hex) => {
+		this.animatingHexes.forEach((hex) =>
+		{
 			const hexElapsed = Math.max(0, elapsed - hex.delay);
 			const hexProgress = Math.min(hexElapsed / 400, 1);
 			const easedHexProgress = easeInOutCubic(hexProgress);
 			hex.progress = easedHexProgress;
 		});
 
-		if (progress < 1) {
+		if (progress < 1)
+		{
 			return true;
-		} else {
+		}
+		else
+		{
 			this.animatingHexes = [];
 			this.animationStartTime = null;
 			return false;
 		}
 	}
 
-	private handleInvalidPlacementAnimation(now: number): boolean {
-		if (!this.invalidPlacementAnimation || !this.invalidPlacementAnimation.isActive) {
+	private handleInvalidPlacementAnimation(now: number): boolean
+	{
+		if (!this.invalidPlacementAnimation || !this.invalidPlacementAnimation.isActive)
+		{
 			return false;
 		}
 
 		const elapsed = now - this.invalidPlacementAnimation.startTime;
-		if (elapsed >= this.invalidPlacementAnimation.duration) {
+		if (elapsed >= this.invalidPlacementAnimation.duration)
+		{
 			this.invalidPlacementAnimation = null;
 			return false;
-		} else {
+		}
+		else
+		{
 			return true;
 		}
 	}
 
-	private animate(): void {
+	private animate(): void
+	{
 		const now = performance.now();
 		let needsMoreFrames = false;
 
@@ -1786,7 +2142,8 @@ class HexSeptominoGame {
 
 		this.render();
 
-		if (needsMoreFrames) {
+		if (needsMoreFrames)
+		{
 			this.requestAnimationFrame();
 		}
 	}

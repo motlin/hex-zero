@@ -1,46 +1,56 @@
 import {describe, it, expect, beforeEach} from 'vite-plus/test';
 import {GameState} from './game-state';
 
-describe('GameState', () => {
+describe('GameState', () =>
+{
 	let gameState: GameState;
 
-	beforeEach(() => {
+	beforeEach(() =>
+	{
 		gameState = new GameState(3, 4);
 	});
 
-	describe('initialization', () => {
-		it('creates game with correct settings', () => {
+	describe('initialization', () =>
+	{
+		it('creates game with correct settings', () =>
+		{
 			const settings = gameState.getSettings();
 			expect(settings.radius).toBe(3);
 			expect(settings.numPieces).toBe(4);
 		});
 
-		it('generates correct number of pieces', () => {
+		it('generates correct number of pieces', () =>
+		{
 			const pieces = gameState.getPieces();
 			expect(pieces).toHaveLength(4);
 		});
 
-		it('starts with piece 0 selected', () => {
+		it('starts with piece 0 selected', () =>
+		{
 			expect(gameState.getCurrentPieceIndex()).toBe(0);
 		});
 
-		it('starts with no pieces placed', () => {
+		it('starts with no pieces placed', () =>
+		{
 			const placedPieces = gameState.getPlacedPieces();
 			expect(placedPieces.size).toBe(0);
 		});
 
-		it('starts with empty move history', () => {
+		it('starts with empty move history', () =>
+		{
 			expect(gameState.getHistory()).toHaveLength(0);
 			expect(gameState.getUndoCount()).toBe(0);
 			expect(gameState.getMoveCount()).toBe(0);
 		});
 
-		it('starts with no undo/redo available', () => {
+		it('starts with no undo/redo available', () =>
+		{
 			expect(gameState.canUndo()).toBe(false);
 			expect(gameState.canRedo()).toBe(false);
 		});
 
-		it('creates hex grid with correct number of hexes', () => {
+		it('creates hex grid with correct number of hexes', () =>
+		{
 			const grid = gameState.getGrid();
 			// For radius 3: hexes in a hexagonal pattern centered at origin
 			// Count: center (1) + ring 1 (6) + ring 2 (12) + ring 3 (18) = 37
@@ -48,15 +58,18 @@ describe('GameState', () => {
 			expect(grid.hexes.size).toBe(expectedHexCount);
 		});
 
-		it('initializes grid with some positive heights', () => {
+		it('initializes grid with some positive heights', () =>
+		{
 			const grid = gameState.getGrid();
 			const hasPositiveHeight = Array.from(grid.hexes.values()).some((hex) => hex.height > 0);
 			expect(hasPositiveHeight).toBe(true);
 		});
 	});
 
-	describe('piece placement', () => {
-		it('allows placing piece at valid position', () => {
+	describe('piece placement', () =>
+	{
+		it('allows placing piece at valid position', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 
@@ -72,7 +85,8 @@ describe('GameState', () => {
 			expect(placed).toBe(true);
 		});
 
-		it('prevents placing piece at invalid position', () => {
+		it('prevents placing piece at invalid position', () =>
+		{
 			const grid = gameState.getGrid();
 			const emptyHex = Array.from(grid.hexes.values()).find((hex) => hex.height === 0);
 			expect(emptyHex).toBeDefined();
@@ -85,7 +99,8 @@ describe('GameState', () => {
 			expect(placed).toBe(false);
 		});
 
-		it('prevents placing same piece twice', () => {
+		it('prevents placing same piece twice', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 			const originalIndex = gameState.getCurrentPieceIndex();
@@ -105,7 +120,8 @@ describe('GameState', () => {
 			expect(secondPlacement).toBe(false);
 		});
 
-		it('updates move history when placing piece', () => {
+		it('updates move history when placing piece', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 
@@ -120,7 +136,8 @@ describe('GameState', () => {
 			expect(gameState.canUndo()).toBe(true);
 		});
 
-		it('advances to next unplaced piece after placement', () => {
+		it('advances to next unplaced piece after placement', () =>
+		{
 			const initialPieceIndex = gameState.getCurrentPieceIndex();
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
@@ -137,7 +154,8 @@ describe('GameState', () => {
 			expect(gameState.isPiecePlaced(newPieceIndex)).toBe(false);
 		});
 
-		it('reduces hex heights when placing piece', () => {
+		it('reduces hex heights when placing piece', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 
@@ -160,8 +178,10 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('piece cycling', () => {
-		it('cycles to next unplaced piece', () => {
+	describe('piece cycling', () =>
+	{
+		it('cycles to next unplaced piece', () =>
+		{
 			const initialPieceIndex = gameState.getCurrentPieceIndex();
 			const cycled = gameState.cyclePiece(1);
 
@@ -169,7 +189,8 @@ describe('GameState', () => {
 			expect(gameState.getCurrentPieceIndex()).not.toBe(initialPieceIndex);
 		});
 
-		it('cycles to previous unplaced piece', () => {
+		it('cycles to previous unplaced piece', () =>
+		{
 			const initialPieceIndex = gameState.getCurrentPieceIndex();
 			const cycled = gameState.cyclePiece(-1);
 
@@ -177,7 +198,8 @@ describe('GameState', () => {
 			expect(gameState.getCurrentPieceIndex()).not.toBe(initialPieceIndex);
 		});
 
-		it('skips placed pieces when cycling', () => {
+		it('skips placed pieces when cycling', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 			const placedPieceIndex = gameState.getCurrentPieceIndex();
@@ -193,18 +215,21 @@ describe('GameState', () => {
 			expect(gameState.getCurrentPieceIndex()).not.toBe(placedPieceIndex);
 		});
 
-		it('returns false when all pieces are placed', () => {
+		it('returns false when all pieces are placed', () =>
+		{
 			const grid = gameState.getGrid();
 			const pieces = gameState.getPieces();
 
 			// Place as many pieces as possible
 			let placedCount = 0;
-			pieces.forEach(() => {
+			pieces.forEach(() =>
+			{
 				const positions = Array.from(grid.hexes.values());
 				const validPosition = positions.find((pos) =>
 					gameState.canPlacePiece(gameState.getCurrentPiece(), pos.q, pos.r),
 				);
-				if (validPosition) {
+				if (validPosition)
+				{
 					gameState.placePiece(validPosition.q, validPosition.r);
 					placedCount++;
 				}
@@ -213,14 +238,20 @@ describe('GameState', () => {
 			// If we placed all pieces, cycling should return false
 			// If we couldn't place all pieces but some are still unplaced, cycling should work
 			const cycled = gameState.cyclePiece(1);
-			if (placedCount === pieces.length) {
+			if (placedCount === pieces.length)
+			{
 				expect(cycled).toBe(false);
-			} else {
+			}
+			else
+			{
 				// If there are unplaced pieces available, cycling should work
 				const unplacedCount = pieces.length - placedCount;
-				if (unplacedCount > 1) {
+				if (unplacedCount > 1)
+				{
 					expect(cycled).toBe(true);
-				} else {
+				}
+				else
+				{
 					// If only one piece remains unplaced, cycling returns false
 					expect(cycled).toBe(false);
 				}
@@ -228,8 +259,10 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('undo/redo', () => {
-		it('undoes piece placement', () => {
+	describe('undo/redo', () =>
+	{
+		it('undoes piece placement', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 			const initialPieceIndex = gameState.getCurrentPieceIndex();
@@ -258,7 +291,8 @@ describe('GameState', () => {
 			expect(gameState.getCurrentPieceIndex()).toBe(initialPieceIndex);
 		});
 
-		it('redoes undone placement', () => {
+		it('redoes undone placement', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 
@@ -283,7 +317,8 @@ describe('GameState', () => {
 			expect(affectedHex.height).toBe(initialHeight - 1);
 		});
 
-		it('clears redo stack when making new move', () => {
+		it('clears redo stack when making new move', () =>
+		{
 			const grid = gameState.getGrid();
 			const positions = Array.from(grid.hexes.values());
 
@@ -300,13 +335,15 @@ describe('GameState', () => {
 			// Place a different piece
 			const secondPiece = gameState.getCurrentPiece();
 			const secondValidPosition = positions.find((pos) => gameState.canPlacePiece(secondPiece, pos.q, pos.r));
-			if (secondValidPosition) {
+			if (secondValidPosition)
+			{
 				gameState.placePiece(secondValidPosition.q, secondValidPosition.r);
 				expect(gameState.canRedo()).toBe(false);
 			}
 		});
 
-		it('increments undo count', () => {
+		it('increments undo count', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 
@@ -323,49 +360,65 @@ describe('GameState', () => {
 			expect(gameState.getUndoCount()).toBe(initialUndoCount + 1);
 		});
 
-		it('returns false when no moves to undo', () => {
+		it('returns false when no moves to undo', () =>
+		{
 			const undone = gameState.undo();
 			expect(undone).toBe(false);
 		});
 
-		it('returns false when no moves to redo', () => {
+		it('returns false when no moves to redo', () =>
+		{
 			const redone = gameState.redo();
 			expect(redone).toBe(false);
 		});
 
-		it('handles complex undo/redo sequence with N-1 moves', () => {
+		it('handles complex undo/redo sequence with N-1 moves', () =>
+		{
 			const grid = gameState.getGrid();
 			const positions = Array.from(grid.hexes.values());
 			const totalPieces = gameState.getPieces().length;
 
 			// Store initial state for comparison
 			const initialGridState = new Map();
-			grid.hexes.forEach((hex, key) => {
+			grid.hexes.forEach((hex, key) =>
+			{
 				initialGridState.set(key, hex.height);
 			});
 			const initialPieceIndex = gameState.getCurrentPieceIndex();
 
 			// Make N-1 moves (place all pieces except the last one)
-			const placedMoves: {q: number; r: number; pieceIndex: number}[] = [];
+			const placedMoves:
+			{
+				q: number;
+				r: number;
+				pieceIndex: number;
+			}[] = [];
 
-			for (let i = 0; i < totalPieces - 1; i++) {
+			for (let i = 0; i < totalPieces - 1; i++)
+			{
 				const currentPiece = gameState.getCurrentPiece();
 				const currentPieceIndex = gameState.getCurrentPieceIndex();
 
 				// Find a valid position for this piece
 				const validPosition = positions.find((pos) => gameState.canPlacePiece(currentPiece, pos.q, pos.r));
 
-				if (validPosition) {
-					placedMoves.push({
-						q: validPosition.q,
-						r: validPosition.r,
-						pieceIndex: currentPieceIndex,
-					});
+				if (validPosition)
+				{
+					placedMoves.push(
+						{
+							q: validPosition.q,
+							r: validPosition.r,
+							pieceIndex: currentPieceIndex,
+						},
+					);
 					gameState.placePiece(validPosition.q, validPosition.r);
-				} else {
+				}
+				else
+				{
 					// If we can't place a piece, cycle to find one that works
 					let attempts = 0;
-					while (attempts < totalPieces) {
+					while (attempts < totalPieces)
+					{
 						const currentAttemptPiece = gameState.getCurrentPiece();
 						const testPosition = positions.find((pos) =>
 							gameState.canPlacePiece(currentAttemptPiece, pos.q, pos.r),
@@ -375,17 +428,21 @@ describe('GameState', () => {
 						attempts++;
 					}
 
-					if (attempts < totalPieces) {
+					if (attempts < totalPieces)
+					{
 						const newCurrentPiece = gameState.getCurrentPiece();
 						const newValidPosition = positions.find((pos) =>
 							gameState.canPlacePiece(newCurrentPiece, pos.q, pos.r),
 						);
-						if (newValidPosition) {
-							placedMoves.push({
-								q: newValidPosition.q,
-								r: newValidPosition.r,
-								pieceIndex: gameState.getCurrentPieceIndex(),
-							});
+						if (newValidPosition)
+						{
+							placedMoves.push(
+								{
+									q: newValidPosition.q,
+									r: newValidPosition.r,
+									pieceIndex: gameState.getCurrentPieceIndex(),
+								},
+							);
 							gameState.placePiece(newValidPosition.q, newValidPosition.r);
 						}
 					}
@@ -402,19 +459,22 @@ describe('GameState', () => {
 			// Safety limit to prevent infinite loops
 			const maxCycles = 50;
 
-			while (gameState.canUndo() && undoRedoCycles < maxCycles) {
+			while (gameState.canUndo() && undoRedoCycles < maxCycles)
+			{
 				// Track state before this cycle
 				const undosAvailableBefore = gameState.canUndo();
 
 				// Undo up to 2 moves
 				let undoCount = 0;
-				while (gameState.canUndo() && undoCount < 2) {
+				while (gameState.canUndo() && undoCount < 2)
+				{
 					gameState.undo();
 					undoCount++;
 				}
 
 				// Redo 1 move if possible
-				if (gameState.canRedo()) {
+				if (gameState.canRedo())
+				{
 					gameState.redo();
 				}
 
@@ -422,16 +482,19 @@ describe('GameState', () => {
 
 				// If we're making no progress (still have undos available and didn't change anything),
 				// we need to do more undos to actually clear the stack
-				if (undosAvailableBefore && gameState.canUndo() && undoCount === 0) {
+				if (undosAvailableBefore && gameState.canUndo() && undoCount === 0)
+				{
 					// Force progress by doing one more undo
-					if (gameState.canUndo()) {
+					if (gameState.canUndo())
+					{
 						gameState.undo();
 					}
 				}
 			}
 
 			// If there are still undos available, finish clearing them
-			while (gameState.canUndo()) {
+			while (gameState.canUndo())
+			{
 				gameState.undo();
 			}
 
@@ -439,7 +502,8 @@ describe('GameState', () => {
 			expect(gameState.canUndo()).toBe(false);
 
 			// Now redo all moves to get back to where we started
-			while (gameState.canRedo()) {
+			while (gameState.canRedo())
+			{
 				gameState.redo();
 			}
 
@@ -447,7 +511,8 @@ describe('GameState', () => {
 			expect(gameState.canRedo()).toBe(false);
 
 			// Check that the placed pieces are still placed
-			placedMoves.forEach((move) => {
+			placedMoves.forEach((move) =>
+			{
 				expect(gameState.isPiecePlaced(move.pieceIndex)).toBe(true);
 			});
 
@@ -457,7 +522,8 @@ describe('GameState', () => {
 			expect(gameState.canUndo()).toBe(true);
 
 			// Perform a final test: undo all moves and verify we're back to initial state
-			while (gameState.canUndo()) {
+			while (gameState.canUndo())
+			{
 				gameState.undo();
 			}
 
@@ -467,32 +533,38 @@ describe('GameState', () => {
 			expect(gameState.canRedo()).toBe(true);
 
 			// Verify grid is back to initial state
-			grid.hexes.forEach((hex, key) => {
+			grid.hexes.forEach((hex, key) =>
+			{
 				expect(hex.height).toBe(initialGridState.get(key));
 			});
 
 			// Redo everything one more time to ensure consistency
-			while (gameState.canRedo()) {
+			while (gameState.canRedo())
+			{
 				gameState.redo();
 			}
 
 			// Final consistency check
-			placedMoves.forEach((move) => {
+			placedMoves.forEach((move) =>
+			{
 				expect(gameState.isPiecePlaced(move.pieceIndex)).toBe(true);
 			});
 		});
 
-		it('maintains undo count correctly through complex sequences', () => {
+		it('maintains undo count correctly through complex sequences', () =>
+		{
 			const grid = gameState.getGrid();
 			const positions = Array.from(grid.hexes.values());
 
 			// Place a few pieces
 			let placedCount = 0;
-			for (let i = 0; i < 3; i++) {
+			for (let i = 0; i < 3; i++)
+			{
 				const currentPiece = gameState.getCurrentPiece();
 				const validPosition = positions.find((pos) => gameState.canPlacePiece(currentPiece, pos.q, pos.r));
 
-				if (validPosition) {
+				if (validPosition)
+				{
 					gameState.placePiece(validPosition.q, validPosition.r);
 					placedCount++;
 				}
@@ -505,33 +577,38 @@ describe('GameState', () => {
 			let expectedUndoCount = initialUndoCount;
 
 			// Undo 2 moves
-			if (gameState.canUndo()) {
+			if (gameState.canUndo())
+			{
 				gameState.undo();
 				expectedUndoCount++;
 				expect(gameState.getUndoCount()).toBe(expectedUndoCount);
 			}
 
-			if (gameState.canUndo()) {
+			if (gameState.canUndo())
+			{
 				gameState.undo();
 				expectedUndoCount++;
 				expect(gameState.getUndoCount()).toBe(expectedUndoCount);
 			}
 
 			// Redo 1 move (should not affect undo count)
-			if (gameState.canRedo()) {
+			if (gameState.canRedo())
+			{
 				gameState.redo();
 				expect(gameState.getUndoCount()).toBe(expectedUndoCount);
 			}
 
 			// Undo again
-			if (gameState.canUndo()) {
+			if (gameState.canUndo())
+			{
 				gameState.undo();
 				expectedUndoCount++;
 				expect(gameState.getUndoCount()).toBe(expectedUndoCount);
 			}
 		});
 
-		it('handles undo/redo with piece cycling', () => {
+		it('handles undo/redo with piece cycling', () =>
+		{
 			const grid = gameState.getGrid();
 			const positions = Array.from(grid.hexes.values());
 
@@ -543,7 +620,8 @@ describe('GameState', () => {
 			const currentPiece = gameState.getCurrentPiece();
 			const validPosition = positions.find((pos) => gameState.canPlacePiece(currentPiece, pos.q, pos.r));
 
-			if (validPosition) {
+			if (validPosition)
+			{
 				gameState.placePiece(validPosition.q, validPosition.r);
 				expect(gameState.isPiecePlaced(cycledPieceIndex)).toBe(true);
 
@@ -559,14 +637,18 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('win condition', () => {
-		it('detects game not won initially', () => {
+	describe('win condition', () =>
+	{
+		it('detects game not won initially', () =>
+		{
 			expect(gameState.isGameWon()).toBe(false);
 		});
 
-		it('detects game won when all heights are zero', () => {
+		it('detects game won when all heights are zero', () =>
+		{
 			const grid = gameState.getGrid();
-			grid.hexes.forEach((hex) => {
+			grid.hexes.forEach((hex) =>
+			{
 				hex.height = 0;
 			});
 
@@ -574,15 +656,18 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('hints', () => {
-		it('provides hint for current piece', () => {
+	describe('hints', () =>
+	{
+		it('provides hint for current piece', () =>
+		{
 			const hint = gameState.getSolutionHint();
 			expect(hint).toBeDefined();
 			expect(hint).toHaveProperty('q');
 			expect(hint).toHaveProperty('r');
 		});
 
-		it('tracks hint count correctly', () => {
+		it('tracks hint count correctly', () =>
+		{
 			expect(gameState.getHintCount()).toBe(0);
 
 			gameState.incrementHintCount();
@@ -592,7 +677,8 @@ describe('GameState', () => {
 			expect(gameState.getHintCount()).toBe(2);
 		});
 
-		it('resets hint count on restart', () => {
+		it('resets hint count on restart', () =>
+		{
 			gameState.incrementHintCount();
 			gameState.incrementHintCount();
 			expect(gameState.getHintCount()).toBe(2);
@@ -602,8 +688,10 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('difficulty detection', () => {
-		it('detects standard difficulty levels', () => {
+	describe('difficulty detection', () =>
+	{
+		it('detects standard difficulty levels', () =>
+		{
 			const easyGame = new GameState(3, 4);
 			expect(easyGame.getDifficulty()).toBe('Easy');
 
@@ -620,19 +708,24 @@ describe('GameState', () => {
 			expect(impossibleGame.getDifficulty()).toBe('Impossible');
 		});
 
-		it('detects custom difficulty for non-standard settings', () => {
+		it('detects custom difficulty for non-standard settings', () =>
+		{
 			const customGame = new GameState(5, 12);
 			expect(customGame.getDifficulty()).toBe('Custom');
 		});
 
-		it('preserves selected difficulty after undoing all moves and winning', () => {
+		it('preserves selected difficulty after undoing all moves and winning', () =>
+		{
 			const mediumGame = new GameState(3, 6, 'Medium');
 
-			const solve = () => {
+			const solve = () =>
+			{
 				let attempts = 0;
-				while (!mediumGame.isGameWon() && attempts < 50) {
+				while (!mediumGame.isGameWon() && attempts < 50)
+				{
 					const hint = mediumGame.getSolutionHint();
-					if (hint === null) {
+					if (hint === null)
+					{
 						throw new Error('Expected solution hint');
 					}
 					expect(mediumGame.placePiece(hint.q, hint.r)).toBe(true);
@@ -642,7 +735,8 @@ describe('GameState', () => {
 			};
 
 			solve();
-			while (mediumGame.canUndo()) {
+			while (mediumGame.canUndo())
+			{
 				mediumGame.undo();
 			}
 			expect(mediumGame.isGameWon()).toBe(false);
@@ -653,8 +747,10 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('restart', () => {
-		it('resets all game state', () => {
+	describe('restart', () =>
+	{
+		it('resets all game state', () =>
+		{
 			const grid = gameState.getGrid();
 			const targetHex = Array.from(grid.hexes.values()).find((hex) => hex.height > 0);
 
@@ -670,10 +766,12 @@ describe('GameState', () => {
 			expect(gameState.canRedo()).toBe(false);
 		});
 
-		it('restores initial grid heights', () => {
+		it('restores initial grid heights', () =>
+		{
 			const grid = gameState.getGrid();
 			const initialHeights = new Map<string, number>();
-			grid.hexes.forEach((hex, key) => {
+			grid.hexes.forEach((hex, key) =>
+			{
 				initialHeights.set(key, hex.height);
 			});
 
@@ -683,34 +781,49 @@ describe('GameState', () => {
 
 			gameState.restart();
 
-			grid.hexes.forEach((hex, key) => {
+			grid.hexes.forEach((hex, key) =>
+			{
 				expect(hex.height).toBe(initialHeights.get(key));
 			});
 		});
 	});
 
-	describe('getters', () => {
-		it('returns immutable copies of pieces', () => {
+	describe('getters', () =>
+	{
+		it('returns immutable copies of pieces', () =>
+		{
 			const pieces = gameState.getPieces();
 			const firstPiece = pieces[0];
 			if (!firstPiece) throw new Error('No pieces found');
 			const originalLength = firstPiece.tiles.length;
 
-			firstPiece.tiles.push({q: 99, r: 99});
+			firstPiece.tiles.push(
+				{
+					q: 99,
+					r: 99,
+				},
+			);
 			const newFirstPiece = gameState.getPieces()[0];
 			if (!newFirstPiece) throw new Error('No pieces found after modification');
 			expect(newFirstPiece.tiles).toHaveLength(originalLength);
 		});
 
-		it('returns copy of current piece', () => {
+		it('returns copy of current piece', () =>
+		{
 			const piece = gameState.getCurrentPiece();
 			const originalLength = piece.tiles.length;
 
-			piece.tiles.push({q: 99, r: 99});
+			piece.tiles.push(
+				{
+					q: 99,
+					r: 99,
+				},
+			);
 			expect(gameState.getCurrentPiece().tiles).toHaveLength(originalLength);
 		});
 
-		it('returns copy of placed pieces set', () => {
+		it('returns copy of placed pieces set', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 
@@ -728,7 +841,8 @@ describe('GameState', () => {
 			expect(gameState.getPlacedPieces().has(currentPieceIndex)).toBe(false);
 		});
 
-		it('returns copy of history', () => {
+		it('returns copy of history', () =>
+		{
 			const grid = gameState.getGrid();
 			const piece = gameState.getCurrentPiece();
 			const positions = Array.from(grid.hexes.values());
@@ -738,17 +852,20 @@ describe('GameState', () => {
 			gameState.placePiece(validPosition!.q, validPosition!.r);
 
 			const history = gameState.getHistory();
-			history.push({
-				pieceIndex: 99,
-				q: 0,
-				r: 0,
-				heightChanges: [],
-			});
+			history.push(
+				{
+					pieceIndex: 99,
+					q: 0,
+					r: 0,
+					heightChanges: [],
+				},
+			);
 
 			expect(gameState.getHistory()).toHaveLength(1);
 		});
 
-		it('returns copy of settings', () => {
+		it('returns copy of settings', () =>
+		{
 			const settings = gameState.getSettings();
 			settings.radius = 99;
 
@@ -756,8 +873,10 @@ describe('GameState', () => {
 		});
 	});
 
-	describe('piece status queries', () => {
-		it('correctly reports piece placement status', () => {
+	describe('piece status queries', () =>
+	{
+		it('correctly reports piece placement status', () =>
+		{
 			const currentIndex = gameState.getCurrentPieceIndex();
 			expect(gameState.isPiecePlaced(currentIndex)).toBe(false);
 
@@ -772,27 +891,33 @@ describe('GameState', () => {
 			expect(gameState.isPiecePlaced(currentIndex)).toBe(true);
 		});
 
-		it('correctly reports all pieces placed status', () => {
+		it('correctly reports all pieces placed status', () =>
+		{
 			expect(gameState.getAllPiecesPlaced()).toBe(false);
 
 			const grid = gameState.getGrid();
 			const pieces = gameState.getPieces();
 
 			let placedCount = 0;
-			pieces.forEach(() => {
+			pieces.forEach(() =>
+			{
 				const positions = Array.from(grid.hexes.values());
 				const piece = gameState.getCurrentPiece();
 				const validPosition = positions.find((pos) => gameState.canPlacePiece(piece, pos.q, pos.r));
-				if (validPosition) {
+				if (validPosition)
+				{
 					gameState.placePiece(validPosition.q, validPosition.r);
 					placedCount++;
 				}
 			});
 
 			// Check if all pieces that could be placed were placed
-			if (placedCount === pieces.length) {
+			if (placedCount === pieces.length)
+			{
 				expect(gameState.getAllPiecesPlaced()).toBe(true);
-			} else {
+			}
+			else
+			{
 				// If not all pieces could be placed, that's still valid behavior
 				expect(gameState.getAllPiecesPlaced()).toBe(false);
 			}

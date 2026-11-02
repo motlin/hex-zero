@@ -3,7 +3,8 @@ export function calculateHexSize(
 	canvasHeight: number,
 	radius: number,
 	zoomFactor: number = 1.0,
-): number {
+): number
+{
 	const padding = 60;
 
 	const widthBasedHexSize = (canvasWidth - padding) / (radius * 3);

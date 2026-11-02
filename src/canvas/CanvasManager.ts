@@ -1,32 +1,39 @@
 import {calculateHexSize} from '../canvas-utils';
 import {getRequiredElementById} from '../dom-utils';
 
-function getRequiredContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+function getRequiredContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D
+{
 	const ctx = canvas.getContext('2d');
-	if (ctx === null) {
+	if (ctx === null)
+	{
 		throw new Error('Failed to get 2d rendering context');
 	}
 	return ctx;
 }
 
-export class CanvasManager {
+export class CanvasManager
+{
 	private readonly canvas: HTMLCanvasElement;
 	private readonly ctx: CanvasRenderingContext2D;
 
-	constructor(canvasId: string) {
+	constructor(canvasId: string)
+	{
 		this.canvas = getRequiredElementById(canvasId, HTMLCanvasElement);
 		this.ctx = getRequiredContext(this.canvas);
 	}
 
-	getCanvas(): HTMLCanvasElement {
+	getCanvas(): HTMLCanvasElement
+	{
 		return this.canvas;
 	}
 
-	getContext(): CanvasRenderingContext2D {
+	getContext(): CanvasRenderingContext2D
+	{
 		return this.ctx;
 	}
 
-	updateCanvasSize(radius: number, zoomFactor: number): number {
+	updateCanvasSize(radius: number, zoomFactor: number): number
+	{
 		const rect = this.canvas.getBoundingClientRect();
 
 		this.canvas.width = rect.width;
@@ -35,7 +42,8 @@ export class CanvasManager {
 		return calculateHexSize(rect.width, rect.height, radius, zoomFactor);
 	}
 
-	clearCanvas(backgroundColor: string): void {
+	clearCanvas(backgroundColor: string): void
+	{
 		this.ctx.fillStyle = backgroundColor;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 	}
@@ -48,15 +56,20 @@ export class CanvasManager {
 		fillColor: string,
 		strokeColor: string,
 		lineWidth: number,
-	): void {
+	): void
+	{
 		ctx.beginPath();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 6; i++)
+		{
 			const angle = (Math.PI / 3) * i;
 			const hx = x + size * Math.cos(angle);
 			const hy = y + size * Math.sin(angle);
-			if (i === 0) {
+			if (i === 0)
+			{
 				ctx.moveTo(hx, hy);
-			} else {
+			}
+			else
+			{
 				ctx.lineTo(hx, hy);
 			}
 		}
