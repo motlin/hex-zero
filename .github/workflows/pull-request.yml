@@ -59,10 +59,12 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Run vp check --fix
+      - name: Run vp check --fix and oxfmt-next-line
         run: |
           pnpm install
           pnpm exec vp check --fix
+          # vp check skips formatting (check.fmt: false), and `pnpm install` runs `vp config`, which rewrites CLAUDE.md's Vite+ section wrapped at 80 columns.
+          oxfmt-next-line --no-error-on-unmatched-pattern
 
           if [[ -n $(git status --porcelain) ]]; then
             FIX_BRANCH="fix-${{ github.event.pull_request.number }}-check"
