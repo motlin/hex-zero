@@ -47,7 +47,7 @@
 		"eslint": "^10.15.0",
 		"fallow": "^3.31.0",
 		"jsdom": "^31.0.1",
-		"markdownlint-cli2": "^0.24.0",
+		"markdownlint-cli2": "^0.24.1",
 		"typescript": "^7.0.2",
 		"vite": "catalog:",
 		"vite-plus": "catalog:",
